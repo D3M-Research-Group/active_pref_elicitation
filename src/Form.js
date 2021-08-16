@@ -8,9 +8,6 @@ class MasterForm extends React.Component {
       this.state = {
         currentStep: 1,
         userChoices: [],
-        email:  '',
-        username: '',
-        password: '', 
         selected: -1
       }
       this.maxSteps = 3;
@@ -18,7 +15,6 @@ class MasterForm extends React.Component {
       this.submitChoice = this.submitChoice.bind(this);
 
       this.graphData = [
-
         {year: 1980, efficiency: 24.3, sales: 8949000},
       
         {year: 1985, efficiency: 27.6, sales: 10979000},
@@ -147,6 +143,14 @@ class MasterForm extends React.Component {
       }
     }
 
+    _restart = () => {
+      this.setState({
+        currentStep: 1,
+        userChoices: [],
+        selected: -1
+      })
+    }
+
     updateSelected(selected){
         this.setState({
         selected: selected
@@ -262,6 +266,7 @@ class MasterForm extends React.Component {
             currentStep={this.state.currentStep}
             displayChoices={this.displayChoices}
             maxSteps={this.maxSteps}
+            restart={this._restart}
           />
           {/* {this.previousButton()} */}
           {/* {this.nextButton()} */}
@@ -340,6 +345,12 @@ class MasterForm extends React.Component {
             Thanks for particpating here are the choices you made:
           </p>
           {props.displayChoices()}
+
+          <button 
+            className="btn btn-primary" 
+            type="button" onClick={props.restart}>
+            Take again
+            </button>                  
       </div>
       
       
