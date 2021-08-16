@@ -14,8 +14,7 @@ class MasterForm extends React.Component {
         password: '', 
         selected: -1
       }
-      this._chooseA = this._chooseA.bind(this);
-      this._chooseB = this._chooseB.bind(this);
+
       this.updateSelected = this.updateSelected.bind(this);
       this.submitChoice = this.submitChoice.bind(this);
     
@@ -82,14 +81,7 @@ class MasterForm extends React.Component {
     submitChoice = () => {
         console.log(this.state.selected);
         this.state.userChoices.push(this.state.selected);
-        // window.alert("Selected: " + this.state.selected);
         console.log(this.state.userChoices);
-        
-        // let currentStep = this.props.currentStep;
-        // currentStep = currentStep >= 2? 3: currentStep + 1;
-        // this.props.setState({
-        //     currentStep: currentStep
-        // })
         this._next();
     }
 
@@ -135,18 +127,16 @@ class MasterForm extends React.Component {
             handleChange={this.handleChange}
             email={this.state.email}
             teams={this.teams}
-            userChoices={this.state.userChoices}
             updateSelected={this.updateSelected}
-            _next={this._next}
             submitChoice={this.submitChoice}
-            selected={this.state.selected}
-
           />
           <Step2 
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
             username={this.state.username}
             companies={this.techCompanies}
+            updateSelected={this.updateSelected}
+            submitChoice={this.submitChoice}
           />
           <Step3 
             currentStep={this.state.currentStep} 
@@ -180,9 +170,9 @@ class MasterForm extends React.Component {
                 onChange={props.handleChange}
                 />    
             </div> */}
-            <Example title="Pick a team" cardContents={props.teams} userChoices={props.userChoices}
-                     _next={props._next} currentStep={props.currentStep} submitChoice={props.submitChoice}
-                     updateSelected={props.updateSelected} />
+            <Example title="Pick a team" cardContents={props.teams} 
+            submitChoice={props.submitChoice}
+            updateSelected={props.updateSelected} />
         </div>
         
             
@@ -209,7 +199,9 @@ class MasterForm extends React.Component {
                 onChange={props.handleChange}
                 />
             </div>
-            <Example title="Pick a team" cardContents={props.companies} />
+            <Example title="Pick a team" cardContents={props.companies} 
+            submitChoice={props.submitChoice}
+            updateSelected={props.updateSelected} />
         </div>
       
     );
@@ -240,7 +232,6 @@ class MasterForm extends React.Component {
 
   class Example extends React.Component {
     onListChanged(selected) {
-        console.log("list changed")
         this.setState({
         selected: selected
         });
