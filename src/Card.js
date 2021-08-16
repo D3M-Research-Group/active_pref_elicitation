@@ -32,13 +32,17 @@ class Card extends React.Component {
         selected
       } = this.props;
       return (
-        <SelectableCard onClick={this.props.onClick}
-          selected={selected}>
-          <div className="content">
-            <h1 className="title">{title}</h1>
-            <p className="description">{description}</p>
+        
+          <div className="col-lg-6">
+            <SelectableCard onClick={this.props.onClick}
+              selected={selected}>
+              <div className="content">
+                <h1 className="title">{title}</h1>
+                <p className="description">{description}</p>
+              </div>
+            </SelectableCard>
           </div>
-        </SelectableCard>
+        
       );
     }
   }
@@ -94,13 +98,21 @@ class Card extends React.Component {
         } = cardContent;
         var selected = multiple ? this.state.selected.indexOf(i) > -1 : this.state.selected === i;
         return (
-          <SelectableTitleCard key={i} 
+          
+            <SelectableTitleCard key={i} 
             title={title} description={description}
             selected={selected} 
             onClick={(e) => this.onItemSelected(i)} />
+          
         );
       });
-      return (<div className="cardlist">{content}</div>);
+      return (
+          <div className="cardlist">
+            <div className="row">
+              {content}
+            </div>
+          </div>
+      );
     }
   }
   

@@ -14,36 +14,53 @@ class MasterForm extends React.Component {
         password: '', 
         selected: -1
       }
-
+      this.maxSteps = 3;
       this.updateSelected = this.updateSelected.bind(this);
       this.submitChoice = this.submitChoice.bind(this);
     
-
+      this.choiceData = [
+        [{
+          title: "FC Barcelona",
+          description: "Spain"
+        }, {
+          title: "Bayern Munich",
+          description: "Germany"
+        }],
+        [{
+          title: "Apple",
+          description: "Cupertino, CA"
+        }, {
+            title: "Microsoft",
+            description: "Redmond, WA"
+        }],
+        [{
+          title: "Apples",
+            description: "some text"
+        },{
+            title: "Oranges",
+            description: "Cara cara"
+        }]
+      ];
       this.teams = [{
         title: "FC Barcelona",
         description: "Spain"
       }, {
-        title: "Real Madrid",
-        description: "Spain"
-      }, {
         title: "Bayern Munich",
         description: "Germany"
-      }, {
-        title: "Juventus",
-        description: "Italy"
       }];
     this.techCompanies = [{
-        title: "Google",
-        description: "Mountain View, CA"
-    }, {
         title: "Apple",
         description: "Cupertino, CA"
     }, {
         title: "Microsoft",
         description: "Redmond, WA"
-    }, {
-        title: "Facebook",
-        description: "Menlo Park, CA"
+    }];
+    this.fruit = [{
+      title: "Apples",
+      description: "some text"
+    },{
+      title: "Oranges",
+      description: "Cara cara"
     }];
     }
   
@@ -65,11 +82,21 @@ class MasterForm extends React.Component {
     
     // _next = () => {
     _next(){
-      let currentStep = this.state.currentStep
-      currentStep = currentStep >= 2? 3: currentStep + 1
+      let currentStep = this.state.currentStep;
+      currentStep = currentStep >= 2? this.maxSteps: currentStep + 1
       this.setState({
         currentStep: currentStep
       })
+    }
+
+    _goToEnd(){
+      let currentStep = this.state.currentStep;
+      if(currentStep === this.maxSteps){
+        // update current step to go to end page
+        this.setState({
+          currentStep: this.maxSteps + 1
+        })
+      }
     }
 
     updateSelected(selected){
@@ -78,11 +105,47 @@ class MasterForm extends React.Component {
         })
     }
 
+    finalSubmit(){
+        let [choice1, choice2, choice3] = this.state.userChoices;
+        alert(`Your choices: \n 
+             Choice 1: ${this.choiceData[0][choice1]['title']} \n 
+             Choice 2: ${this.choiceData[1][choice2]['title']} \n
+             Choice 3: ${this.choiceData[2][choice3]['title']} \n
+        This is where we will send the results back to the server`);
+        this._goToEnd();
+    }
+
+    displayChoices = () => {
+      let [choice1, choice2, choice3] = this.state.userChoices;
+        return(
+          <ul>
+            <li>
+              Choice 1: {this.choiceData[0][choice1]['title']}
+            </li>
+            <li>
+              Choice 2: {this.choiceData[1][choice2]['title']}
+            </li>
+            <li>
+              Choice 3: {this.choiceData[2][choice3]['title']}
+            </li>
+            
+          </ul>
+          
+          );
+    }
+
     submitChoice = () => {
         console.log(this.state.selected);
         this.state.userChoices.push(this.state.selected);
         console.log(this.state.userChoices);
-        this._next();
+        if(this.state.currentStep === this.maxSteps){
+          // then we want to submit the results
+          this.finalSubmit();
+        } else{
+          // move to next question
+          this._next();
+        }
+        
     }
 
     _chooseA = () => {
@@ -126,7 +189,7 @@ class MasterForm extends React.Component {
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
             email={this.state.email}
-            teams={this.teams}
+            data={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
           />
@@ -134,7 +197,7 @@ class MasterForm extends React.Component {
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
             username={this.state.username}
-            companies={this.techCompanies}
+            data={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
           />
@@ -142,9 +205,18 @@ class MasterForm extends React.Component {
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
             password={this.state.password}
+            data={this.choiceData[this.state.currentStep -1]}
+            updateSelected={this.updateSelected}
+            submitChoice={this.submitChoice}
+          />
+
+          <EndPage
+            currentStep={this.state.currentStep}
+            displayChoices={this.displayChoices}
+            maxSteps={this.maxSteps}
           />
           {/* {this.previousButton()} */}
-          {this.nextButton()}
+          {/* {this.nextButton()} */}
   
         {/* </form> */}
         </React.Fragment>
@@ -170,7 +242,7 @@ class MasterForm extends React.Component {
                 onChange={props.handleChange}
                 />    
             </div> */}
-            <Example title="Pick a team" cardContents={props.teams} 
+            <Example title="Pick a team" cardContents={props.data} 
             submitChoice={props.submitChoice}
             updateSelected={props.updateSelected} />
         </div>
@@ -187,19 +259,7 @@ class MasterForm extends React.Component {
     } 
     return(
         <div className="container">
-            <div className="form-group">
-                <label htmlFor="username">Username</label>
-                <input
-                className="form-control"
-                id="username"
-                name="username"
-                type="text"
-                placeholder="Enter username"
-                value={props.username}
-                onChange={props.handleChange}
-                />
-            </div>
-            <Example title="Pick a team" cardContents={props.companies} 
+            <Example title="Pick a company" cardContents={props.data} 
             submitChoice={props.submitChoice}
             updateSelected={props.updateSelected} />
         </div>
@@ -212,22 +272,30 @@ class MasterForm extends React.Component {
       return null
     } 
     return(
-      <React.Fragment>
-      <div className="form-group">
-        <label htmlFor="password">Password</label>
-        <input
-          className="form-control"
-          id="password"
-          name="password"
-          type="password"
-          placeholder="Enter password"
-          value={props.password}
-          onChange={props.handleChange}
-          />      
+      <div className="container">
+        <Example title="Pick a fruit" cardContents={props.data} 
+            submitChoice={props.submitChoice}
+            updateSelected={props.updateSelected} />
       </div>
-      <button className="btn btn-success btn-block">Sign up</button>
-      </React.Fragment>
-    );
+    )
+  }
+
+  function EndPage(props) {
+    console.log(props.currentStep)
+    if (props.currentStep !== props.maxSteps + 1) {
+      return null
+    } 
+    return(
+        <div className="container">
+          <h1 className="title">All done!</h1>
+          <p>
+            Thanks for particpating here are the choices you made:
+          </p>
+          {props.displayChoices()}
+      </div>
+      
+      
+    )
   }
 
   class Example extends React.Component {
