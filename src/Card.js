@@ -1,4 +1,5 @@
 import React from 'react';
+import BarChart from './BarChart';
 import './Card.scss'
 
 class Card extends React.Component {
@@ -29,7 +30,8 @@ class Card extends React.Component {
       var {
         title,
         description,
-        selected
+        selected,
+        data
       } = this.props;
       return (
         
@@ -39,6 +41,7 @@ class Card extends React.Component {
               <div className="content">
                 <h1 className="title">{title}</h1>
                 <p className="description">{description}</p>
+                <BarChart data={data}/>
               </div>
             </SelectableCard>
           </div>
@@ -94,13 +97,14 @@ class Card extends React.Component {
         var {
           title,
           description,
+          data,
           selected
         } = cardContent;
         var selected = multiple ? this.state.selected.indexOf(i) > -1 : this.state.selected === i;
         return (
           
             <SelectableTitleCard key={i} 
-            title={title} description={description}
+            title={title} description={description} data={data}
             selected={selected} 
             onClick={(e) => this.onItemSelected(i)} />
           
