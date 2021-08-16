@@ -283,18 +283,6 @@ class MasterForm extends React.Component {
     } 
     return(
         <div className="container">
-            {/* <div className="form-group">
-                <label htmlFor="email">Email address</label>
-                <input
-                className="form-control"
-                id="email"
-                name="email"
-                type="text"
-                placeholder="Enter email"
-                value={props.email}
-                onChange={props.handleChange}
-                />    
-            </div> */}
             <Example title="Pick a team" cardContents={props.data} 
             submitChoice={props.submitChoice}
             updateSelected={props.updateSelected} />
