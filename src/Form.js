@@ -6,7 +6,7 @@ class MasterForm extends React.Component {
     constructor(props) {
       super(props)
       this.state = {
-        currentStep: 1,
+        currentStep: 0,
         userChoices: [],
         selected: -1
       }
@@ -125,9 +125,16 @@ class MasterForm extends React.Component {
     }
     
     // _next = () => {
+    _start_questions = () => {
+      let currentStep = this.state.currentStep;
+      currentStep = currentStep >= this.maxSteps-1? this.maxSteps: currentStep + 1
+      this.setState({
+        currentStep: currentStep
+      })
+    }
     _next(){
       let currentStep = this.state.currentStep;
-      currentStep = currentStep >= 2? this.maxSteps: currentStep + 1
+      currentStep = currentStep >= this.maxSteps-1? this.maxSteps: currentStep + 1
       this.setState({
         currentStep: currentStep
       })
@@ -145,7 +152,7 @@ class MasterForm extends React.Component {
 
     _restart = () => {
       this.setState({
-        currentStep: 1,
+        currentStep: 0,
         userChoices: [],
         selected: -1
       })
@@ -230,6 +237,7 @@ class MasterForm extends React.Component {
       return (
         <React.Fragment>
         <h1>Active Preference Elicitation 🔮 </h1>
+        {/* Only show the step once current step > 0 */}
         <p>Step {this.state.currentStep} </p> 
   
         {/* <form onSubmit={this.handleSubmit}> */}
@@ -237,6 +245,10 @@ class MasterForm extends React.Component {
         {/* 
           render the form steps and pass required props in
         */}
+          <StartPage
+            currentStep={this.state.currentStep} 
+            _start_questions={this._start_questions}
+          />
           <Step1 
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
@@ -317,6 +329,26 @@ class MasterForm extends React.Component {
         <Example title="Pick a fruit" cardContents={props.data} 
             submitChoice={props.submitChoice}
             updateSelected={props.updateSelected} />
+      </div>
+    )
+  }
+
+  function StartPage(props){
+    if (props.currentStep !== 0) {
+      return null
+    } 
+    return(
+      <div className="container">
+          <h1 className="title">Welcome!</h1>
+          <p>
+            Click on the "Start" button to start answering the questions
+          </p>
+
+          <button 
+            className="btn btn-primary" 
+            type="button" onClick={props._start_questions}>
+            Start
+            </button>                  
       </div>
     )
   }
