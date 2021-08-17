@@ -26,12 +26,16 @@ class Choices(models.Model):
 
 
 # Which question to display next
-class NextChoice(models.Model):
-    session_id = models.BigAutoField(auto_created=True,
-                                    primary_key=True,
-                                    serialize= False,
-                                    verbose_name='session_id')
-    previous_step = models.PositiveIntegerField() # what was the step just passed to the backend?
-    current_step = models.PositiveIntegerField() # for which step are we giving the frontend data?
-    choice_topic = models.PositiveIntegerField() # integer corresponding to one of a fixed number of topics. Data is matched with the topic number
-    left_choice = models.PositiveIntegerField() # which choice should we put on the left side?
+# class NextChoice(models.Model):
+#     # Don't need the session id for this model
+
+#     # session_id = models.BigAutoField(auto_created=True,
+#     #                                 primary_key=True,
+#     #                                 serialize= False,
+#     #                                 verbose_name='session_id')
+#     previous_step = models.PositiveIntegerField() # what was the step just passed to the backend?
+#     current_step = models.PositiveIntegerField() # for which step are we giving the frontend data?
+#     choice_topic = models.PositiveIntegerField() # integer corresponding to one of a fixed number of topics. Data is matched with the topic number
+#     left_choice = models.PositiveIntegerField() # which choice should we put on the left side?
+
+    
