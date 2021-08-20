@@ -1,5 +1,7 @@
 import React from 'react';
-import SelectableCardList from "./Card"
+import SelectableCardList from "./Card";
+import Alert from 'react-bootstrap/Alert'
+// import axios from "axios";
 import './Form.css';
 
 class MasterForm extends React.Component {
@@ -8,11 +10,14 @@ class MasterForm extends React.Component {
       this.state = {
         currentStep: 0,
         userChoices: [],
-        selected: -1
+        selected: -1,
+        showError: false
       }
       this.maxSteps = 3;
       this.updateSelected = this.updateSelected.bind(this);
       this.submitChoice = this.submitChoice.bind(this);
+      this.updateShowError = this.updateShowError.bind(this);
+      // this.onSubmitDecision= this.onSubmitDecision.bind(this);
 
       this.graphData = [
         {year: 1980, efficiency: 24.3, sales: 8949000},
@@ -136,7 +141,8 @@ class MasterForm extends React.Component {
       let currentStep = this.state.currentStep;
       currentStep = currentStep >= this.maxSteps-1? this.maxSteps: currentStep + 1
       this.setState({
-        currentStep: currentStep
+        currentStep: currentStep,
+        selected: -1
       })
     }
 
@@ -164,7 +170,14 @@ class MasterForm extends React.Component {
         })
     }
 
+    updateShowError(show){
+      this.setState({
+      showError: show
+      })
+  }
+
     finalSubmit(){
+      // We want to lop over each of the choices made and post each of them to the db
         let [choice1, choice2, choice3] = this.state.userChoices;
         alert(`Your choices: \n 
              Choice 1: ${this.choiceData[0][choice1]['title']} \n 
@@ -193,7 +206,28 @@ class MasterForm extends React.Component {
           );
     }
 
-    submitChoice = () => {
+    onSubmitDecision(e){
+      e.preventDefault();
+      if(this.state.selected === -1){
+        alert("Please choose an option!")
+      }
+    }
+
+    
+
+    submitChoice = (e) => {
+      
+      e.preventDefault();
+      if(this.state.selected === -1){
+        // alert("Please choose an option!")
+        this.setState({
+          showError: true
+        })
+          
+      } else{
+        this.setState({
+          showError: false
+        }) 
         console.log(this.state.selected);
         this.state.userChoices.push(this.state.selected);
         console.log(this.state.userChoices);
@@ -204,6 +238,8 @@ class MasterForm extends React.Component {
           // move to next question
           this._next();
         }
+      }
+        
         
     }
 
@@ -236,7 +272,7 @@ class MasterForm extends React.Component {
     render() {    
       return (
         <React.Fragment>
-        <h1>Active Preference Elicitation 🔮 </h1>
+        <h1>Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span> </h1>
         {/* Only show the step once current step > 0 */}
         <p>Step {this.state.currentStep} </p> 
   
@@ -252,26 +288,35 @@ class MasterForm extends React.Component {
           <Step1 
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
-            email={this.state.email}
             data={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
+            currently_selected={this.state.selected}
+
+            showError={this.state.showError}
+            updateShowError={this.updateShowError}
           />
           <Step2 
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
-            username={this.state.username}
             data={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
+            currently_selected={this.state.selected}
+
+            showError={this.state.showError}
+            updateShowError={this.updateShowError}
           />
           <Step3 
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
-            password={this.state.password}
             data={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
+            currently_selected={this.state.selected}
+
+            showError={this.state.showError}
+            updateShowError={this.updateShowError}
           />
 
           <EndPage
@@ -297,7 +342,10 @@ class MasterForm extends React.Component {
         <div className="container">
             <Example title="Pick a team" cardContents={props.data} 
             submitChoice={props.submitChoice}
-            updateSelected={props.updateSelected} />
+            updateSelected={props.updateSelected}
+            showError={props.showError} 
+            updateShowError={props.updateShowError}
+            />
         </div>
         
             
@@ -314,7 +362,10 @@ class MasterForm extends React.Component {
         <div className="container">
             <Example title="Pick a company" cardContents={props.data} 
             submitChoice={props.submitChoice}
-            updateSelected={props.updateSelected} />
+            updateSelected={props.updateSelected}
+            showError={props.showError} 
+            updateShowError={props.updateShowError}
+            />
         </div>
       
     );
@@ -328,7 +379,10 @@ class MasterForm extends React.Component {
       <div className="container">
         <Example title="Pick a fruit" cardContents={props.data} 
             submitChoice={props.submitChoice}
-            updateSelected={props.updateSelected} />
+            updateSelected={props.updateSelected}
+            showError={props.showError} 
+            updateShowError={props.updateShowError}
+            />
       </div>
     )
   }
@@ -377,12 +431,31 @@ class MasterForm extends React.Component {
     )
   }
 
+  function AlertDismissibleExample(props) {
+    // const [show, setShow] = useState(false);
+  
+    if (!props.showError) {
+      return null
+    }
+    return (
+      <div class="d-flex justify-content-center">
+        <Alert variant="danger" className="text-center" onClose={() => props.updateShowError(false)} dismissible>
+          <Alert.Heading>Error</Alert.Heading>
+          <p>
+            Please click/tap on one of the three options.
+          </p>
+        </Alert>
+      </div>
+    );
+    
+  }
   class Example extends React.Component {
     onListChanged(selected) {
         this.setState({
         selected: selected
         });
         this.props.updateSelected(selected);
+        this.props.updateShowError(false);
     }
     render() {
       return (
@@ -395,15 +468,15 @@ class MasterForm extends React.Component {
               onChange={this.onListChanged.bind(this)}/>
               {/* On click we want to move to the next choice and store this information.
               I think we can use _next but we need to add in the info for the choices */}
-            <button className="card" onClick={this.props.submitChoice}>
-              Choose option
-            </button>
+              <AlertDismissibleExample showError={this.props.showError} updateShowError={this.props.updateShowError}  />
+              <button className="card" onClick={e => this.props.submitChoice(e)}>
+                Choose option
+              </button>
+              
+            
         </div>);
     }
   }
   
 
-    
-  
-//   ReactDOM.render(<MasterForm />, document.getElementById('root'))
 export default MasterForm;
