@@ -442,7 +442,7 @@ class MasterForm extends React.Component {
         <div className="container">
           <h1 className="title">All done!</h1>
           <p>
-            Thanks for particpating here are the choices you made:
+            Thanks for participating here are the choices you made:
           </p>
           {props.displayChoices()}
 
