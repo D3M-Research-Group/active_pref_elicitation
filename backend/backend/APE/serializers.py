@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SessionInfo, Choices, NextChoice
+from .models import SessionInfo, Choices
 
 # The serializer converts model instances to JSON so that our frontend can work with the received data
 # class NextChoiceSerializer(serializers.ModelSerializer):

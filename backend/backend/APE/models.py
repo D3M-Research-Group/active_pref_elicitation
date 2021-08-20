@@ -3,11 +3,9 @@ from django.db import models
 # Session info
 class SessionInfo(models.Model):
     ip_address = models.GenericIPAddressField()
-    date = models.DateTimeField('date test taken')
+    datetime = models.DateTimeField('date test taken')
     # We might want to keep user info in the form of a cookie?
-    session_id = models.BigAutoField(auto_created=True,
-                                        primary_key=True,
-                                        serialize= False,
+    session_id = models.UUIDField(primary_key=True,
                                         verbose_name='session_id')
     # To-do: want a way to differentiate between AMTurkers and regular people using the app
     # easiest would be to have a URI for the link given to AMTurkers like ?amturk=true
@@ -16,12 +14,10 @@ class SessionInfo(models.Model):
 # Each user choice is a row here with session_id connecting them together.
 # We insert this information in at the end by looping over the info stored user-side
 class Choices(models.Model):
-    session_id = models.BigAutoField(auto_created=True,
-                                    primary_key=True,
-                                    serialize= False,
-                                    verbose_name='session_id') # session id which relates this to SessionInfo
+    session_id = models.UUIDField(primary_key=True,
+                                        verbose_name='session_id')# session id which relates this to SessionInfo
     question_id = models.PositiveIntegerField() # id of the question shown to the user
-    user_choice = models.PositiveIntegerField() # which of the two options did the user choose?
+    user_choice = models.IntegerField(choices=[-1,0,1]) # which of the two options did the user choose?
     left_choice = models.PositiveIntegerField() # when we showed this question to a user, which option was on the left side?
 
 

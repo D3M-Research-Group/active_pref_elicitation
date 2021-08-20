@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db import models
-from .models import SessionInfo, Choices, NextChoice
+from .models import SessionInfo, Choices
 # Register your models here.
 
 
@@ -15,8 +15,8 @@ class ChoicesAdmin(admin.ModelAdmin):
 admin.site.register(Choices, ChoicesAdmin)
 
 
-class NextChoiceAdmin(admin.ModelAdmin):
-    list_display = ('session_id', 'previous_step', 'current_step', 'choice_topic',
-    'left_choice')
+# class NextChoiceAdmin(admin.ModelAdmin):
+#     list_display = ('session_id', 'previous_step', 'current_step', 'choice_topic',
+#     'left_choice')
 
-admin.site.register(NextChoice,NextChoiceAdmin)
+# admin.site.register(NextChoice,NextChoiceAdmin)

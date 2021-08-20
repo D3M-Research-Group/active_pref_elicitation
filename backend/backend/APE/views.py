@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
+from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import SessionInfoSerializer, ChoicesSerializer
@@ -10,12 +11,17 @@ from .models import SessionInfo, Choices
 # class SessionInfoView(viewsets.ModelViewSet):
 #     serializer_class = SessionInfoSerializer
 #     queryset = SessionInfo.objects.all()
-class SessionInfoView(mixins.CreateModelMixin):
+class SessionInfoView(mixins.CreateModelMixin,
+                  GenericAPIView):
+    queryset = SessionInfo.objects.all()
     serializer_class = SessionInfoSerializer
+    
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-class ChoicesView(mixins.CreateModelMixin):
+class ChoicesView(mixins.CreateModelMixin,
+                  GenericAPIView):
+    queryset = Choices.objects.all()
     serializer_class = ChoicesSerializer
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -23,7 +29,9 @@ class ChoicesView(mixins.CreateModelMixin):
 
 # NextChoice is a generic view
 class NextChoiceView(APIView):
-    
-    def post(self, request, format=None):
+    def get(self, request, format=None):
         # pass the request parameters into the code for calculating next choice
-        pass
+        # return Response(response_dict, status=status.HTTP_201_CREATED)
+        # pass
+        response_dict = {"test": "hello"}
+        return Response(response_dict, status=status.HTTP_200_CREATED)
