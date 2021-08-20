@@ -101,3 +101,22 @@ body {
       box-shadow: $card-shadow;
     }
   }
+
+  .chart-container {
+
+    display: flex;
+  
+    flex-direction: column;
+  
+  }
+  
+  
+  @media (min-width: 900px) {
+  
+    .chart-container {
+  
+      flex-direction: row;
+  
+    }
+  
+  }

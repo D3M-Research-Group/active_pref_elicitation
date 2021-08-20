@@ -87,19 +87,27 @@ class MasterForm extends React.Component {
           title: "FC Barcelona",
           description: "Spain",
           data: this.graphData
-        }, {
+        },{
           title: "Bayern Munich",
           description: "Germany",
           data: this.graphData
+        },{
+          title: "Indifferent 🤷‍♀️ ",
+          description: "I don't like either option more than the other",
+          data: []
         }],
         [{
           title: "Apple",
           description: "Cupertino, CA",
           data: this.graphData
-        }, {
+        },{
             title: "Microsoft",
             description: "Redmond, WA",
             data: this.graphData
+        },{
+          title: "Indifferent 🤷‍♀️ ", 
+          description: "I don't like either option more than the other",
+          data: []
         }],
         [{
           title: "Apples",
@@ -107,8 +115,12 @@ class MasterForm extends React.Component {
             data: this.graphData
         },{
             title: "Oranges",
-            description: "Cara cara",
+            description: "Cara cara are the best",
             data: this.graphData
+        },{
+          title: "Indifferent 🤷‍♀️ ", 
+          description: "I don't like either option more than the other",
+          data: []
         }]
       ];
     }
@@ -470,7 +482,7 @@ class MasterForm extends React.Component {
               I think we can use _next but we need to add in the info for the choices */}
               <AlertDismissibleExample showError={this.props.showError} updateShowError={this.props.updateShowError}  />
               <button className="card" onClick={e => this.props.submitChoice(e)}>
-                Choose option
+                Submit selection
               </button>
               
             

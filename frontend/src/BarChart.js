@@ -4,16 +4,14 @@ import React from 'react';
 
 import * as d3 from 'd3';
 
+const height = 500;
+const width = 500;
 
 function BarChart({ data }) {
 
   const ref = useD3(
 
     (svg) => {
-
-      const height = 500;
-
-      const width = 500;
 
       const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
@@ -124,17 +122,21 @@ function BarChart({ data }) {
     [data.length]
 
   );
-
-
+  
+  if(data.length === 0){
+    return null
+  }
   return (
 
     <svg
 
       ref={ref}
 
+      viewBox={`0 0 ${height} ${width}`}
+
       style={{
 
-        height: 500,
+        height: "100%",
 
         width: "100%",
 

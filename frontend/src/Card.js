@@ -33,6 +33,21 @@ class Card extends React.Component {
         selected,
         data
       } = this.props;
+      if(data.length === 0){
+        return (
+            <div className="col-sm-4 align-self-center">
+              <SelectableCard onClick={this.props.onClick}
+                selected={selected}>
+                <div className="content">
+                  <h1 className="title">{title}</h1>
+                  <p className="description">{description}</p>
+                  <BarChart data={data}/>
+                </div>
+              </SelectableCard>
+            </div>
+          
+        );
+      }
       return (
         
           <div className="col-lg-6">
@@ -41,7 +56,14 @@ class Card extends React.Component {
               <div className="content">
                 <h1 className="title">{title}</h1>
                 <p className="description">{description}</p>
-                <BarChart data={data}/>
+                {/* <div class="container">
+                  <div class="row">
+                      <div class="col-lg-6" id="chartArea"> */}
+                        <BarChart data={data}/>
+                      {/* </div>
+                  </div> */}
+                {/* </div> */}
+                
               </div>
             </SelectableCard>
           </div>
@@ -113,75 +135,17 @@ class Card extends React.Component {
       return (
           <div className="cardlist">
             <div className="row">
-              {content}
+            {/* <div class="d-flex flex-row"> */}
+              {content.splice(0,content.length-1)}
+            </div>
+            <div class="d-flex justify-content-center">
+            {content[content.length - 1]}
+
             </div>
           </div>
       );
     }
   }
   
-//   class Example extends React.Component {
-//     onListChanged(selected) {
-//       this.setState({
-//         selected: selected
-//       });
-//     }
-//     submit() {
-//       window.alert("Selected: " + this.state.selected);
-//     }
-//     render() {
-//       return (
-//         <div className="column">
-//             <h1 className="title">{this.props.title}</h1>
-//             <SelectableCardList 
-//               multiple={this.props.multiple}
-//               maxSelectable={this.props.maxSelectable}
-//               contents={this.props.cardContents}
-//               onChange={this.onListChanged.bind(this)}/>
-//             <button className="card" onClick={(e) => this.submit() }>
-//               Get selected
-//             </button>
-//         </div>);
-//     }
-//   }
-  
-  
-//   var teams = [{
-//     title: "FC Barcelona",
-//     description: "Spain"
-//   }, {
-//     title: "Real Madrid",
-//     description: "Spain"
-//   }, {
-//     title: "Bayern Munich",
-//     description: "Germany"
-//   }, {
-//     title: "Juventus",
-//     description: "Italy"
-//   }];
-  
-//   var genres = [{
-//     title: "Google",
-//     description: "Mountain View, CA"
-//   }, {
-//     title: "Apple",
-//     description: "Cupertino, CA"
-//   }, {
-//     title: "Microsoft",
-//     description: "Redmond, WA"
-//   }, {
-//     title: "Facebook",
-//     description: "Menlo Park, CA"
-//   }];
-  
-//   class App extends React.Component {
-//     render() {
-//       return (
-//         <div>
-//           <Example title="Pick a team" cardContents={teams} />
-//           <Example title="Choose brands (3 max)" cardContents={genres} multiple maxSelectable={3} />
-//         </div>
-//       );
-//     }
-//   }
+
 export default SelectableCardList;
