@@ -149,13 +149,22 @@ class MasterForm extends React.Component {
         currentStep: currentStep
       })
     }
+
+    scrollTop = () =>{
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
     _next(){
+      // update current step and selected in state
       let currentStep = this.state.currentStep;
       currentStep = currentStep >= this.maxSteps-1? this.maxSteps: currentStep + 1
       this.setState({
         currentStep: currentStep,
         selected: -1
       })
+
+      // scroll up to the top of the container
+      this.scrollTop();
     }
 
     _goToEnd(){
@@ -237,12 +246,17 @@ class MasterForm extends React.Component {
         })
           
       } else{
+        // hide the error message
         this.setState({
           showError: false
         }) 
+
+        // record the choice made
         console.log(this.state.selected);
         this.state.userChoices.push(this.state.selected);
         console.log(this.state.userChoices);
+
+
         if(this.state.currentStep === this.maxSteps){
           // then we want to submit the results
           this.finalSubmit();
