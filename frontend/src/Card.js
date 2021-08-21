@@ -3,6 +3,7 @@ import BarChart from './BarChart';
 import './Card.scss'
 
 class Card extends React.Component {
+    
     render() {
       return (<div className="card">{this.props.children}</div>)
     }
@@ -78,12 +79,13 @@ class Card extends React.Component {
       super(props);
       var selected = props.multiple ? [] : -1;
       var initialState = {
-        selected: selected
+        selected: selected.state
       };
       this.state = initialState;
     }
   
     onItemSelected(index) {
+
       this.setState((prevState, props) => {
         if (props.multiple) {
           var selectedIndexes = prevState.selected;
@@ -108,11 +110,11 @@ class Card extends React.Component {
         }
       });
     }
-  
+
     render() {
       var {
         contents,
-        multiple
+        multiple,
       } = this.props;
   
       var content = contents.map((cardContent, i) => {

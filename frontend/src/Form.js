@@ -83,47 +83,60 @@ class MasterForm extends React.Component {
       ]
     
       this.choiceData = [
-        [{
-          title: "FC Barcelona",
-          description: "Spain",
-          data: this.graphData
-        },{
-          title: "Bayern Munich",
-          description: "Germany",
-          data: this.graphData
-        },{
-          title: "Indifferent 🤷‍♀️ ",
-          description: "I don't like either option more than the other",
-          data: []
-        }],
-        [{
-          title: "Apple",
-          description: "Cupertino, CA",
-          data: this.graphData
-        },{
-            title: "Microsoft",
-            description: "Redmond, WA",
-            data: this.graphData
-        },{
-          title: "Indifferent 🤷‍♀️ ", 
-          description: "I don't like either option more than the other",
-          data: []
-        }],
-        [{
-          title: "Apples",
-            description: "some text",
-            data: this.graphData
-        },{
-            title: "Oranges",
-            description: "Cara cara are the best",
-            data: this.graphData
-        },{
-          title: "Indifferent 🤷‍♀️ ", 
-          description: "I don't like either option more than the other",
-          data: []
-        }]
-      ];
+            {
+            query_title : "Pick a team",
+            data: [{
+              title: "FC Barcelona",
+              description: "Spain",
+              data: this.graphData
+            },{
+              title: "Bayern Munich",
+              description: "Germany",
+              data: this.graphData
+            },{
+              title: "Indifferent 🤷‍♀️ ",
+              description: "I don't like either option more than the other",
+              data: []
+            }]
+          },
+          {
+            query_title : "Pick a company",
+            data: [{
+              title: "Apple",
+              description: "Cupertino, CA",
+              data: this.graphData
+            },{
+                title: "Microsoft",
+                description: "Redmond, WA",
+                data: this.graphData
+            },{
+              title: "Indifferent 🤷‍♀️ ", 
+              description: "I don't like either option more than the other",
+              data: []
+            }]   
+          },
+          {
+            query_title : "Pick a fruit",
+            data: [
+              {
+                title: "Apples",
+                  description: "some text",
+                  data: this.graphData
+              },{
+                  title: "Oranges",
+                  description: "Cara cara are the best",
+                  data: this.graphData
+              },{
+                title: "Indifferent 🤷‍♀️ ", 
+                description: "I don't like either option more than the other",
+                data: []
+              }
+            ]
+
+          }
+      ]
     }
+
   
     handleChange = event => {
       const {name, value} = event.target
@@ -161,8 +174,8 @@ class MasterForm extends React.Component {
       this.setState({
         currentStep: currentStep,
         selected: -1
-      })
-
+      });
+      // console.log("selected after reset: " + this.state.selected)
       // scroll up to the top of the container
       this.scrollTop();
     }
@@ -195,7 +208,7 @@ class MasterForm extends React.Component {
       this.setState({
       showError: show
       })
-  }
+    }
 
     finalSubmit(){
       // We want to lop over each of the choices made and post each of them to the db
@@ -249,53 +262,29 @@ class MasterForm extends React.Component {
         // hide the error message
         this.setState({
           showError: false
-        }) 
-
+        }); 
         // record the choice made
-        console.log(this.state.selected);
         this.state.userChoices.push(this.state.selected);
-        console.log(this.state.userChoices);
+        // console.log(this.state.userChoices);
 
 
-        if(this.state.currentStep === this.maxSteps){
-          // then we want to submit the results
-          this.finalSubmit();
-        } else{
-          // move to next question
-          this._next();
+          if(this.state.currentStep === this.maxSteps){
+            // then we want to submit the results
+            this.finalSubmit();
+          } else{
+            // move to next question
+            this._next();
+          }
         }
       }
         
         
-    }
-
-    _chooseA = () => {
-        alert(
-            `You chose option A!`
-        )
-    }
-
-    _chooseB = () => {
-        alert(
-            `You chose option B!`
-        )
-    }
-      
-    nextButton(){
-        let currentStep = this.state.currentStep;
-        if(currentStep <3){
-        return (
-            <button 
-            className="btn btn-primary float-right" 
-            type="button" onClick={this._next}>
-            Next
-            </button>        
-        )
-        }
-        return null;
-    }
     
-    render() {    
+
+
+    
+    render() { 
+      var numSteps = Array(this.maxSteps).fill().map((element,index) => index+1);
       return (
         <React.Fragment>
         <h1>Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span> </h1>
@@ -311,10 +300,59 @@ class MasterForm extends React.Component {
             currentStep={this.state.currentStep} 
             _start_questions={this._start_questions}
           />
+    
+          {/* <Steps 
+            currentStep={this.state.currentStep} 
+            maxSteps={this.maxSteps}
+            handleChange={this.handleChange}
+            choiceData={this.choiceData}
+            updateSelected={this.updateSelected}
+            submitChoice={this.submitChoice}
+            currently_selected={this.state.selected}
+            default_selected={-1}
+
+            showError={this.state.showError}
+            updateShowError={this.updateShowError}
+          /> */}
+          {/* Is there some way that we can dynamically create these steps and be able to update selected? */}
+          {/* <Step
+              currentStep={this.state.currentStep} 
+              maxSteps={this.maxSteps}
+              handleChange={this.handleChange}
+              choiceData={this.choiceData}
+              updateSelected={this.updateSelected}
+              submitChoice={this.submitChoice}
+              currently_selected={this.state.selected}
+              selectedCard={this.state.selectedCard}
+              resetCard={this.state.resetCard}
+              updateResetCard={this.updateResetCard}
+  
+              showError={this.state.showError}
+              updateShowError={this.updateShowError} 
+              _reset_selected={this._reset_selected}
+              /> */}
+          {/* {numSteps.map((element, idx) => { 
+            return(
+              <Step element={element}
+              currentStep={this.state.currentStep} 
+              maxSteps={this.maxSteps}
+              handleChange={this.handleChange}
+              choiceData={this.choiceData}
+              updateSelected={this.updateSelected}
+              submitChoice={this.submitChoice}
+              currently_selected={this.state.selected}
+  
+              showError={this.state.showError}
+              updateShowError={this.updateShowError} /> 
+              )
+          })
+            }
+           */}
           <Step1 
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
             data={this.choiceData[this.state.currentStep -1]}
+            choiceData={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
             currently_selected={this.state.selected}
@@ -326,6 +364,7 @@ class MasterForm extends React.Component {
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
             data={this.choiceData[this.state.currentStep -1]}
+            choiceData={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
             currently_selected={this.state.selected}
@@ -337,6 +376,7 @@ class MasterForm extends React.Component {
             currentStep={this.state.currentStep} 
             handleChange={this.handleChange}
             data={this.choiceData[this.state.currentStep -1]}
+            choiceData={this.choiceData[this.state.currentStep -1]}
             updateSelected={this.updateSelected}
             submitChoice={this.submitChoice}
             currently_selected={this.state.selected}
@@ -359,6 +399,42 @@ class MasterForm extends React.Component {
       );
     }
   }
+
+  // function Steps(props){
+  //   var numSteps = Array(props.maxSteps).fill().map((element,index) => index+1);
+  //   var allSteps =  numSteps.map((element, idx) => {
+  //       return(Step(props, element))
+  //   });
+  //   // console.log(props.currentStep)
+  //   if(props.currentStep < 1 | props.currentStep > props.maxSteps){
+  //     return null
+  //   }
+  //   return(allSteps[ props.currentStep - 1 ])
+  
+    
+  // }
+
+  // function Step(props){
+  //   if(props.currentStep < 1 | props.currentStep > props.maxSteps){
+  //       return null
+  //     }
+  //   return(
+  //       <div className="container">
+  //           <Example title= {props.choiceData[(props.currentStep)-1]['query_title']} 
+  //           cardContents={props.choiceData[props.currentStep-1]['data']} 
+  //           submitChoice={props.submitChoice}
+  //           updateSelected={props.updateSelected}
+  //           showError={props.showError} 
+  //           updateShowError={props.updateShowError}
+  //           default_selected={props.default_selected}
+  //           _reset_selected={props._reset_selected}
+  //           selectedCard={props.selectedCard}
+  //           resetCard={props.resetCard}
+  //           updateResetCard={props.updateResetCard}
+  //           />
+  //       </div>
+  //   )
+  // }
   
   function Step1(props) {
     if (props.currentStep !== 1) {
@@ -366,7 +442,9 @@ class MasterForm extends React.Component {
     } 
     return(
         <div className="container">
-            <Example title="Pick a team" cardContents={props.data} 
+            <Example 
+            title={props.choiceData['query_title']}
+            cardContents={props.choiceData['data']} 
             submitChoice={props.submitChoice}
             updateSelected={props.updateSelected}
             showError={props.showError} 
@@ -386,7 +464,9 @@ class MasterForm extends React.Component {
     } 
     return(
         <div className="container">
-            <Example title="Pick a company" cardContents={props.data} 
+            <Example 
+            title={props.choiceData['query_title']}
+            cardContents={props.choiceData['data']} 
             submitChoice={props.submitChoice}
             updateSelected={props.updateSelected}
             showError={props.showError} 
@@ -403,7 +483,9 @@ class MasterForm extends React.Component {
     } 
     return(
       <div className="container">
-        <Example title="Pick a fruit" cardContents={props.data} 
+        <Example 
+            title={props.choiceData['query_title']}
+            cardContents={props.choiceData['data']} 
             submitChoice={props.submitChoice}
             updateSelected={props.updateSelected}
             showError={props.showError} 
@@ -434,7 +516,7 @@ class MasterForm extends React.Component {
   }
 
   function EndPage(props) {
-    console.log(props.currentStep)
+    // console.log(props.currentStep)
     if (props.currentStep !== props.maxSteps + 1) {
       return null
     } 
@@ -478,11 +560,13 @@ class MasterForm extends React.Component {
   class Example extends React.Component {
     onListChanged(selected) {
         this.setState({
-        selected: selected
+        selected: selected,
         });
         this.props.updateSelected(selected);
         this.props.updateShowError(false);
     }
+
+
     render() {
       return (
         <div className="column">
@@ -495,7 +579,9 @@ class MasterForm extends React.Component {
               {/* On click we want to move to the next choice and store this information.
               I think we can use _next but we need to add in the info for the choices */}
               <AlertDismissibleExample showError={this.props.showError} updateShowError={this.props.updateShowError}  />
-              <button className="card" onClick={e => this.props.submitChoice(e)}>
+              <button className="card" onClick={e => {
+                this.props.submitChoice(e);
+              }}>
                 Submit selection
               </button>
               
