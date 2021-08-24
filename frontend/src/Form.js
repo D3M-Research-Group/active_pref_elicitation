@@ -1,8 +1,26 @@
 import React from 'react';
 import SelectableCardList from "./Card";
 import Alert from 'react-bootstrap/Alert'
+import { v4 as uuidv4 } from 'uuid';
 // import axios from "axios";
 import './Form.css';
+import './Loader.scss';
+
+
+const Loader = () => (
+  // <div class="divLoader">
+  //   <svg class="svgLoader" viewBox="0 0 100 100" width="10em" height="10em">
+  //     <path stroke="none" d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50" fill="#51CACC" transform="rotate(179.719 50 51)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 51;360 50 51" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path>
+  //   </svg>
+  // </div>
+  <div class="loading">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+);
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 class MasterForm extends React.Component {
     constructor(props) {
@@ -11,14 +29,15 @@ class MasterForm extends React.Component {
         currentStep: 0,
         userChoices: [],
         selected: -1,
-        showError: false
+        showError: false,
+        loading: false
       }
       this.maxSteps = 3;
       this.updateSelected = this.updateSelected.bind(this);
       this.submitChoice = this.submitChoice.bind(this);
       this.updateShowError = this.updateShowError.bind(this);
-      // this.onSubmitDecision= this.onSubmitDecision.bind(this);
-
+      this.uuid = uuidv4();
+      this.mturk = false;
       this.graphData = [
         {year: 1980, efficiency: 24.3, sales: 8949000},
       
@@ -138,6 +157,23 @@ class MasterForm extends React.Component {
     }
 
   
+
+  async componentDidMount() {
+    
+    // get IP info
+    const response = await fetch('https://geolocation-db.com/json/');
+    const data = await response.json();
+    this.setState({ ip: data.IPv4 })
+    // parse query string info
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    // only want param mturk
+    if(params['mturk']){
+      this.mturk = true;
+    }
+
+  }
+  
     handleChange = event => {
       const {name, value} = event.target
       this.setState({
@@ -163,6 +199,27 @@ class MasterForm extends React.Component {
       })
     }
 
+    showLoading = async () => {
+      await delay(5000);
+      this.setState({
+        loading: false
+      });
+    }
+
+    post_request(){
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'React POST Request Example' })
+      };
+      fetch('https://jsonplaceholder.typicode.com/posts', requestOptions)
+          .then(response => {
+            const data = response.json();
+            // delay(2000);
+            this.setState({loading: false });
+          } );
+    }
+
     scrollTop = () =>{
       window.scrollTo({top: 0, behavior: 'smooth'});
     };
@@ -175,7 +232,17 @@ class MasterForm extends React.Component {
         currentStep: currentStep,
         selected: -1
       });
-      // console.log("selected after reset: " + this.state.selected)
+      
+      // wait two seconds, show loading then stop showing loading
+      
+      this.setState({
+        loading: true
+      }, function(){
+        this.showLoading();  
+      });
+      
+      
+
       // scroll up to the top of the container
       this.scrollTop();
     }
@@ -214,29 +281,44 @@ class MasterForm extends React.Component {
       // We want to lop over each of the choices made and post each of them to the db
         let [choice1, choice2, choice3] = this.state.userChoices;
         alert(`Your choices: \n 
-             Choice 1: ${this.choiceData[0][choice1]['title']} \n 
-             Choice 2: ${this.choiceData[1][choice2]['title']} \n
-             Choice 3: ${this.choiceData[2][choice3]['title']} \n
+             Choice 1: ${this.choiceData[0]['data'][choice1]['title']} \n 
+             Choice 2: ${this.choiceData[1]['data'][choice2]['title']} \n
+             Choice 3: ${this.choiceData[2]['data'][choice3]['title']} \n
+             Your IP: ${this.state.ip} \n
+             Your UUID: ${this.uuid} \n
+             MTurk worker: ${this.mturk}\n
         This is where we will send the results back to the server`);
         this._goToEnd();
     }
 
     displayChoices = () => {
       let [choice1, choice2, choice3] = this.state.userChoices;
+      console.log(this.mturk);
         return(
-          <ul>
-            <li>
-              Choice 1: {this.choiceData[0][choice1]['title']}
-            </li>
-            <li>
-              Choice 2: {this.choiceData[1][choice2]['title']}
-            </li>
-            <li>
-              Choice 3: {this.choiceData[2][choice3]['title']}
-            </li>
-            
-          </ul>
-          
+          <div>
+            <ul>
+              <li>
+                Choice 1: {this.choiceData[0]['data'][choice1]['title']}
+              </li>
+              <li>
+                Choice 2: {this.choiceData[1]['data'][choice2]['title']}
+              </li>
+              <li>
+                Choice 3: {this.choiceData[2]['data'][choice3]['title']}
+              </li>
+              
+            </ul>
+            <p>
+              Your IP: {this.state.ip}
+            </p>
+            <p>
+              Your UUID: {this.uuid}
+            </p>
+            <p>
+              MTurk worker: {this.mturk.toString()}
+            </p>
+
+          </div>
           );
     }
 
@@ -359,6 +441,7 @@ class MasterForm extends React.Component {
 
             showError={this.state.showError}
             updateShowError={this.updateShowError}
+            loading={this.state.loading}
           />
           <Step2 
             currentStep={this.state.currentStep} 
@@ -371,6 +454,7 @@ class MasterForm extends React.Component {
 
             showError={this.state.showError}
             updateShowError={this.updateShowError}
+            loading={this.state.loading}
           />
           <Step3 
             currentStep={this.state.currentStep} 
@@ -383,6 +467,7 @@ class MasterForm extends React.Component {
 
             showError={this.state.showError}
             updateShowError={this.updateShowError}
+            loading={this.state.loading}
           />
 
           <EndPage
@@ -449,6 +534,7 @@ class MasterForm extends React.Component {
             updateSelected={props.updateSelected}
             showError={props.showError} 
             updateShowError={props.updateShowError}
+            loading={props.loading}
             />
         </div>
         
@@ -471,6 +557,7 @@ class MasterForm extends React.Component {
             updateSelected={props.updateSelected}
             showError={props.showError} 
             updateShowError={props.updateShowError}
+            loading={props.loading}
             />
         </div>
       
@@ -490,6 +577,7 @@ class MasterForm extends React.Component {
             updateSelected={props.updateSelected}
             showError={props.showError} 
             updateShowError={props.updateShowError}
+            loading={props.loading}
             />
       </div>
     )
@@ -570,21 +658,24 @@ class MasterForm extends React.Component {
     render() {
       return (
         <div className="column">
-            <h1 className="title">{this.props.title}</h1>
-            <SelectableCardList 
-              multiple={this.props.multiple}
-              maxSelectable={this.props.maxSelectable}
-              contents={this.props.cardContents}
-              onChange={this.onListChanged.bind(this)}/>
-              {/* On click we want to move to the next choice and store this information.
-              I think we can use _next but we need to add in the info for the choices */}
-              <AlertDismissibleExample showError={this.props.showError} updateShowError={this.props.updateShowError}  />
-              <button className="card" onClick={e => {
-                this.props.submitChoice(e);
-              }}>
-                Submit selection
-              </button>
-              
+          {this.props.loading ? <Loader /> : null}
+
+            {this.props.loading ? null : <div>
+              <h1 className="title">{this.props.title}</h1>
+              <SelectableCardList 
+                multiple={this.props.multiple}
+                maxSelectable={this.props.maxSelectable}
+                contents={this.props.cardContents}
+                onChange={this.onListChanged.bind(this)}/>
+                {/* On click we want to move to the next choice and store this information.
+                I think we can use _next but we need to add in the info for the choices */}
+                <AlertDismissibleExample showError={this.props.showError} updateShowError={this.props.updateShowError}  />
+                <button className="card" onClick={e => {
+                  this.props.submitChoice(e);
+                }}>
+                  Submit selection
+                </button>
+            </div>}
             
         </div>);
     }
