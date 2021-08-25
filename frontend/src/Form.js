@@ -1,6 +1,7 @@
 import React from 'react';
 import SelectableCardList from "./Card";
 import Alert from 'react-bootstrap/Alert'
+import UserInfoForm from './UserInfoForm';
 import { v4 as uuidv4 } from 'uuid';
 // import axios from "axios";
 import './Form.css';
@@ -8,11 +9,6 @@ import './Loader.scss';
 
 
 const Loader = () => (
-  // <div class="divLoader">
-  //   <svg class="svgLoader" viewBox="0 0 100 100" width="10em" height="10em">
-  //     <path stroke="none" d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50" fill="#51CACC" transform="rotate(179.719 50 51)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 51;360 50 51" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path>
-  //   </svg>
-  // </div>
   <div class="loading">
     <div></div>
     <div></div>
@@ -30,12 +26,21 @@ class MasterForm extends React.Component {
         userChoices: [],
         selected: -1,
         showError: false,
-        loading: false
+        loading: false,
+        UserInfoError: false,
+        userInfo: {
+          name: "",
+          email: "",
+          gender: "",
+          complete: false
+        }
       }
       this.maxSteps = 3;
       this.updateSelected = this.updateSelected.bind(this);
       this.submitChoice = this.submitChoice.bind(this);
       this.updateShowError = this.updateShowError.bind(this);
+      this.updateUserInfoError = this.updateUserInfoError.bind(this);
+      this.updateUserInfo = this.updateUserInfo.bind(this);
       this.uuid = uuidv4();
       this.mturk = false;
       this.graphData = [
@@ -174,12 +179,6 @@ class MasterForm extends React.Component {
 
   }
   
-    handleChange = event => {
-      const {name, value} = event.target
-      this.setState({
-        [name]: value
-      })    
-    }
      
     handleSubmit = event => {
       event.preventDefault()
@@ -191,12 +190,47 @@ class MasterForm extends React.Component {
     }
     
     // _next = () => {
-    _start_questions = () => {
-      let currentStep = this.state.currentStep;
-      currentStep = currentStep >= this.maxSteps-1? this.maxSteps: currentStep + 1
-      this.setState({
-        currentStep: currentStep
-      })
+    _start_questions = (e) => {
+      e.preventDefault();
+      if(this.state.userInfo.complete){
+        let currentStep = this.state.currentStep;
+        currentStep = currentStep >= this.maxSteps-1? this.maxSteps: currentStep + 1
+        this.setState({
+          currentStep: currentStep
+        })
+      } else {
+        this.setState({
+          UserInfoError: true
+        });
+      }
+      
+        
+
+      
+    }
+
+    updateUserInfo(info) {
+      // handle formValues somehow ending up in parent state?
+      var toUpdate = info;
+      if(toUpdate['formObj'].formValues){
+        delete toUpdate['formObj'].formValues;
+      }
+      console.log(Object.keys(toUpdate['errors']).length);
+
+      if(Object.keys(toUpdate['errors']).length === 0){
+        toUpdate['formObj']['complete'] = true;
+      }
+
+      this.setState(
+        {
+          userInfo: toUpdate['formObj'],
+          
+        }, function(){
+        console.log("state in parent");
+        console.log(this.state.userInfo);
+        console.log("size of errors object");
+        console.log(Object.keys(toUpdate['errors']).length);
+      });
     }
 
     showLoading = async () => {
@@ -214,7 +248,7 @@ class MasterForm extends React.Component {
       };
       fetch('https://jsonplaceholder.typicode.com/posts', requestOptions)
           .then(response => {
-            const data = response.json();
+            // const data = response.json();
             // delay(2000);
             this.setState({loading: false });
           } );
@@ -274,6 +308,11 @@ class MasterForm extends React.Component {
     updateShowError(show){
       this.setState({
       showError: show
+      })
+    }
+    updateUserInfoError(show){
+      this.setState({
+      UserInfoError: show
       })
     }
 
@@ -381,6 +420,10 @@ class MasterForm extends React.Component {
           <StartPage
             currentStep={this.state.currentStep} 
             _start_questions={this._start_questions}
+            formInfo={this.state.userInfo}
+            updateUserInfo={this.updateUserInfo}
+            UserInfoError={this.state.UserInfoError}
+            updateUserInfoError={this.updateUserInfoError}
           />
     
           {/* <Steps 
@@ -593,10 +636,17 @@ class MasterForm extends React.Component {
           <p>
             Click on the "Start" button to start answering the questions
           </p>
+          <div className="col-lg-6 offset-lg-3 ">
+            <div className="row justify-content-center">
+            <UserInfoForm initialState={props.formInfo} updateUserInfo={props.updateUserInfo} />
+            </div>
 
+          </div>
+          
+          <UserInfoFormError showError={props.UserInfoError} updateShowError={props.updateUserInfoError} />
           <button 
-            className="btn btn-primary" 
-            type="button" onClick={props._start_questions}>
+            className="btn btn-primary" form='user-info'
+            type="submit" value="submit" onClick={props._start_questions}>
             Start
             </button>                  
       </div>
@@ -625,6 +675,25 @@ class MasterForm extends React.Component {
       
       
     )
+  }
+
+  function UserInfoFormError(props) {
+    // const [show, setShow] = useState(false);
+  
+    if (!props.showError) {
+      return null
+    }
+    return (
+      <div class="d-flex justify-content-center">
+        <Alert variant="danger" className="text-center" onClose={() => props.updateShowError(false)} dismissible>
+          <Alert.Heading>Form Error</Alert.Heading>
+          <p>
+            Please enter information for all fields.
+          </p>
+        </Alert>
+      </div>
+    );
+    
   }
 
   function AlertDismissibleExample(props) {
