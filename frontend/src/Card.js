@@ -121,14 +121,14 @@ class Card extends React.Component {
         var {
           title,
           description,
-          data,
+          graphData,
           selected
         } = cardContent;
         var selected = multiple ? this.state.selected.indexOf(i) > -1 : this.state.selected === i;
         return (
           
             <SelectableTitleCard key={i} 
-            title={title} description={description} data={data}
+            title={title} description={description} data={graphData}
             selected={selected} 
             onClick={(e) => this.onItemSelected(i)} />
           
@@ -140,7 +140,7 @@ class Card extends React.Component {
             {/* <div class="d-flex flex-row"> */}
               {content.splice(0,content.length-1)}
             </div>
-            <div class="d-flex justify-content-center">
+            <div className="d-flex justify-content-center">
             {content[content.length - 1]}
 
             </div>

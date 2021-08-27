@@ -1,0 +1,8 @@
+.Jfv_Field {
+	&.isInvalid {
+		&.isSubmitted,
+		&.isTouched {
+			border-color: #db0029;
+		}
+	}
+}

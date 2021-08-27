@@ -1,127 +1,543 @@
 import React from 'react';
-import { Formik, Field, Form } from 'formik';
-// import 'bootstrap/dist/css/bootstrap.min.css';
+import { Field, FieldError, Form } from 'react-jsonschema-form-validation';
+import {
+	Col,
+	FormGroup,
+	Label,
+	Row,
+    Container
+} from 'reactstrap';
 
-// const UserInfoForm = () => {
-class UserInfoForm extends React.Component {
+import { defaultMessage, 
+    selectFieldMessage,
+    usernameFieldMessage,
+    healthcareroleFieldMessage } from './FormErrorMessages';
+
+import './Field.scss';
+import './FieldError.scss';
+import schema from './simplifiedFormSchema';
+import Submit from './Submit';
+import Select from './Select';
+
+
+class UserInfoForm extends React.Component{
     constructor(props){
         super(props);
-        this.state = props.initialState
-        // this.state ={
-        //     name: "",
-        //     email: "",
-        //     gender: ""
-
-        // }
-    }
-
-    validateForm = (values) => {
-        const errors = {};
-        if (!values.name) {
-            errors.name = 'Name is required';
+        this.state = {
+            formData: {
+                username: '',
+                age: '',
+                race_ethnicity: '',
+                gender: '',
+                marital_status: '',
+                education: '',
+                political: '',
+                positive_family: '',
+                positive_anyone: '',
+                healthcare_yn: '',
+                healthcare_role: '',
+                defaultMessage, selectFieldMessage, usernameFieldMessage, healthcareroleFieldMessage
+            },
+            loading: false,
+			success: false,
         }
-        if (!values.email) {
-            errors.email = 'Email is required';
-        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-            errors.email = 'Invalid email address';
-        }
-        if (!values.gender){
-            errors.gender = "Gender is required";
-        } else if (values.gender === "-1"){
-            errors.gender = "Please select one of the options";
-        }
-        console.log(errors);
-        return errors;
+        this.handleChange = this.handleChange.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
     };
+    handleChange(data) {
+		this.setState({
+			formData: data,
+			success: false,
+		});
+	}
 
-    handleChange = ({ target }) => {
-        // console.log(target);
-        const formValues = this.state;
-        formValues[target.name] = target.value;
-        this.setState({ formValues });
-        const name = target.name;
-        const value = target.value;
-        this.validateForm(target);
-        // update the form values and the error object
-        this.props.updateUserInfo({
-            formObj: formValues,
-            errors: this.validateForm(target)
-        });
-        console.log(this.validateForm(target));
-      };
+    
 
-    render(){
-        return (
-            <Formik
-                enableReinitialize
-                initialValues={{ name: this.state.name, email: this.state.email, gender: this.state.gender}}
-                onSubmit={(values, { setSubmitting }) => {
-                    setTimeout(() => {
-                        alert(JSON.stringify(values, null, 2));
-                        setSubmitting(false);
-                    }, 1000);
-                }}
-                
-                validate={this.validateForm}
-            >
-                {(formik, isSubmitting) => (
-                    <Form id='user-info'>
-                        <div className="form-group">
-                            <label htmlFor="name">Name</label>
-                            <Field name="name" 
-                            className={(formik.touched.name && formik.errors.name) ? 'form-control is-invalid' : 'form-control'} 
-                            type="text"
-                            onChange={this.handleChange} 
-                            />
+	handleSubmit() {
+		this.setState({ loading: true });
+        // lift up form data to App component 
+        this.props.updateUserInfo(this.state.formData);
+		setTimeout(() => {
+			this.setState({ loading: false, success: true });
+            
+		}, 1000);
+        this.props.toggleUserInfoForm();
+        this.props.incrementStep();
+        
+	}
+
+	render() {
+
+        if(!this.props.showForm){
+            return null;
+        }
+
+        const {
+			formData,
+			loading,
+			success,
+		} = this.state;  
+
+        return(
+            <Form
+				data={formData}
+				onChange={this.handleChange}
+				onSubmit={this.handleSubmit}
+				schema={schema}
+			>
+                <Row className="mb-4">
+                <FormGroup>
+                    <Label>Worker ID (Please use the MTurk Worker ID that we use to verify payment)</Label>
+                    <Col md="4">
+                        <Field className=""
+                            name="username"
+                            value={formData.username}
+                            type="input"
+                        />
+                        <FieldError 
+                        errorMessages={{
+                            required: () => formData.usernameFieldMessage
+                        }}
+                        name="username" />
+                    </Col>
+                    
+                </FormGroup>
+                <FormGroup>
+                <Label>What is your age group?</Label>
+                    <Col md="4">
+                        <Field
+                            className=""
+                            component={Select}
+                            name="age"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('age', newVal)}
+                            options={[
+                                {
+                                    name: "18-39",
+                                    label: "18-39",
+                                    value: "18-39",
+                                },{
+                                    name: "40-49",
+                                    label: "40-49",
+                                    value: "40-49",
+                                },{
+                                    name: "50-59",
+                                    label: "50-59",
+                                    value: "50-59",
+                                },{
+                                    name: "60-69",
+                                    label: "60-69",
+                                    value: "60-69",
+                                },{
+                                    name: "70-79",
+                                    label: "70-79",
+                                    value: "70-79",
+                                },{
+                                    name: "80+",
+                                    label: "80+",
+                                    value: "80+",
+                                }
+                            ]}
+                            value={formData.age}
+                        />
+                        <FieldError 
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="age" />
+                    </Col>
+					
+					
+				</FormGroup>
+
+                <FormGroup>
+					<Label>What is your race/ethnicity?</Label>
+                    <Col md="4">
+                    <Field
+						className=""
+						component={Select}
+						name="race_ethnicity"
+						isClearable
+						onChange={(newVal, handleFieldChange) => handleFieldChange('race_ethnicity', newVal)}
+						options={[
+							{
+								name: "American Indian or Alaska Native",
+								label: "American Indian or Alaska Native",
+								value: "American Indian or Alaska Native",
+							},{
+								name: "Asian",
+								label: "Asian",
+								value: "Asian",
+							},{
+								name: "Black or African American",
+								label: "Black or African American",
+								value: "Black or African American",
+							},{
+								name: "Hispanic or Latino",
+								label: "Hispanic or Latino",
+								value: "Hispanic or Latino",
+							},{
+								name: "Multiracial",
+								label: "Multiracial",
+								value: "Multiracial",
+							},{
+								name: "Native Hawaiian or Other Pacific Islander",
+								label: "Native Hawaiian or Other Pacific Islander",
+								value: "Native Hawaiian or Other Pacific Islander",
+							},{
+								name: "White",
+								label: "White",
+								value: "White",
+							},{
+								name: "Prefer not to Answer",
+								label: "Prefer not to Answer",
+								value: "Prefer not to Answer",
+							}
                             
-                            {formik.touched.name && formik.errors.name ? (
-                                <div className="invalid-feedback">{formik.errors.name}</div>
-                            ) : null}
-                        </div>
-    
-                        <div className="form-group">
-                            <label htmlFor="email">Email Address</label>
-                            <Field name="email"
-                             className={(formik.touched.email && formik.errors.email) ? 'form-control is-invalid' : 'form-control'} 
-                             type="email" 
-                             onChange={this.handleChange}
-                             />
-                            
-                            {formik.touched.email && formik.errors.email ? (
-                                <div className="invalid-feedback">{formik.errors.email}</div>
-                            ) : null}
-                        </div>
-    
-                        <div className="form-group">
-                            <label htmlFor="content">Gender</label>
-                            <Field name="gender" 
-                            as="select" 
-                            multiple={false} 
-                            className={(formik.touched.gender && formik.errors.gender) ? 'form-control is-invalid' : 'form-control'}
-                            onChange={this.handleChange}
-                            >
-                                <option defaultValue value="-1"></option>
-                                <option value="0">Female</option>
-                                <option value="1">Male</option>
-                                <option value="2">Other</option>
-                            </Field>
-                            {formik.touched.gender && formik.errors.gender ? (
-                                <div className="invalid-feedback">{formik.errors.gender}</div>
-                            ) : null}
-                        </div>
-    
-                        {/* <div className="form-group">
-                            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>{isSubmitting ? "Please wait..." : "Submit"}</button>
-                        </div> */}
-    
-                    </Form>
-                )
-                }
-            </Formik >
+						]}
+						value={formData.race_ethnicity}
+					/>
+					<FieldError 
+                    errorMessages={{
+                        required: () => formData.selectFieldMessage
+                    }}
+                    name="race_ethnicity" />
+                    </Col>
+					
+				</FormGroup>
+
+                <FormGroup>
+					<Label>What is your gender?</Label>
+                    < Col md="4"> 
+                        <Field
+                            className=""
+                            component={Select}
+                            name="gender"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('gender', newVal)}
+                            options={[
+                                {
+                                    name: "Female",
+                                    label: "Female",
+                                    value: "Female",
+                                },{
+                                    name: "Male",
+                                    label: "Male",
+                                    value: "Male",
+                                },{
+                                    name: "Other",
+                                    label: "Other",
+                                    value: "Other",
+                                },{
+                                    name: "Prefer not to answer",
+                                    label: "Prefer not to answer",
+                                    value: "Prefer not to answer",
+                                }
+                            ]}
+                            value={formData.gender}
+                        />
+                        <FieldError
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="gender" />   
+                    </Col>
+					
+				</FormGroup>
+
+                <FormGroup>
+					<Label>What is your marital status?</Label>
+                    <Col md="4">
+                        <Field
+                            className=""
+                            component={Select}
+                            name="marital_status"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('marital_status', newVal)}
+                            options={[
+                                {
+                                    name: "Single (Never Married)",
+                                    label: "Single (Never Married)",
+                                    value: "Single (Never Married)",
+                                },{
+                                    name: "Married",
+                                    label: "Married",
+                                    value: "Married",
+                                },{
+                                    name: "Divorced",
+                                    label: "Divorced",
+                                    value: "Divorced",
+                                },{
+                                    name: "Widowed",
+                                    label: "Widowed",
+                                    value: "Widowed",
+                                },{
+                                    name: "Other",
+                                    label: "Other",
+                                    value: "Other",
+                                },{
+                                    name: "Prefer not to answer",
+                                    label: "Prefer not to answer",
+                                    value: "Prefer not to answer",
+                                }
+                            ]}
+                            value={formData.marital_status}
+                        />
+                        <FieldError
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="marital_status" />
+                    </Col>
+					
+				</FormGroup>
+
+                <FormGroup>
+					<Label>What is the highest degree or level of school you have completed?</Label>
+                    <Col md="4">
+                        <Field
+                            className=""
+                            component={Select}
+                            name="education"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('education', newVal)}
+                            options={[
+                                {
+                                    name: "No schooling completed",
+                                    label: "No schooling completed",
+                                    value: "No schooling completed",
+                                },{
+                                    name: "Nursery school to 8th grade",
+                                    label: "Nursery school to 8th grade",
+                                    value: "Nursery school to 8th grade",
+                                },{
+                                    name: "Some high school, no diploma",
+                                    label: "Some high school, no diploma",
+                                    value: "Some high school, no diploma",
+                                },{
+                                    name: "High school graduate, diploma or the equivalent (for example: GED)",
+                                    label: "High school graduate, diploma or the equivalent (for example: GED)",
+                                    value: "High school graduate, diploma or the equivalent (for example: GED)",
+                                },{
+                                    name: "Some college credit, no degree",
+                                    label: "Some college credit, no degree",
+                                    value: "Some college credit, no degree",
+                                },{
+                                    name: "Trade/technical/vocational training",
+                                    label: "Trade/technical/vocational training",
+                                    value: "Trade/technical/vocational training",
+                                },{
+                                    name: "Associate degree",
+                                    label: "Associate degree",
+                                    value: "Associate degree",
+                                },{
+                                    name: "Bachelor’s degree",
+                                    label: "Bachelor’s degree",
+                                    value: "Bachelor’s degree",
+                                },{
+                                    name: "Master's degree",
+                                    label: "Master's degree",
+                                    value: "Master's degree",
+                                },{
+                                    name: "Professional degree",
+                                    label: "Professional degree",
+                                    value: "Professional degree",
+                                },{
+                                    name: "Doctorate degree",
+                                    label: "Doctorate degree",
+                                    value: "Doctorate degree",
+                                }
+                            ]}
+                            value={formData.education}
+                        />
+                        <FieldError
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="education" />
+                    </Col>
+					
+				</FormGroup>
+
+                <FormGroup>
+					<Label>What is your political party affiliation?</Label>
+					<Col md="4">
+                        <Field
+                            className=""
+                            component={Select}
+                            name="political"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('political', newVal)}
+                            options={[
+                                {
+                                    name: "Constitution",
+                                    label: "Constitution",
+                                    value: "Constitution",
+                                },{
+                                    name: "Democratic",
+                                    label: "Democratic",
+                                    value: "Democratic",
+                                },{
+                                    name: "Green",
+                                    label: "Green",
+                                    value: "Green",
+                                },{
+                                    name: "Independent",
+                                    label: "Independent",
+                                    value: "Independent",
+                                },{
+                                    name: "Libertarian",
+                                    label: "Libertarian",
+                                    value: "Libertarian",
+                                },{
+                                    name: "Republican",
+                                    label: "Republican",
+                                    value: "Republican",
+                                },{
+                                    name: "Other",
+                                    label: "Other",
+                                    value: "Other",
+                                },{
+                                    name: "Prefer not to Answer",
+                                    label: "Prefer not to Answer",
+                                    value: "Prefer not to Answer",
+                                }
+                            ]}
+                            value={formData.political}
+                        />
+                        <FieldError
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="political" />
+                    </Col>
+				</FormGroup>
+
+                <FormGroup>
+					<Label>Do you have family members who tested positive for COVID-19?</Label>
+					<Col md="4">
+                        <Field
+                            className=""
+                            component={Select}
+                            name="positive_family"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('positive_family', newVal)}
+                            options={[
+                                {
+                                    name: "Yes",
+                                    label: "Yes",
+                                    value: "Yes",
+                                },{
+                                    name: "No",
+                                    label: "No",
+                                    value: "No",
+                                },{
+                                    name: "Unsure",
+                                    label: "Unsure",
+                                    value: "Unsure",
+                                }
+                            ]}
+                            value={formData.positive_family}
+                        />
+                        <FieldError
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="positive_family" />
+                    </Col>
+				</FormGroup>
+
+                <FormGroup>
+					<Label>Do you know anyone (other than family members) who tested positive for COVID-19?</Label>
+                    <Col md="4">
+                        <Field
+                            className=""
+                            component={Select}
+                            name="positive_anyone"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('positive_anyone', newVal)}
+                            options={[
+                                {
+                                    name: "Yes",
+                                    label: "Yes",
+                                    value: "Yes",
+                                },{
+                                    name: "No",
+                                    label: "No",
+                                    value: "No",
+                                },{
+                                    name: "Unsure",
+                                    label: "Unsure",
+                                    value: "Unsure",
+                                }
+                            ]}
+                            value={formData.positive_anyone}
+                        />
+                        <FieldError
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="positive_anyone" />
+                    </Col>
+					
+				</FormGroup>
+
+                <FormGroup>
+					<Label>Do you work in health care?</Label>
+                    <Col md="4">
+                        <Field
+                            className=""
+                            component={Select}
+                            name="healthcare_yn"
+                            isClearable
+                            onChange={(newVal, handleFieldChange) => handleFieldChange('healthcare_yn', newVal)}
+                            options={[
+                                {
+                                    name: "Yes",
+                                    label: "Yes",
+                                    value: "Yes",
+                                },{
+                                    name: "No",
+                                    label: "No",
+                                    value: "No",
+                                }
+                            ]}
+                            value={formData.healthcare_yn}
+                        />
+                        <FieldError
+                        errorMessages={{
+                            required: () => formData.selectFieldMessage
+                        }}
+                        name="healthcare_yn" />
+                    </Col>
+					
+				</FormGroup>
+
+                <FormGroup>
+                    <Label>If you answered yes to the above question, what is your role? Otherwise enter "NA".</Label>
+                    <Col md="4" >
+                        <Field className=""
+                            name="healthcare_role"
+                            value={formData.healthcare_role}
+                            type="input"
+                        />
+                        <FieldError 
+                        errorMessages={{
+                            required: () => formData.healthcareroleFieldMessage
+                        }}
+                        name="healthcare_role" />
+                    </Col>
+
+                </FormGroup>
+                </Row>
+                <Row className="mb-4">
+					<Col md="10" className="">
+						<Submit loading={loading} success={success} />
+					</Col>
+				</Row>
+            </Form>
         );
     }
-    
-};
-
+}
 
 export default UserInfoForm;

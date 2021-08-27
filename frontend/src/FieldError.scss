@@ -1,0 +1,12 @@
+.Jfv_FieldError {
+	display: none;
+	width: 100%;
+	margin-top: .25rem;
+	font-size: 80%;
+	color: #db0029;
+
+	&.isSubmitted {
+		display: block;
+		text-align: left;
+	}
+}
