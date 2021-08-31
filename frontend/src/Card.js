@@ -1,6 +1,15 @@
 import React from 'react';
 import BarChart from './BarChart';
+import PolicyDataBarChart from './PolicyDataBarChart';
 import './Card.scss'
+
+import {
+	Col,
+	FormGroup,
+	Label,
+	Row,
+    Container
+} from 'reactstrap';
 
 class Card extends React.Component {
     
@@ -32,8 +41,11 @@ class Card extends React.Component {
         title,
         description,
         selected,
-        data
+        data,
+        policy_id
       } = this.props;
+      // console.log("card data", data);
+      // console.log("policy_id", policy_id);
       if(data.length === 0){
         return (
             <div className="col-sm-4 align-self-center">
@@ -42,7 +54,7 @@ class Card extends React.Component {
                 <div className="content">
                   <h1 className="title">{title}</h1>
                   <p className="description">{description}</p>
-                  <BarChart data={data}/>
+                  {/* <BarChart data={data}/> */}
                 </div>
               </SelectableCard>
             </div>
@@ -57,13 +69,17 @@ class Card extends React.Component {
               <div className="content">
                 <h1 className="title">{title}</h1>
                 <p className="description">{description}</p>
-                {/* <div class="container">
-                  <div class="row">
-                      <div class="col-lg-6" id="chartArea"> */}
-                        <BarChart data={data}/>
-                      {/* </div>
-                  </div> */}
-                {/* </div> */}
+                <Container fluid={true}>
+                  <div className="row">
+                      <div className="col-lg-6" id="chartArea">
+                        {/* <BarChart data={data}/> */}
+                        <PolicyDataBarChart data={data}/>
+                      </div>
+                      <div className="col-lg-6" id="chartArea">
+                        <PolicyDataBarChart data={data}/>
+                     </div>
+                  </div> 
+                </Container>
                 
               </div>
             </SelectableCard>
@@ -116,6 +132,7 @@ class Card extends React.Component {
         contents,
         multiple,
       } = this.props;
+      console.log(contents);
   
       var content = contents.map((cardContent, i) => {
         var {
@@ -129,6 +146,7 @@ class Card extends React.Component {
           
             <SelectableTitleCard key={i} 
             title={title} description={description} data={graphData}
+            // policy_id={policy_id}
             selected={selected} 
             onClick={(e) => this.onItemSelected(i)} />
           

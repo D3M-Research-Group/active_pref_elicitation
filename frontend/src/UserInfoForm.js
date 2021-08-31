@@ -18,6 +18,7 @@ import './FieldError.scss';
 import schema from './simplifiedFormSchema';
 import Submit from './Submit';
 import Select from './Select';
+import './UserInfoForm';
 
 
 class UserInfoForm extends React.Component{
@@ -79,6 +80,8 @@ class UserInfoForm extends React.Component{
 		} = this.state;  
 
         return(
+            <Container>
+                
             <Form
 				data={formData}
 				onChange={this.handleChange}
@@ -87,9 +90,10 @@ class UserInfoForm extends React.Component{
 			>
                 <Row className="mb-4">
                 <FormGroup>
-                    <Label>Worker ID (Please use the MTurk Worker ID that we use to verify payment)</Label>
-                    <Col md="4">
-                        <Field className=""
+                    {/* MAKE TEXT INPUT IN-LINE */}
+                    <Label style={{width: "100%"}} >Worker ID (Please use the MTurk Worker ID that we use to verify payment)</Label>
+                    <Col  style={{width: "100%"}} md="4">
+                        <Field
                             name="username"
                             value={formData.username}
                             type="input"
@@ -103,8 +107,8 @@ class UserInfoForm extends React.Component{
                     
                 </FormGroup>
                 <FormGroup>
-                <Label>What is your age group?</Label>
-                    <Col md="4">
+                <Label style={{width: "100%"}}>What is your age group?</Label>
+                    <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
                             component={Select}
@@ -145,14 +149,13 @@ class UserInfoForm extends React.Component{
                             required: () => formData.selectFieldMessage
                         }}
                         name="age" />
-                    </Col>
-					
+				</Col>	
 					
 				</FormGroup>
 
                 <FormGroup>
-					<Label>What is your race/ethnicity?</Label>
-                    <Col md="4">
+					<Label style={{width: "100%"}}>What is your race/ethnicity?</Label>
+                    <Col style={{width: "100%"}} md="4">
                     <Field
 						className=""
 						component={Select}
@@ -207,8 +210,8 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label>What is your gender?</Label>
-                    < Col md="4"> 
+					<Label style={{width: "100%"}}>What is your gender?</Label>
+                    < Col style={{width: "100%"}} md="4"> 
                         <Field
                             className=""
                             component={Select}
@@ -246,8 +249,8 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label>What is your marital status?</Label>
-                    <Col md="4">
+					<Label style={{width: "100%"}}>What is your marital status?</Label>
+                    <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
                             component={Select}
@@ -293,8 +296,8 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label>What is the highest degree or level of school you have completed?</Label>
-                    <Col md="4">
+					<Label style={{width: "100%"}}>What is the highest degree or level of school you have completed?</Label>
+                    <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
                             component={Select}
@@ -360,8 +363,8 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label>What is your political party affiliation?</Label>
-					<Col md="4">
+					<Label style={{width: "100%"}}>What is your political party affiliation?</Label>
+					<Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
                             component={Select}
@@ -414,8 +417,8 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label>Do you have family members who tested positive for COVID-19?</Label>
-					<Col md="4">
+					<Label style={{width: "100%"}}>Do you have family members who tested positive for COVID-19?</Label>
+					<Col  style={{width: "100%"}} md="4">
                         <Field
                             className=""
                             component={Select}
@@ -448,8 +451,8 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label>Do you know anyone (other than family members) who tested positive for COVID-19?</Label>
-                    <Col md="4">
+					<Label style={{width: "100%"}} >Do you know anyone (other than family members) who tested positive for COVID-19?</Label>
+                    <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
                             component={Select}
@@ -483,8 +486,8 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label>Do you work in health care?</Label>
-                    <Col md="4">
+					<Label style={{width: "100%"}}>Do you work in health care?</Label>
+                    <Col  style={{width: "100%"}} md="4">
                         <Field
                             className=""
                             component={Select}
@@ -514,12 +517,13 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-                    <Label>If you answered yes to the above question, what is your role? Otherwise enter "NA".</Label>
-                    <Col md="4" >
+                    <Label style={{width: "100%"}}>If you answered yes to the above question, what is your role? Otherwise enter "NA".</Label>
+                    <Col style={{width: "100%"}} md="4" >
                         <Field className=""
                             name="healthcare_role"
                             value={formData.healthcare_role}
                             type="input"
+                            placeholder="NA"
                         />
                         <FieldError 
                         errorMessages={{
@@ -536,6 +540,7 @@ class UserInfoForm extends React.Component{
 					</Col>
 				</Row>
             </Form>
+            </Container>
         );
     }
 }

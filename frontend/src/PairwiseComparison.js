@@ -32,11 +32,14 @@ class PairwiseComparison extends React.Component {
         this.title = this.props.title;
         this.loading = this.props.loading
         this.cardContents = this.props.cardContents;
+        this.graphData = this.props.graphData;
+        this.policy_ids = this.props.policy_ids;
         this.onListChanged = this.onListChanged.bind(this);
         this.updateShowError = this.updateShowError.bind(this);
         this.userChoices = this.props.userChoices;
         this.incrementStep = this.props.incrementStep;
-        this.incrementStep = this.incrementStep.bind(this);
+        this.prepareCardData = this.prepareCardData.bind(this);
+
 
         // lift up state function
         this.pushBackChoice = this.pushBackChoice.bind(this);
@@ -82,8 +85,18 @@ class PairwiseComparison extends React.Component {
         }
     }
 
+    prepareCardData(cardData,graphData,policy_ids){
+        var dat = cardData
+        for(var i=0; i < policy_ids.length; i++){
+            dat[i]['graphData'] = graphData[policy_ids[i]]
+        }
+        return dat;
+    }
+
 
     render() {
+        // cardContents contains title, description, and graph data
+        // we will use the policy ids to population the graph data element in cardContents
       return (
         <div className="column">
           {this.loading ? <Loader /> : null}
@@ -91,7 +104,7 @@ class PairwiseComparison extends React.Component {
             {this.loading ? null : <div>
               <h1 className="title">{this.props.title}</h1>
               <SelectableCardList 
-                contents={this.cardContents}
+                contents={this.prepareCardData(this.cardContents,this.graphData, this.policy_ids)}
                 onChange={this.onListChanged}/>
                 {/* On click we want to move to the next choice and store this information.
                 I think we can use _next but we need to add in the info for the choices */}

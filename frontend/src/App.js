@@ -16,6 +16,9 @@ import Loader from "./Loader";
 import graphData from "./mockGraphData";
 import choiceData from "./mockChoiceData";
 import StepList from './StepGenerator';
+import getPolicyData from './transformCsvFiles';
+import policy_data_path from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25policies.csv';
+import { csv } from 'd3-fetch';
 
 
 class App extends React.Component {
@@ -38,6 +41,9 @@ class App extends React.Component {
       // toggle show steps
       showSteps: false,
 
+      policy_ids: [0,1],
+      policyData: [],
+
       // form info
       userInfo: {
         username: '',
@@ -53,8 +59,12 @@ class App extends React.Component {
         healthcare_role: ''
       }
     }
-    this.maxSteps = 7;
+    this.maxSteps = choiceData.length;
     this.uuid = uuidv4();
+    // use this for barchart
+    // this.policyData = policy_data;
+    // console.log(this.policyData);
+
     this.graphData = graphData;
     this.choiceData = choiceData;
 
@@ -112,6 +122,13 @@ class App extends React.Component {
       this.mturk = true;
     }
 
+    const csvData = await csv(policy_data_path)
+    const cleanedData = await getPolicyData(csvData);
+    this.setState({
+      policyData: cleanedData
+    }, function(){console.log(this.state.policyData)})
+
+
   }
   render() {
     return(
@@ -131,6 +148,8 @@ class App extends React.Component {
             userChoices={this.state.userChoices}
             maxSteps={this.maxSteps}
             choiceData={this.choiceData}
+            policyData={this.state.policyData}
+            policy_ids={this.state.policy_ids}
             currentStep={this.state.currentStep}
             loading={this.state.loading}
             incrementStep={this.incrementStep}

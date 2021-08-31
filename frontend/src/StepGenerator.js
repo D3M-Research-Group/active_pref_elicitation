@@ -18,6 +18,8 @@ class Step extends React.Component{
         this.loading = this.props.loading;
         this.userChoices = this.props.userChoices;
         this.incrementStep = this.props.incrementStep;
+        this.policyData = this.props.policyData;
+        this.policy_ids = this.props.policy_ids;
     }
 
     render() { 
@@ -26,7 +28,7 @@ class Step extends React.Component{
             return null
         }
         return(
-            <div className="container">
+            <Container fluid={true}>
                 <PairwiseComparison
                     // title={this.data['query_title']}
                     title={"TEST"}
@@ -34,11 +36,13 @@ class Step extends React.Component{
                     loading={this.loading}
                     userChoices = {this.userChoices}
                     incrementStep={this.incrementStep}
+                    graphData={this.policyData}
+                    policy_ids={this.policy_ids}
                     // pass userChoices all the way to PairwiseComparisons and from their lift up state by pushing
                     // choices back to userChoices in App's state
 
                 />
-            </div>
+            </Container>
         );
     }
 }
@@ -52,6 +56,8 @@ class StepList extends React.Component{
         this.currentStep = this.props.currentStep;
         this.loading = this.props.loading;
         this.incrementStep = this.props.incrementStep;
+        this.policyData=this.props.policyData;
+        this.policy_ids=this.props.policy_ids;
     }
 
 
@@ -67,13 +73,17 @@ class StepList extends React.Component{
         //     );
         // });
         return(
-            <Container>
+            <Container fluid={true}>
                 {
                     numSteps.map((elem) => {
                             return (
                             <Step key={elem.toString()} stepNum={elem} currentStep={this.currentStep}
-                             data={this.choiceData[elem-1]} loading={this.loading} userChoices={this.userChoices}
-                             incrementStep={this.incrementStep}/> 
+                             data={this.choiceData[elem-1]} 
+                             loading={this.loading} userChoices={this.userChoices}
+                             incrementStep={this.incrementStep}
+                             policyData={this.policyData}
+                             policy_ids={this.policy_ids}
+                             /> 
                              );
                     })
                 }
