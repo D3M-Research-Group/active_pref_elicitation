@@ -56,19 +56,31 @@ class PairwiseComparison extends React.Component {
         this.next = this.props.next;
 
         this.sectionInfo = [{
+            sectionType : "plot",
             plotType : "bar",
             columnNums: [0,5],
-            sectionName: "CCU Probability"
+            sectionName: "Chance of Receiving Critical Care by Age Group",
+            sectionDescription: "Among People Who Need It",
           },
           {
+            sectionType : "plot",
             plotType : "bar",
             columnNums: [9,14],
-            sectionName: "Survival Probability"
+            sectionName: "Survival Probability",
+            sectionDescription: "Chance of Surviving by Age Group"
           },
           {
-            plotType : "number",
+            sectionType : "number",
             columnNums: [7,7],
-            sectionName: "Life Years Saved"
+            sectionName: "Life Years Saved",
+            sectionDescription: ""
+          },
+          {
+            sectionType : "plot",
+            plotType : "pie",
+            columnNums: [8,8],
+            sectionName: "Overall Survival Probability",
+            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care"
           }
         ]
 
@@ -139,10 +151,12 @@ class PairwiseComparison extends React.Component {
                     <PolicyComparisonSection
                       key={index}
                       plotType={section.plotType}
+                      sectionType={section.sectionType}
                       policyData={this.prepareCardData(this.cardContents,this.graphData, this.policy_ids)}
                       sectionNum={index+1}
                       columnNums={section.columnNums}
                       title={section.sectionName}  
+                      description={section.sectionDescription}
                     />
                   )
                 })

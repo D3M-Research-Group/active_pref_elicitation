@@ -3,10 +3,12 @@ import { Col, Container, Row } from 'reactstrap';
 import PolicyDataBarChart from './PolicyDataBarChart';
 import PolicyNumberDisplay from './PolicyNumberDisplay';
 import './PolicyComparisonSection.css'
+import PolicyDataPlot from './PolicyDataPlots';
 
 class PolicyComparisonSection extends React.Component{
     constructor(props){
         super(props)
+        this.sectionType = this.props.sectionType;
         this.plotType = this.props.plotType;
         this.policyData = this.props.policyData;
         this.columnNums = this.props.columnNums;
@@ -18,10 +20,12 @@ class PolicyComparisonSection extends React.Component{
 
     }
 
-    choosePlotType(plotType, data, columnNums, idx){
-        switch(plotType){
-            case "bar":
-                return( <PolicyDataBarChart key={idx} data={data['graphData']} columnNums={columnNums} />);
+    choosePlotType(sectionType, plotType, data, columnNums, idx){
+        console.log("sectionType ", sectionType);
+        switch(sectionType){
+            case "plot":
+                return( <PolicyDataPlot key={idx} plotType={plotType}
+                     data={data['graphData']} columnNums={columnNums} />);
             case "number":
                 return(<PolicyNumberDisplay key={idx} data={data['graphData']} columnNums={columnNums} />);
             default:
@@ -36,7 +40,7 @@ class PolicyComparisonSection extends React.Component{
                     <React.Fragment>
                         <Col lg="6" className="text-center">
                             <h3> Policy {(idx + 1) % 2 === 0 ? "B" : "A" }</h3>
-                            {this.choosePlotType(this.plotType, data, this.columnNums, idx)}
+                            {this.choosePlotType(this.sectionType, this.plotType, data, this.columnNums, idx)}
                         </Col>
                     </React.Fragment>
                 )
@@ -51,6 +55,7 @@ class PolicyComparisonSection extends React.Component{
                     <h2>
                         {this.title}
                     </h2>
+                    <p>Among Those Who Contracted COVID-19 and Needed Critical Care</p>
                     <Container fluid={true} style={{marginBottom: "5rem"}}>
                         <Row>
                             {this.generatePlotColumn(this.policyData)}
