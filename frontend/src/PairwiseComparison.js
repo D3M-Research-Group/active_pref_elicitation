@@ -1,10 +1,9 @@
 import React from 'react';
-import SelectableCardList from "./Card";
-import Alert from 'react-bootstrap/Alert';
+// import Alert from 'react-bootstrap/Alert';
 import Loader from "./Loader";
 import BottomNavBar from './NavBar';
-import { Col, Container, Row } from 'reactstrap';
-import PolicyDataBarChart from './PolicyDataBarChart';
+import { Container} from 'reactstrap';
+// import PolicyDataBarChart from './PolicyDataBarChart';
 import PolicyComparisonSection from './PolicyComparisonSection';
 import './PolicyComparisonSection'
 
@@ -36,6 +35,7 @@ class PairwiseComparison extends React.Component {
         }
         this.title = this.props.title;
         this.loading = this.props.loading
+        this.toggleLoading = this.props.toggleLoading;
         this.cardContents = this.props.cardContents;
         this.graphData = this.props.graphData;
         this.policy_ids = this.props.policy_ids;
@@ -112,13 +112,14 @@ class PairwiseComparison extends React.Component {
             // })
             
         } else{
+            this.toggleLoading();
             this.incrementStep();
-            // hide the error message
-            // this.setState({
-            // showError: false
-            // }); 
             // record the choice made
+            console.log(this.state.selected);
             this.pushBackChoice(this.state.selected);
+            // this.toggleLoading();
+            this.toggleLoading();  
+            
             
             
         }
@@ -167,6 +168,7 @@ class PairwiseComparison extends React.Component {
               sectionNames={this.sectionInfo.map((x,idx)=> x.sectionName)} 
               onSelectChange={this.onListChanged}
               submitChoice={this.submitChoice}
+              toggleLoading={this.toggleLoading}
             />
             </div>
             }

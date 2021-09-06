@@ -1,5 +1,4 @@
 import React from 'react';
-import BarChart from './BarChart';
 import PolicyDataBarChart from './PolicyDataBarChart';
 import './Card.scss'
 

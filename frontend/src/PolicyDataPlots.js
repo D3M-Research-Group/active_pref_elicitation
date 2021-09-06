@@ -56,8 +56,6 @@ class PolicyDataPlot extends React.Component {
     createChartJsData(data, plotType, column_start, column_end){
         var dat = data.values.slice(column_start,column_end+1);
         this.max = dat.reduce(function(a, b) {return Math.max(a, b);}, 0);
-        console.log(this.max);
-        console.log(this.plotOptions);
         var labs = data.labels.slice(column_start,column_end+1);
 
         var bg_colors = backgroundColors.slice(0, (column_end - column_start + 1));
@@ -106,7 +104,6 @@ class PolicyDataPlot extends React.Component {
     }
 
     choosePlotType(){
-        console.log("plotType ", this.plotType);
         switch(this.plotType){
             case "bar":
                 return(<Bar data={this.createChartJsData(this.data, this.plotType, this.columnNums[0], this.columnNums[1])}

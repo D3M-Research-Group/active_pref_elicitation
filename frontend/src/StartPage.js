@@ -41,11 +41,6 @@ class StartPage extends React.Component {
                     Who gets an ICU bed? Who gets a ventilator? Our goal is meant to find a set of guidelines to help healthcare providers
                     decide which patients would get a bed, ventilator, or receive other lifesaving treatments in a critical care unit in an
                     <b> event where there are more patients than necessary resources. </b>
-
-                    <br></br>
-                    <br></br>
-                    <br></br>
-                    Note: Once the policy selection button is clicked you may not change your response.
                 </p>
                 {/* Center this */}
                 <div>

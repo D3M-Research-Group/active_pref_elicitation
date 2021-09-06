@@ -16,6 +16,7 @@ class Step extends React.Component{
         this.currentStep = this.props.currentStep; // which step is the app currently on?
         this.data = this.props.data;
         this.loading = this.props.loading;
+        this.toggleLoading = this.props.toggleLoading;
         this.userChoices = this.props.userChoices;
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
@@ -34,6 +35,7 @@ class Step extends React.Component{
                     title={"TEST"}
                     cardContents={this.data['cardData']}
                     loading={this.loading}
+                    toggleLoading={this.toggleLoading}
                     userChoices = {this.userChoices}
                     incrementStep={this.incrementStep}
                     graphData={this.policyData}
@@ -56,6 +58,7 @@ class StepList extends React.Component{
         this.choiceData = this.props.choiceData;
         this.currentStep = this.props.currentStep;
         this.loading = this.props.loading;
+        this.toggleLoading = this.props.toggleLoading;
         this.incrementStep = this.props.incrementStep;
         this.policyData=this.props.policyData;
         this.policy_ids=this.props.policy_ids;
@@ -81,7 +84,9 @@ class StepList extends React.Component{
                             return (
                             <Step key={elem.toString()} stepNum={elem} currentStep={this.currentStep}
                              data={this.choiceData[elem-1]} 
-                             loading={this.loading} userChoices={this.userChoices}
+                             loading={this.loading} 
+                             toggleLoading={this.toggleLoading}
+                             userChoices={this.userChoices}
                              incrementStep={this.incrementStep}
                              policyData={this.policyData}
                              policy_ids={this.policy_ids}

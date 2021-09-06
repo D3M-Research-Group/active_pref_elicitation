@@ -8,13 +8,11 @@ import {
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
-import Loader from "./Loader";
 import choiceData from "./mockChoiceData";
 import StepList from './StepGenerator';
 import getPolicyData from './transformCsvFiles';
 import policy_data_path from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25policies.csv';
 import { csv } from 'd3-fetch';
-import BottomNavBar from './NavBar';
 import TopNavBar from './TopNavBar';
 
 
@@ -69,6 +67,7 @@ class App extends React.Component {
     this.toggleStartPage = this.toggleStartPage.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.incrementStep = this.incrementStep.bind(this);
+    this.toggleLoading = this.toggleLoading.bind(this);
 
   }
 
@@ -83,6 +82,10 @@ class App extends React.Component {
 
   toggleShowSteps(){
     this.setState({ showSteps: !this.state.showSteps})
+  }
+
+  toggleLoading(){
+    this.setState({ loading: !this.state.loading})
   }
 
   toggleStartPage(){
@@ -151,6 +154,7 @@ class App extends React.Component {
               currentStep={this.state.currentStep}
               loading={this.state.loading}
               incrementStep={this.incrementStep}
+              toggleLoading={this.toggleLoading}
             /> : 
             null
           }

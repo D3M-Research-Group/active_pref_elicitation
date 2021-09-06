@@ -48,8 +48,7 @@ function BottomNavBar(props){
                                 className="bottom_navbar_submit"
                                 id="submitButton" 
                                 disabled={submitDisabled}
-                                onClick={props.submitChoice}
-                            >
+                                onClick={props.submitChoice}>
                                 Submit Selection
                             </Button>
                         </span>

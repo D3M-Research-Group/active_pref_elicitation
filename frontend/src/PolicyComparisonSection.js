@@ -12,7 +12,7 @@ class PolicyComparisonSection extends React.Component{
         this.plotType = this.props.plotType;
         this.policyData = this.props.policyData;
         this.columnNums = this.props.columnNums;
-        console.log("Policy data: ", this.policyData);
+        // console.log("Policy data: ", this.policyData);
         this.sectionNum = this.props.sectionNum;
         this.title=this.props.title
 
@@ -21,7 +21,7 @@ class PolicyComparisonSection extends React.Component{
     }
 
     choosePlotType(sectionType, plotType, data, columnNums, idx){
-        console.log("sectionType ", sectionType);
+        // console.log("sectionType ", sectionType);
         switch(sectionType){
             case "plot":
                 return( <PolicyDataPlot key={idx} plotType={plotType}
