@@ -5,10 +5,7 @@ import './Card.scss'
 
 import {
 	Col,
-	FormGroup,
-	Label,
-	Row,
-    Container
+  Container
 } from 'reactstrap';
 
 class Card extends React.Component {

@@ -1,16 +1,34 @@
 const choiceData = [
   {
   cardData: [{
-    title: "A",
+    title: "A Step 1",
     description: "A",
     graphData: []
   },{
     title: "B",
     description: "B",
     graphData: []
+  }]
+},
+{
+  cardData: [{
+    title: "A Step 2",
+    description: "A",
+    graphData: []
   },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 1",
+    title: "B",
+    description: "B",
+    graphData: []
+  }]
+},
+{
+  cardData: [{
+    title: "A Step 3",
+    description: "A",
+    graphData: []
+  },{
+    title: "B",
+    description: "B",
     graphData: []
   }]
 },
@@ -23,9 +41,16 @@ const choiceData = [
     title: "B",
     description: "B",
     graphData: []
+  }]
+},
+{
+  cardData: [{
+    title: "A",
+    description: "A",
+    graphData: []
   },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 2",
+    title: "B",
+    description: "B",
     graphData: []
   }]
 },
@@ -38,9 +63,16 @@ const choiceData = [
     title: "B",
     description: "B",
     graphData: []
+  }]
+},
+{
+  cardData: [{
+    title: "A",
+    description: "A",
+    graphData: []
   },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 3",
+    title: "B",
+    description: "B",
     graphData: []
   }]
 },
@@ -53,9 +85,16 @@ const choiceData = [
     title: "B",
     description: "B",
     graphData: []
+  }]
+},
+{
+  cardData: [{
+    title: "A",
+    description: "A",
+    graphData: []
   },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 4",
+    title: "B",
+    description: "B",
     graphData: []
   }]
 },
@@ -68,9 +107,16 @@ const choiceData = [
     title: "B",
     description: "B",
     graphData: []
+  }]
+},
+{
+  cardData: [{
+    title: "A",
+    description: "A",
+    graphData: []
   },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 5",
+    title: "B",
+    description: "B",
     graphData: []
   }]
 },
@@ -83,10 +129,6 @@ const choiceData = [
     title: "B",
     description: "B",
     graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 6",
-    graphData: []
   }]
 },
 {
@@ -97,100 +139,6 @@ const choiceData = [
   },{
     title: "B",
     description: "B",
-    graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 7",
-    graphData: []
-  }]
-},
-{
-  cardData: [{
-    title: "A",
-    description: "A",
-    graphData: []
-  },{
-    title: "B",
-    description: "B",
-    graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 8",
-    graphData: []
-  }]
-},
-{
-  cardData: [{
-    title: "A",
-    description: "A",
-    graphData: []
-  },{
-    title: "B",
-    description: "B",
-    graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 9",
-    graphData: []
-  }]
-},
-{
-  cardData: [{
-    title: "A",
-    description: "A",
-    graphData: []
-  },{
-    title: "B",
-    description: "B",
-    graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 10",
-    graphData: []
-  }]
-},
-{
-  cardData: [{
-    title: "A",
-    description: "A",
-    graphData: []
-  },{
-    title: "B",
-    description: "B",
-    graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 3",
-    graphData: []
-  }]
-},
-{
-  cardData: [{
-    title: "A",
-    description: "A",
-    graphData: []
-  },{
-    title: "B",
-    description: "B",
-    graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 3",
-    graphData: []
-  }]
-},
-{
-  cardData: [{
-    title: "A",
-    description: "A",
-    graphData: []
-  },{
-    title: "B",
-    description: "B",
-    graphData: []
-  },{
-    title: "Indifferent 🤷‍♀️ ",
-    description: "I don't like either option more than the other. Step 3",
     graphData: []
   }]
 }

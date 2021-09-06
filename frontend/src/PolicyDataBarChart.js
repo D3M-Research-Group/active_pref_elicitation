@@ -9,6 +9,7 @@ class PolicyDataBarChart extends React.Component {
     constructor(props){
         super(props);
         this.data = this.props.data;
+        this.columnNums= this.props.columnNums; //start and end columns
         this.plotOptions = {
             responsive: true,
             scales: {
@@ -30,7 +31,7 @@ class PolicyDataBarChart extends React.Component {
     }
 
 
-    createChartJsData(data){
+    createChartJsData(data, column_start, column_end){
         // need data in the form
         // const data = {
         //     labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
@@ -59,10 +60,10 @@ class PolicyDataBarChart extends React.Component {
         //     ],
         //   };
         const chartData = {
-            labels: data.labels.slice(0,6),
+            labels: data.labels.slice(column_start,column_end+1),
             datasets: [
                 {
-                    data: data.values.slice(0,6),
+                    data: data.values.slice(column_start,column_end+1),
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
@@ -89,7 +90,7 @@ class PolicyDataBarChart extends React.Component {
 
     render() {
         return(
-            <Bar data={this.createChartJsData(this.data)}
+            <Bar data={this.createChartJsData(this.data, this.columnNums[0], this.columnNums[1])}
             options={this.plotOptions} redraw={false}
             />
         )

@@ -21,10 +21,9 @@ function BottomNavBar(props){
     const makeNavItem = (sectionNames) =>{
         return(
         sectionNames.map((name, idx) => {
-            console.log(name);
             return(
-            <NavItem>
-                <NavLink key={idx} href={"#section_"+idx.toString()}>{name}</NavLink>    
+            <NavItem key={idx + 1}>
+                <NavLink key={idx + 1} href={"#section_"+(idx + 1).toString()}>{name}</NavLink>    
             </NavItem>
             )
         }))

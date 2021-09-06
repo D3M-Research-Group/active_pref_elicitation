@@ -3,13 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 
 import {
-	Col,
-	FormGroup,
-	Label,
-	Row,
   Container,
-  Navbar,
-  Nav
 } from 'reactstrap';
 
 import StartPage from './StartPage';
@@ -46,7 +40,6 @@ class App extends React.Component {
 
       policy_ids: [0,1],
       policyData: [],
-      sectionNames: ["First Section", "Second Section"],
 
       // form info
       userInfo: {
@@ -138,7 +131,7 @@ class App extends React.Component {
       <React.Fragment>
         {/* <h1>Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span> </h1> */}
         <TopNavBar></TopNavBar>
-        <Container fluid={true} style={{marginTop : "1rem"}}>
+        <Container fluid={true} style={{marginTop : "1rem", marginBottom: "10rem"}}>
           
           <StartPage showStartPage={this.state.showStartPage}
           toggleStartPage={this.toggleStartPage}
@@ -155,7 +148,6 @@ class App extends React.Component {
               choiceData={this.choiceData}
               policyData={this.state.policyData}
               policy_ids={this.state.policy_ids}
-              sectionNames={this.state.sectionNames}
               currentStep={this.state.currentStep}
               loading={this.state.loading}
               incrementStep={this.incrementStep}

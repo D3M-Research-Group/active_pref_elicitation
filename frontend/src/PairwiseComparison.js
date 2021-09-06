@@ -3,26 +3,29 @@ import SelectableCardList from "./Card";
 import Alert from 'react-bootstrap/Alert';
 import Loader from "./Loader";
 import BottomNavBar from './NavBar';
-import { Container } from 'reactstrap';
+import { Col, Container, Row } from 'reactstrap';
+import PolicyDataBarChart from './PolicyDataBarChart';
+import PolicyComparisonSection from './PolicyComparisonSection';
+import './PolicyComparisonSection'
 
-function SelectionErrorAlert(props) {
-    // const [show, setShow] = useState(false);
+// function SelectionErrorAlert(props) {
+//     // const [show, setShow] = useState(false);
   
-    if (!props.showError) {
-      return null
-    }
-    return (
-      <div class="d-flex justify-content-center">
-        <Alert variant="danger" className="text-center" onClose={() => props.updateShowError(false)} dismissible>
-          <Alert.Heading>Error</Alert.Heading>
-          <p>
-            Please select one of the three options before clicking Next.
-          </p>
-        </Alert>
-      </div>
-    );
+//     if (!props.showError) {
+//       return null
+//     }
+//     return (
+//       <div class="d-flex justify-content-center">
+//         <Alert variant="danger" className="text-center" onClose={() => props.updateShowError(false)} dismissible>
+//           <Alert.Heading>Error</Alert.Heading>
+//           <p>
+//             Please select one of the three options before clicking Next.
+//           </p>
+//         </Alert>
+//       </div>
+//     );
     
-  }
+//   }
 
 class PairwiseComparison extends React.Component {
     constructor(props) {
@@ -37,7 +40,7 @@ class PairwiseComparison extends React.Component {
         this.graphData = this.props.graphData;
         this.policy_ids = this.props.policy_ids;
         this.userChoices = this.props.userChoices;
-        this.sectionNames = this.props.sectionNames;
+        this.stepNum = this.props.stepNum;
 
         this.incrementStep = this.props.incrementStep;
 
@@ -51,6 +54,24 @@ class PairwiseComparison extends React.Component {
         
         // go to next step or end function
         this.next = this.props.next;
+
+        this.sectionInfo = [{
+            plotType : "bar",
+            columnNums: [0,5],
+            sectionName: "CCU Probability"
+          },
+          {
+            plotType : "bar",
+            columnNums: [9,14],
+            sectionName: "Survival Probability"
+          },
+          {
+            plotType : "number",
+            columnNums: [7,7],
+            sectionName: "Life Years Saved"
+          }
+        ]
+
     }
 
     pushBackChoice(selected){
@@ -110,22 +131,26 @@ class PairwiseComparison extends React.Component {
 
             {this.loading ? null : 
             <div>
-            <Container fluid={true} style={{marginBottom: "1rem"}}>
-              <h1 className="title">{this.props.title}</h1>
-              <SelectableCardList 
-                contents={this.prepareCardData(this.cardContents,this.graphData, this.policy_ids)}
-                onChange={this.onListChanged}/>
-                {/* On click we want to move to the next choice and store this information.*/}
-                <SelectionErrorAlert showError={this.state.showError} updateShowError={this.updateShowError}  />
-                <button className="card" onClick={e => {
-                  this.submitChoice(e);
-                }}>
-                  Submit selection
-                </button>
+            <Container fluid={false}>
+              <h1 className="title">Query {this.stepNum}</h1>
+              {
+                this.sectionInfo.map((section, index) => {
+                  return(
+                    <PolicyComparisonSection
+                      key={index}
+                      plotType={section.plotType}
+                      policyData={this.prepareCardData(this.cardContents,this.graphData, this.policy_ids)}
+                      sectionNum={index+1}
+                      columnNums={section.columnNums}
+                      title={section.sectionName}  
+                    />
+                  )
+                })
+              }
                 
             </Container>
             <BottomNavBar 
-              sectionNames={this.sectionNames} 
+              sectionNames={this.sectionInfo.map((x,idx)=> x.sectionName)} 
               onSelectChange={this.onListChanged}
               submitChoice={this.submitChoice}
             />
