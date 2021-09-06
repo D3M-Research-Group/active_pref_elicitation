@@ -7,18 +7,21 @@ import {
 	FormGroup,
 	Label,
 	Row,
-    Container
+  Container,
+  Navbar,
+  Nav
 } from 'reactstrap';
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
 import Loader from "./Loader";
-import graphData from "./mockGraphData";
 import choiceData from "./mockChoiceData";
 import StepList from './StepGenerator';
 import getPolicyData from './transformCsvFiles';
 import policy_data_path from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25policies.csv';
 import { csv } from 'd3-fetch';
+import BottomNavBar from './NavBar';
+import TopNavBar from './TopNavBar';
 
 
 class App extends React.Component {
@@ -43,6 +46,7 @@ class App extends React.Component {
 
       policy_ids: [0,1],
       policyData: [],
+      sectionNames: ["First Section", "Second Section"],
 
       // form info
       userInfo: {
@@ -65,7 +69,6 @@ class App extends React.Component {
     // this.policyData = policy_data;
     // console.log(this.policyData);
 
-    this.graphData = graphData;
     this.choiceData = choiceData;
 
     // binding functions
@@ -111,16 +114,16 @@ class App extends React.Component {
   async componentDidMount() {
     
     // get IP info
-    const response = await fetch('https://geolocation-db.com/json/');
-    const data = await response.json();
-    this.setState({ ip: data.IPv4 })
-    // parse query string info
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(urlSearchParams.entries());
-    // only want param mturk
-    if(params['mturk']){
-      this.mturk = true;
-    }
+    // const response = await fetch('https://geolocation-db.com/json/');
+    // const data = await response.json();
+    // this.setState({ ip: data.IPv4 })
+    // // parse query string info
+    // const urlSearchParams = new URLSearchParams(window.location.search);
+    // const params = Object.fromEntries(urlSearchParams.entries());
+    // // only want param mturk
+    // if(params['mturk']){
+    //   this.mturk = true;
+    // }
 
     const csvData = await csv(policy_data_path)
     const cleanedData = await getPolicyData(csvData);
@@ -133,31 +136,36 @@ class App extends React.Component {
   render() {
     return(
       <React.Fragment>
-        <h1>Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span> </h1>
-
-        <StartPage showStartPage={this.state.showStartPage}
-        toggleStartPage={this.toggleStartPage}
-        toggleUserInfoForm={this.toggleUserInfoForm}
-        />
-        <UserInfoForm showForm={this.state.showUserInfoForm}
-         toggleUserInfoForm={this.toggleUserInfoForm} updateUserInfo={this.updateUserInfo}
-         incrementStep={this.incrementStep} />
-        {this.state.showSteps ? 
-          <StepList 
-            key={this.state.currentStep.toString()} // key necessary for ensuring re-render on state change
-            userChoices={this.state.userChoices}
-            maxSteps={this.maxSteps}
-            choiceData={this.choiceData}
-            policyData={this.state.policyData}
-            policy_ids={this.state.policy_ids}
-            currentStep={this.state.currentStep}
-            loading={this.state.loading}
-            incrementStep={this.incrementStep}
-          /> : 
-          null
-        }
+        {/* <h1>Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span> </h1> */}
+        <TopNavBar></TopNavBar>
+        <Container fluid={true} style={{marginTop : "1rem"}}>
+          
+          <StartPage showStartPage={this.state.showStartPage}
+          toggleStartPage={this.toggleStartPage}
+          toggleUserInfoForm={this.toggleUserInfoForm}
+          />
+          <UserInfoForm showForm={this.state.showUserInfoForm}
+          toggleUserInfoForm={this.toggleUserInfoForm} updateUserInfo={this.updateUserInfo}
+          incrementStep={this.incrementStep} />
+          {this.state.showSteps ? 
+            <StepList 
+              key={this.state.currentStep.toString()} // key necessary for ensuring re-render on state change
+              userChoices={this.state.userChoices}
+              maxSteps={this.maxSteps}
+              choiceData={this.choiceData}
+              policyData={this.state.policyData}
+              policy_ids={this.state.policy_ids}
+              sectionNames={this.state.sectionNames}
+              currentStep={this.state.currentStep}
+              loading={this.state.loading}
+              incrementStep={this.incrementStep}
+            /> : 
+            null
+          }
+        </Container>
+        
         {/* <EndPage></EndPage> */}
-
+        {/* <BottomNavBar></BottomNavBar> */}
       </React.Fragment>
     );
   }

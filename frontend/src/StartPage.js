@@ -25,7 +25,9 @@ class StartPage extends React.Component {
         }
 
         return(
-            <Container>
+            
+            <React.Fragment>
+                <Container>
                 <h2>Help make a difference!</h2>
                     <p className="lead">The questionnaires are designed to learn your preferences by displaying outcomes
                     of different policies and learning your choices. New policy outcomes are displayed
@@ -57,7 +59,9 @@ class StartPage extends React.Component {
                     > Start Adaptive Questionnaire
                     </Button>
                 </div>
-            </Container>
+                </Container>
+            </React.Fragment>
+            
             
         )
     }

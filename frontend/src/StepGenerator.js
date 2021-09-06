@@ -20,6 +20,7 @@ class Step extends React.Component{
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
         this.policy_ids = this.props.policy_ids;
+        this.sectionNames= this.props.sectionNames;
     }
 
     render() { 
@@ -28,7 +29,7 @@ class Step extends React.Component{
             return null
         }
         return(
-            <Container fluid={true}>
+            // <Container fluid={true}>
                 <PairwiseComparison
                     // title={this.data['query_title']}
                     title={"TEST"}
@@ -38,11 +39,12 @@ class Step extends React.Component{
                     incrementStep={this.incrementStep}
                     graphData={this.policyData}
                     policy_ids={this.policy_ids}
+                    sectionNames={this.sectionNames}
                     // pass userChoices all the way to PairwiseComparisons and from their lift up state by pushing
                     // choices back to userChoices in App's state
 
                 />
-            </Container>
+            // </Container>
         );
     }
 }
@@ -58,6 +60,7 @@ class StepList extends React.Component{
         this.incrementStep = this.props.incrementStep;
         this.policyData=this.props.policyData;
         this.policy_ids=this.props.policy_ids;
+        this.sectionNames=this.props.sectionNames;
     }
 
 
@@ -83,6 +86,7 @@ class StepList extends React.Component{
                              incrementStep={this.incrementStep}
                              policyData={this.policyData}
                              policy_ids={this.policy_ids}
+                             sectionNames={this.sectionNames}
                              /> 
                              );
                     })

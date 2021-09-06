@@ -2,6 +2,8 @@ import React from 'react';
 import SelectableCardList from "./Card";
 import Alert from 'react-bootstrap/Alert';
 import Loader from "./Loader";
+import BottomNavBar from './NavBar';
+import { Container } from 'reactstrap';
 
 function SelectionErrorAlert(props) {
     // const [show, setShow] = useState(false);
@@ -34,10 +36,13 @@ class PairwiseComparison extends React.Component {
         this.cardContents = this.props.cardContents;
         this.graphData = this.props.graphData;
         this.policy_ids = this.props.policy_ids;
+        this.userChoices = this.props.userChoices;
+        this.sectionNames = this.props.sectionNames;
+
+        this.incrementStep = this.props.incrementStep;
+
         this.onListChanged = this.onListChanged.bind(this);
         this.updateShowError = this.updateShowError.bind(this);
-        this.userChoices = this.props.userChoices;
-        this.incrementStep = this.props.incrementStep;
         this.prepareCardData = this.prepareCardData.bind(this);
 
 
@@ -55,7 +60,7 @@ class PairwiseComparison extends React.Component {
     onListChanged(selected) {
         this.setState({
         selected: selected,
-        });
+        }, function(){console.log(this.state.selected)});
         this.updateShowError(false);
     }
 
@@ -67,17 +72,18 @@ class PairwiseComparison extends React.Component {
 
     submitChoice = (e) => {
         e.preventDefault();
-        if(this.state.selected === -1){
-            this.setState({
-            showError: true
-            })
+        if(this.state.selected === ""){
+          console.log("somehow got here, but we shouldn't be able to if we have button disabled?")
+            // this.setState({
+            // showError: true
+            // })
             
         } else{
             this.incrementStep();
             // hide the error message
-            this.setState({
-            showError: false
-            }); 
+            // this.setState({
+            // showError: false
+            // }); 
             // record the choice made
             this.pushBackChoice(this.state.selected);
             
@@ -98,25 +104,36 @@ class PairwiseComparison extends React.Component {
         // cardContents contains title, description, and graph data
         // we will use the policy ids to population the graph data element in cardContents
       return (
-        <div className="column">
+        // <div className="column">
+        <React.Fragment>
           {this.loading ? <Loader /> : null}
 
-            {this.loading ? null : <div>
+            {this.loading ? null : 
+            <div>
+            <Container fluid={true} style={{marginBottom: "1rem"}}>
               <h1 className="title">{this.props.title}</h1>
               <SelectableCardList 
                 contents={this.prepareCardData(this.cardContents,this.graphData, this.policy_ids)}
                 onChange={this.onListChanged}/>
-                {/* On click we want to move to the next choice and store this information.
-                I think we can use _next but we need to add in the info for the choices */}
+                {/* On click we want to move to the next choice and store this information.*/}
                 <SelectionErrorAlert showError={this.state.showError} updateShowError={this.updateShowError}  />
                 <button className="card" onClick={e => {
                   this.submitChoice(e);
                 }}>
                   Submit selection
                 </button>
-            </div>}
+                
+            </Container>
+            <BottomNavBar 
+              sectionNames={this.sectionNames} 
+              onSelectChange={this.onListChanged}
+              submitChoice={this.submitChoice}
+            />
+            </div>
+            }
             
-        </div>);
+        </React.Fragment>
+        );
     }
   }
 

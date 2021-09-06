@@ -41,8 +41,7 @@ class Card extends React.Component {
         title,
         description,
         selected,
-        data,
-        policy_id
+        data
       } = this.props;
       // console.log("card data", data);
       // console.log("policy_id", policy_id);
@@ -62,28 +61,33 @@ class Card extends React.Component {
         );
       }
       return (
-        
-          <div className="col-lg-6">
+          <Col lg={{ size: '6'}}>
             <SelectableCard onClick={this.props.onClick}
               selected={selected}>
               <div className="content">
                 <h1 className="title">{title}</h1>
                 <p className="description">{description}</p>
                 <Container fluid={true}>
-                  <div className="row">
-                      <div className="col-lg-6" id="chartArea">
+                  <PolicyDataBarChart data={data}/>
+                  <PolicyDataBarChart data={data}/>
+                  <PolicyDataBarChart data={data}/>
+                  <PolicyDataBarChart data={data}/>
+                  <PolicyDataBarChart data={data}/>
+                      {/* <div className="col-lg-6" id="chartArea"> */}
                         {/* <BarChart data={data}/> */}
-                        <PolicyDataBarChart data={data}/>
+                        {/* <PolicyDataBarChart data={data}/>
                       </div>
                       <div className="col-lg-6" id="chartArea">
                         <PolicyDataBarChart data={data}/>
                      </div>
-                  </div> 
+                     <div className="col-lg-6" id="chartArea">
+                        <PolicyDataBarChart data={data}/>
+                     </div> */}
                 </Container>
                 
               </div>
             </SelectableCard>
-          </div>
+          </Col>
         
       );
     }

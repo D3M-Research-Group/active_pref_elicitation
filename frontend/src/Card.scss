@@ -83,10 +83,29 @@ body {
     width: 100%;
   }
   
-  button.card {
+  // button.card {
+  //   display: block;
+  //   cursor: pointer;
+  //   width: 180px;
+  //   margin: 20px auto;
+  //   text-align: center;
+  //   padding: 16px;
+  //   border-color: transparent;
+  //   border-radius: 10px;
+  //   background: $selected-color !important;
+  //   color: #fff;
+  //   text-transform: uppercase;
+  //   font-weight: bold;
+  //   outline: none;
+  //   &:focus{
+  //     box-shadow: $card-shadow;
+  //   }
+  // }
+
+  button.bottom_navbar {
     display: block;
     cursor: pointer;
-    width: 180px;
+    // width: 180px;
     margin: 20px auto;
     text-align: center;
     padding: 16px;
@@ -94,12 +113,36 @@ body {
     border-radius: 10px;
     background: $selected-color !important;
     color: #fff;
-    text-transform: uppercase;
+    text-transform: capitalize;
     font-weight: bold;
     outline: none;
     &:focus{
       box-shadow: $card-shadow;
     }
+    margin-inline: 10px;
+    font-size: 1rem;
+
+  }
+
+  button.bottom_navbar_submit {
+    display: block;
+    cursor: pointer;
+    // width: 180px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 16px;
+    border-color: transparent;
+    border-radius: 10px;
+    background: $selected-color !important;
+    color: #fff;
+    text-transform: capitalize;
+    font-weight: bold;
+    outline: none;
+    &:focus{
+      box-shadow: $card-shadow;
+    }
+    margin-left: 1rem;
+    font-size: 1rem;
   }
 
   .chart-container {
