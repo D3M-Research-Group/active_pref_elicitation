@@ -58,8 +58,9 @@ class PolicyDataPlot extends React.Component {
                 datalabels: {
                     display: true,
                     color: "black",
-                    align: "end",
-                    anchor: "end",
+                    // align: "end",
+                    // anchor: "end",
+                    clamp:true,
                     font: { size: "16" },
                     formatter: function(value, context) {
                         return Math.round(value*100).toFixed(0) + '%';
@@ -125,6 +126,7 @@ class PolicyDataPlot extends React.Component {
                     datalabels: {
                         display: true,
                         color: "black",
+                        clamp:true,
                         // align: "end",
                         // anchor: "end",
                         font: { size: "16" },
