@@ -2,9 +2,9 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 
+
 import {
-  Container,
-} from 'reactstrap';
+  Container} from 'reactstrap';
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
@@ -14,6 +14,7 @@ import getPolicyData from './transformCsvFiles';
 import policy_data_path from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25policies.csv';
 import { csv } from 'd3-fetch';
 import TopNavBar from './TopNavBar';
+import './Card.scss';
 
 
 class App extends React.Component {
@@ -133,7 +134,7 @@ class App extends React.Component {
     return(
       <React.Fragment>
         {/* <h1>Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span> </h1> */}
-        <TopNavBar></TopNavBar>
+        <TopNavBar/>
         <Container fluid={true} style={{marginTop : "1rem", marginBottom: "10rem"}}>
           
           <StartPage showStartPage={this.state.showStartPage}
