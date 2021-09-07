@@ -1,6 +1,7 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
+import axios from 'axios';
 
 
 import {
@@ -16,6 +17,7 @@ import { csv } from 'd3-fetch';
 import TopNavBar from './TopNavBar';
 import './Card.scss';
 
+// const SERVER_URL = "http://localhost:3004";
 
 class App extends React.Component {
   constructor(props){
@@ -69,8 +71,40 @@ class App extends React.Component {
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.incrementStep = this.incrementStep.bind(this);
     this.toggleLoading = this.toggleLoading.bind(this);
+    // this.getNextQuery = this.getNextQuery.bind(this);
+    this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
+    this.pushBackChoices = this.pushBackChoices.bind(this);
 
   }
+
+  // getNextQuery(step_num, selected){
+  //   // this.toggleLoading(true);
+  //   console.log("step num", step_num);
+  //   console.log("request", `${SERVER_URL}/next_query/${step_num}`)
+  //   this.setState({loading: true}, () => {
+  //       axios.get(`${SERVER_URL}/next_query/${step_num}`, {})
+  //       .then((response) => {
+  //         console.log(response.data);
+  //         this.updatePolicyIDs(response.data.policy_ids);
+  //         this.incrementStep();
+  //         console.log("selected", selected);
+  //         this.pushBackChoices(selected);
+          
+  //         this.setState({loading: false}, () =>{ console.log(this.state.loading)});
+  //       })
+  //       .catch((err) => {
+  //         console.log("got error: ", err.data)
+  //       })
+  //   })
+    
+  //     // .then(() => {
+  //     //   this.incrementStep();
+  //     //   console.log("selected", selected);
+  //     //   this.pushBackChoices(selected);
+        
+  //     //   this.toggleLoading(false);
+  //     // })
+  // }
 
   incrementStep(){
     this.setState({
@@ -81,12 +115,23 @@ class App extends React.Component {
     }
   }
 
+  updatePolicyIDs(ids){
+    this.setState({
+      policy_ids : ids
+    })
+  }
+
+  pushBackChoices(selected){
+    this.state.userChoices.push(selected);
+    console.log(this.state.userChoices);
+  }
+
   toggleShowSteps(){
     this.setState({ showSteps: !this.state.showSteps})
   }
 
-  toggleLoading(){
-    this.setState({ loading: !this.state.loading})
+  toggleLoading(state){
+    this.setState({ loading: state})
   }
 
   toggleStartPage(){
@@ -156,6 +201,7 @@ class App extends React.Component {
               loading={this.state.loading}
               incrementStep={this.incrementStep}
               toggleLoading={this.toggleLoading}
+              updatePolicyIDs={this.updatePolicyIDs}
             /> : 
             null
           }

@@ -33,7 +33,8 @@ class StartPage extends React.Component {
                     of different policies and learning your choices. New policy outcomes are displayed
                     after each choice you make. The <b>adaptive questionnaire</b> is tailored to ask
                     questions based on your previous choices.
-                    You can start  the <b>Adaptive</b> questionnaire by clicking on the button below. Please take the survey <b>only once</b>. Once logged in, <b>please do not log out and log back in again</b>. For the survey to be accepted please take it only once and complete it without logging out and back in.
+                    You can start  the <b>Adaptive</b> questionnaire by clicking on the button below. Please take the survey <b>only once</b>. 
+                    Once you've started the questionnaire, <b>please do not refresh or leave the page</b>. For the survey to be accepted please take it only once and complete it in one sitting.
                     <br></br>
                     <br></br>
                     <br></br>

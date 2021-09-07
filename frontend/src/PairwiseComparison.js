@@ -6,6 +6,7 @@ import { Container} from 'reactstrap';
 // import PolicyDataBarChart from './PolicyDataBarChart';
 import PolicyComparisonSection from './PolicyComparisonSection';
 import './PolicyComparisonSection'
+import axios from 'axios';
 
 // function SelectionErrorAlert(props) {
 //     // const [show, setShow] = useState(false);
@@ -26,21 +27,25 @@ import './PolicyComparisonSection'
     
 //   }
 
+const SERVER_URL = "http://localhost:3004";
+
 class PairwiseComparison extends React.Component {
     constructor(props) {
         super(props);
         this.state ={
             showError: false,
-            selected: -1
+            selected: -1,
+            loading : false
         }
         this.title = this.props.title;
-        this.loading = this.props.loading
+        // this.loading = this.props.loading
         this.toggleLoading = this.props.toggleLoading;
         this.cardContents = this.props.cardContents;
         this.graphData = this.props.graphData;
         this.policy_ids = this.props.policy_ids;
         this.userChoices = this.props.userChoices;
         this.stepNum = this.props.stepNum;
+        this.updatePolicyIDs=this.props.updatePolicyIDs
 
         this.incrementStep = this.props.incrementStep;
 
@@ -88,6 +93,7 @@ class PairwiseComparison extends React.Component {
 
     pushBackChoice(selected){
         this.userChoices.push(selected);
+        console.log("userChoices", this.userChoices);
     }
 
     onListChanged(selected) {
@@ -112,13 +118,30 @@ class PairwiseComparison extends React.Component {
             // })
             
         } else{
-            this.toggleLoading();
-            this.incrementStep();
+            // get next query
+            // this.getNextQuery(this.stepNum, this.state.selected);
+            // this.incrementStep();
             // record the choice made
-            console.log(this.state.selected);
-            this.pushBackChoice(this.state.selected);
+            // console.log(this.state.selected);
+            // this.pushBackChoice(this.state.selected);
             // this.toggleLoading();
-            this.toggleLoading();  
+            // this.toggleLoading();  
+
+            this.setState({loading: true}, () => {
+              axios.get(`${SERVER_URL}/next_query/${this.stepNum}`, {})
+              .then((response) => {
+                console.log(response.data);
+                this.updatePolicyIDs(response.data.policy_ids);
+                this.incrementStep();
+                console.log("selected", this.state.selected);
+                this.pushBackChoice(this.state.selected);
+                
+                this.setState({loading: false});
+              })
+              .catch((err) => {
+                console.log("got error: ", err.data)
+              })
+          })
             
             
             
@@ -140,9 +163,9 @@ class PairwiseComparison extends React.Component {
       return (
         // <div className="column">
         <React.Fragment>
-          {this.loading ? <Loader /> : null}
+          {this.state.loading ? <Loader /> : null}
 
-            {this.loading ? null : 
+            {this.state.loading ? null : 
             <div>
             <Container fluid={false}>
               <h1 className="title">Query {this.stepNum}</h1>

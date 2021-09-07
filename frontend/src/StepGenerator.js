@@ -1,10 +1,6 @@
 import React from 'react';
 import PairwiseComparison from './PairwiseComparison';
 import {
-	Col,
-	FormGroup,
-	Label,
-	Row,
     Container
 } from 'reactstrap';
 
@@ -21,6 +17,7 @@ class Step extends React.Component{
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
         this.policy_ids = this.props.policy_ids;
+        this.updatePolicyIDs=this.props.updatePolicyIDs
     }
 
     render() { 
@@ -41,6 +38,7 @@ class Step extends React.Component{
                     graphData={this.policyData}
                     policy_ids={this.policy_ids}
                     stepNum={this.stepNum}
+                    updatePolicyIDs={this.updatePolicyIDs}
                     // pass userChoices all the way to PairwiseComparisons and from their lift up state by pushing
                     // choices back to userChoices in App's state
 
@@ -63,6 +61,7 @@ class StepList extends React.Component{
         this.policyData=this.props.policyData;
         this.policy_ids=this.props.policy_ids;
         this.sectionNames=this.props.sectionNames;
+        this.updatePolicyIDs=this.props.updatePolicyIDs
     }
 
 
@@ -91,6 +90,7 @@ class StepList extends React.Component{
                              policyData={this.policyData}
                              policy_ids={this.policy_ids}
                              sectionNames={this.sectionNames}
+                             updatePolicyIDs={this.updatePolicyIDs}
                              /> 
                              );
                     })
