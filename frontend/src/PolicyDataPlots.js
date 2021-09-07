@@ -1,9 +1,13 @@
 import React from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import { defaults } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+
 
 // Disable animating charts by default.
 defaults.animation = false;
+defaults.font.size=16;
 
 const backgroundColors = [
     'rgba(255, 99, 132, 0.2)',
@@ -28,6 +32,8 @@ class PolicyDataPlot extends React.Component {
     constructor(props){
         super(props);
         this.plotType = this.props.plotType;
+        this.updateMaxYVal = this.props.updateMaxYVal;
+        this.maxYVal = this.props.maxYVal;
         this.data = this.props.data;
         this.columnNums= this.props.columnNums; //start and end columns
         this.plotOptions = {
@@ -43,20 +49,44 @@ class PolicyDataPlot extends React.Component {
                 }
              },
             plugins: {
+                tooltip:{
+                    enabled: false
+                },
                 legend: {
                     display: false
-                }
+                },
+                datalabels: {
+                    display: true,
+                    color: "black",
+                    align: "end",
+                    anchor: "end",
+                    font: { size: "16" },
+                    formatter: function(value, context) {
+                        return Math.round(value*100).toFixed(0) + '%';
+                      }
+                  }
             }
         };
         this.createChartJsData = this.createChartJsData.bind(this);
         this.choosePlotType = this.choosePlotType.bind(this);
+        this.cleanAxisLabels = this.cleanAxisLabels.bind(this);
+    }
+
+
+
+    cleanAxisLabels(labels){
+        const reg_exp = /.*_/i
+        var cleaned_labels = labels.map((label) => {
+            return(label.replace(reg_exp,""));
+        })
+        return(cleaned_labels);
     }
 
 
     createChartJsData(data, plotType, column_start, column_end){
         var dat = data.values.slice(column_start,column_end+1);
-        this.max = dat.reduce(function(a, b) {return Math.max(a, b);}, 0);
-        var labs = data.labels.slice(column_start,column_end+1);
+        this.plotOptions.scales.y.suggestedMax =this.maxYVal;
+        var labs = this.cleanAxisLabels(data.labels.slice(column_start,column_end+1));
 
         var bg_colors = backgroundColors.slice(0, (column_end - column_start + 1));
         var border_colors = borderColors.slice(0, (column_end - column_start + 1));
@@ -81,9 +111,27 @@ class PolicyDataPlot extends React.Component {
                     },
                  },
                 plugins: {
+                    tooltip:{
+                        enabled: false
+                    },
                     legend: {
-                        display: true
-                    }
+                        display: true,
+                        labels: {
+                            font :{
+                                size : 20
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: true,
+                        color: "black",
+                        // align: "end",
+                        // anchor: "end",
+                        font: { size: "16" },
+                        formatter: function(value, context) {
+                            return Math.round(value*100).toFixed(0) + '%';
+                          }
+                      }
                 }
             };
 
@@ -107,11 +155,11 @@ class PolicyDataPlot extends React.Component {
         switch(this.plotType){
             case "bar":
                 return(<Bar data={this.createChartJsData(this.data, this.plotType, this.columnNums[0], this.columnNums[1])}
-                    options={this.plotOptions} redraw={false}
+                    options={this.plotOptions} redraw={false} plugins={[ChartDataLabels]}
                 />)
             case "pie":
                 return(<Pie data={this.createChartJsData(this.data, this.plotType, this.columnNums[0], this.columnNums[1])}
-                options={this.plotOptions} redraw={false}
+                options={this.plotOptions} redraw={false} plugins={[ChartDataLabels]}
             />)
             default:
                 return(null)

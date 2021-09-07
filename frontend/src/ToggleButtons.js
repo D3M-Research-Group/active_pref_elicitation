@@ -6,10 +6,20 @@ export default function ToggleButtons(props) {
   const [selected, setSelected] = React.useState("");
 
   const handleSelected = (event, newSelected) => {
-    setSelected(newSelected);
-    // also need to lift this information up through props
-    props.onSelectChange(newSelected);
-    props.toggleDisabled();
+    if(newSelected === null){
+      //they deselected the current option
+      
+      setSelected("");
+      props.onSelectChange("");
+      props.toggleDisabled(true);
+    } else {
+      console.log("newSelected", newSelected);
+      setSelected(newSelected);
+      // also need to lift this information up through props
+      props.onSelectChange(newSelected);
+      props.toggleDisabled(false);
+    }
+    
   };
 
   return (

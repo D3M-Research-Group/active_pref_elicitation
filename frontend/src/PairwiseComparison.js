@@ -61,6 +61,18 @@ class PairwiseComparison extends React.Component {
         this.next = this.props.next;
 
         this.sectionInfo = [{
+          sectionType : "number",
+          columnNums: [7,7],
+          sectionName: "Life Years Saved",
+          sectionDescription: ""
+        },{
+          sectionType : "plot",
+          plotType : "pie",
+          columnNums: [8,8],
+          sectionName: "Overall Survival Probability",
+          sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care"
+        },
+        {
             sectionType : "plot",
             plotType : "bar",
             columnNums: [0,5],
@@ -73,20 +85,9 @@ class PairwiseComparison extends React.Component {
             columnNums: [9,14],
             sectionName: "Survival Probability",
             sectionDescription: "Chance of Surviving by Age Group"
-          },
-          {
-            sectionType : "number",
-            columnNums: [7,7],
-            sectionName: "Life Years Saved",
-            sectionDescription: ""
-          },
-          {
-            sectionType : "plot",
-            plotType : "pie",
-            columnNums: [8,8],
-            sectionName: "Overall Survival Probability",
-            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care"
           }
+          
+          
         ]
 
     }
@@ -148,12 +149,16 @@ class PairwiseComparison extends React.Component {
         }
     }
 
-    prepareCardData(cardData,graphData,policy_ids){
+    prepareCardData(cardData,graphData,policy_ids, columnNums){
+        var maxVals = []
         var dat = cardData
         for(var i=0; i < policy_ids.length; i++){
-            dat[i]['graphData'] = graphData[policy_ids[i]]
+            dat[i]['graphData'] = graphData[policy_ids[i]];
+            // for each policy take the max of the column values
+            maxVals.push(graphData[policy_ids[i]]['values'].slice(columnNums[0], columnNums[1]).reduce(
+              function(a, b) {return Math.max(a, b);}, 0));
         }
-        return dat;
+        return {"dat": dat, "maxYVal": maxVals.reduce(function(a, b) {return Math.max(a, b);}, 0)};
     }
 
 
@@ -171,12 +176,14 @@ class PairwiseComparison extends React.Component {
               <h1 className="title">Query {this.stepNum}</h1>
               {
                 this.sectionInfo.map((section, index) => {
+                  const prepped_dat = this.prepareCardData(this.cardContents,this.graphData, this.policy_ids, section.columnNums);
                   return(
                     <PolicyComparisonSection
                       key={index}
                       plotType={section.plotType}
                       sectionType={section.sectionType}
-                      policyData={this.prepareCardData(this.cardContents,this.graphData, this.policy_ids)}
+                      policyData={prepped_dat['dat']}
+                      maxYVal={prepped_dat['maxYVal']}
                       sectionNum={index+1}
                       columnNums={section.columnNums}
                       title={section.sectionName}  

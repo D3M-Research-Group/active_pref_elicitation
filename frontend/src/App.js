@@ -1,7 +1,6 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
-import axios from 'axios';
 
 
 import {
@@ -71,40 +70,11 @@ class App extends React.Component {
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.incrementStep = this.incrementStep.bind(this);
     this.toggleLoading = this.toggleLoading.bind(this);
-    // this.getNextQuery = this.getNextQuery.bind(this);
     this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
     this.pushBackChoices = this.pushBackChoices.bind(this);
 
   }
 
-  // getNextQuery(step_num, selected){
-  //   // this.toggleLoading(true);
-  //   console.log("step num", step_num);
-  //   console.log("request", `${SERVER_URL}/next_query/${step_num}`)
-  //   this.setState({loading: true}, () => {
-  //       axios.get(`${SERVER_URL}/next_query/${step_num}`, {})
-  //       .then((response) => {
-  //         console.log(response.data);
-  //         this.updatePolicyIDs(response.data.policy_ids);
-  //         this.incrementStep();
-  //         console.log("selected", selected);
-  //         this.pushBackChoices(selected);
-          
-  //         this.setState({loading: false}, () =>{ console.log(this.state.loading)});
-  //       })
-  //       .catch((err) => {
-  //         console.log("got error: ", err.data)
-  //       })
-  //   })
-    
-  //     // .then(() => {
-  //     //   this.incrementStep();
-  //     //   console.log("selected", selected);
-  //     //   this.pushBackChoices(selected);
-        
-  //     //   this.toggleLoading(false);
-  //     // })
-  // }
 
   incrementStep(){
     this.setState({

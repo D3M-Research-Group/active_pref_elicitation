@@ -16,7 +16,7 @@ function BottomNavBar(props){
     const sectionNames = props.sectionNames;
     const [submitDisabled, setSubmitedDisabled] = useState(true);
 
-    const toggleDisabled = () => setSubmitedDisabled(false);
+    const toggleDisabled = (choice) => setSubmitedDisabled(choice);
 
     const makeNavItem = (sectionNames) =>{
         return(

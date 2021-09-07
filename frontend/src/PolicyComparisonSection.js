@@ -15,8 +15,9 @@ class PolicyComparisonSection extends React.Component{
         // console.log("Policy data: ", this.policyData);
         this.sectionNum = this.props.sectionNum;
         this.title=this.props.title
-
+        this.maxYVal = this.props.maxYVal;
         this.generatePlotColumn = this.generatePlotColumn.bind(this);
+        
 
     }
 
@@ -25,7 +26,8 @@ class PolicyComparisonSection extends React.Component{
         switch(sectionType){
             case "plot":
                 return( <PolicyDataPlot key={idx} plotType={plotType}
-                     data={data['graphData']} columnNums={columnNums} />);
+                     data={data['graphData']} columnNums={columnNums} 
+                     maxYVal={this.maxYVal}/>);
             case "number":
                 return(<PolicyNumberDisplay key={idx} data={data['graphData']} columnNums={columnNums} />);
             default:
