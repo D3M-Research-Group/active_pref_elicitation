@@ -40,7 +40,6 @@ class PairwiseComparison extends React.Component {
         this.title = this.props.title;
         // this.loading = this.props.loading
         this.toggleLoading = this.props.toggleLoading;
-        this.cardContents = this.props.cardContents;
         this.graphData = this.props.graphData;
         this.policy_ids = this.props.policy_ids;
         this.userChoices = this.props.userChoices;
@@ -149,11 +148,14 @@ class PairwiseComparison extends React.Component {
         }
     }
 
-    prepareCardData(cardData,graphData,policy_ids, columnNums){
+    prepareCardData(graphData,policy_ids, columnNums){
         var maxVals = []
-        var dat = cardData
+        var dat = []
         for(var i=0; i < policy_ids.length; i++){
-            dat[i]['graphData'] = graphData[policy_ids[i]];
+            dat.push(
+              {graphData: graphData[policy_ids[i]]}
+            );
+            // dat[i]['graphData'] = graphData[policy_ids[i]];
             // for each policy take the max of the column values
             maxVals.push(graphData[policy_ids[i]]['values'].slice(columnNums[0], columnNums[1]).reduce(
               function(a, b) {return Math.max(a, b);}, 0));
@@ -176,7 +178,7 @@ class PairwiseComparison extends React.Component {
               <h1 className="title">Query {this.stepNum}</h1>
               {
                 this.sectionInfo.map((section, index) => {
-                  const prepped_dat = this.prepareCardData(this.cardContents,this.graphData, this.policy_ids, section.columnNums);
+                  const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);
                   return(
                     <PolicyComparisonSection
                       key={index}
@@ -195,7 +197,7 @@ class PairwiseComparison extends React.Component {
                 
             </Container>
             <BottomNavBar 
-              sectionNames={this.sectionInfo.map((x,idx)=> x.sectionName)} 
+              sectionNames={this.sectionInfo.map((x)=> x.sectionName)} 
               onSelectChange={this.onListChanged}
               submitChoice={this.submitChoice}
               toggleLoading={this.toggleLoading}

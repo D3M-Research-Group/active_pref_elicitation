@@ -8,7 +8,6 @@ import {
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
-import choiceData from "./mockChoiceData";
 import StepList from './StepGenerator';
 import getPolicyData from './transformCsvFiles';
 import policy_data_path from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25policies.csv';
@@ -56,13 +55,12 @@ class App extends React.Component {
         healthcare_role: ''
       }
     }
-    this.maxSteps = choiceData.length;
+    this.maxSteps = 5;
     this.uuid = uuidv4();
     // use this for barchart
     // this.policyData = policy_data;
     // console.log(this.policyData);
 
-    this.choiceData = choiceData;
 
     // binding functions
     this.toggleUserInfoForm = this.toggleUserInfoForm.bind(this);
@@ -164,7 +162,6 @@ class App extends React.Component {
               key={this.state.currentStep.toString()} // key necessary for ensuring re-render on state change
               userChoices={this.state.userChoices}
               maxSteps={this.maxSteps}
-              choiceData={this.choiceData}
               policyData={this.state.policyData}
               policy_ids={this.state.policy_ids}
               currentStep={this.state.currentStep}

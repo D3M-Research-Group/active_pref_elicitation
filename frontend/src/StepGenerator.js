@@ -10,7 +10,6 @@ class Step extends React.Component{
         super(props)
         this.stepNum = this.props.stepNum; // which step is this
         this.currentStep = this.props.currentStep; // which step is the app currently on?
-        this.data = this.props.data;
         this.loading = this.props.loading;
         this.toggleLoading = this.props.toggleLoading;
         this.userChoices = this.props.userChoices;
@@ -30,7 +29,6 @@ class Step extends React.Component{
                 <PairwiseComparison
                     // title={this.data['query_title']}
                     title={"TEST"}
-                    cardContents={this.data['cardData']}
                     loading={this.loading}
                     toggleLoading={this.toggleLoading}
                     userChoices = {this.userChoices}
@@ -82,7 +80,6 @@ class StepList extends React.Component{
                     numSteps.map((elem) => {
                             return (
                             <Step key={elem.toString()} stepNum={elem} currentStep={this.currentStep}
-                             data={this.choiceData[elem-1]} 
                              loading={this.loading} 
                              toggleLoading={this.toggleLoading}
                              userChoices={this.userChoices}
