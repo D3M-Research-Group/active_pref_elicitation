@@ -1,6 +1,10 @@
 {
     "next_query": [
         {
+            "id" : 0,
+            "policy_ids": [3,4]
+        },
+        {
             "id" : 1,
             "policy_ids": [1,4]
         },

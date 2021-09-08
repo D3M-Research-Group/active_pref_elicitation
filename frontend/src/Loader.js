@@ -1,7 +1,7 @@
 import './Loader.scss';
 
 
-const Loader = () => (
+const Loader = (props) => (
   <>
   <div class="loading">
     <div></div>
@@ -9,7 +9,11 @@ const Loader = () => (
     <div></div>
   </div>
   <div class="text-center">
-    <h1>Loading next response, please do not refresh the page</h1>
+    {props.wrapup ? 
+    <h1>Loading next response, please do not refresh the page</h1> :
+    <h1>Submitting your responses, please do not refresh the page</h1>
+    }
+    
   </div>
   
   </>

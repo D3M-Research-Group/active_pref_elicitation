@@ -3,8 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 
 
-import {
-  Container} from 'reactstrap';
+import {Container} from 'reactstrap';
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
@@ -14,8 +13,10 @@ import policy_data_path from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25pol
 import { csv } from 'd3-fetch';
 import TopNavBar from './TopNavBar';
 import './Card.scss';
+import axios from 'axios';
+import EndPage from './EndPage';
 
-// const SERVER_URL = "http://localhost:3004";
+const SERVER_URL = "http://localhost:3004";
 
 class App extends React.Component {
   constructor(props){
@@ -34,10 +35,16 @@ class App extends React.Component {
       // toggle show Start page
       showStartPage: true,
 
+      // toggle show End page,
+      showEndPage: false,
+
       // toggle show steps
       showSteps: false,
 
-      policy_ids: [0,1],
+      // toggle which loading message we show. this is used for when we are submitting final responses
+      wrapup: false,
+
+      policy_ids: [],
       policyData: [],
 
       // form info
@@ -57,17 +64,17 @@ class App extends React.Component {
     }
     this.maxSteps = 5;
     this.uuid = uuidv4();
-    // use this for barchart
-    // this.policyData = policy_data;
-    // console.log(this.policyData);
+
 
 
     // binding functions
     this.toggleUserInfoForm = this.toggleUserInfoForm.bind(this);
     this.toggleStartPage = this.toggleStartPage.bind(this);
+    this.toggleEndPage = this.toggleEndPage.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.incrementStep = this.incrementStep.bind(this);
     this.toggleLoading = this.toggleLoading.bind(this);
+    this.toggleWrapUp = this.toggleWrapUp.bind(this);
     this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
     this.pushBackChoices = this.pushBackChoices.bind(this);
 
@@ -106,6 +113,14 @@ class App extends React.Component {
     this.setState({ showStartPage: !this.state.showStartPage})
   }
 
+  toggleEndPage(){
+    this.setState({ showEndPage: !this.state.showEndPage})
+  }
+
+  toggleWrapUp(){
+    this.setState({ wrapup: !this.state.wrapup})
+  }
+
   toggleUserInfoForm(){
     this.setState({ showUserInfoForm: !this.state.showUserInfoForm})
   }
@@ -120,6 +135,7 @@ class App extends React.Component {
     function(){console.log(this.state.userInfo)}
     )
   }
+
   
   async componentDidMount() {
     
@@ -134,6 +150,11 @@ class App extends React.Component {
     // if(params['mturk']){
     //   this.mturk = true;
     // }
+
+    // for now we will get the first set of policies on mount
+    const response = await axios.get(`${SERVER_URL}/next_query/${this.state.currentStep}`);
+    this.updatePolicyIDs(response.data.policy_ids);
+    console.log(this.state.policy_ids);
 
     const csvData = await csv(policy_data_path)
     const cleanedData = await getPolicyData(csvData);
@@ -166,12 +187,15 @@ class App extends React.Component {
               policy_ids={this.state.policy_ids}
               currentStep={this.state.currentStep}
               loading={this.state.loading}
+              wrapup={this.state.wrapup}
               incrementStep={this.incrementStep}
               toggleLoading={this.toggleLoading}
+              toggleWrapUp={this.toggleWrapUp}
               updatePolicyIDs={this.updatePolicyIDs}
             /> : 
             null
           }
+          <EndPage showEndPage={this.state.showEndPage}/>
         </Container>
         
         {/* <EndPage></EndPage> */}

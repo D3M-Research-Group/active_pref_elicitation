@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-	Col,
-	Row,
     Container,
     Button
 } from 'reactstrap';
@@ -29,11 +27,12 @@ class StartPage extends React.Component {
             <React.Fragment>
                 <Container>
                 <h2>Help make a difference!</h2>
-                    <p className="lead">The questionnaires are designed to learn your preferences by displaying outcomes
+                <p className="lead">
+                    The questionnaires are designed to learn your preferences by displaying outcomes
                     of different policies and learning your choices. New policy outcomes are displayed
-                    after each choice you make. The <b>adaptive questionnaire</b> is tailored to ask
+                    after each choice you make. The questionnaire is tailored to ask
                     questions based on your previous choices.
-                    You can start  the <b>Adaptive</b> questionnaire by clicking on the button below. Please take the survey <b>only once</b>. 
+                    You can start the questionnaire by clicking on the button below. Please take the survey <b>only once</b>. 
                     Once you've started the questionnaire, <b>please do not refresh or leave the page</b>. For the survey to be accepted please take it only once and complete it in one sitting.
                     <br></br>
                     <br></br>
@@ -43,7 +42,6 @@ class StartPage extends React.Component {
                     decide which patients would get a bed, ventilator, or receive other lifesaving treatments in a critical care unit in an
                     <b> event where there are more patients than necessary resources. </b>
                 </p>
-                {/* Center this */}
                 <div>
                     <br></br>
                     <br></br>
@@ -52,7 +50,7 @@ class StartPage extends React.Component {
                         size="lg"
                         type="submit"
                         onClick={this.nextPage}
-                    > Start Adaptive Questionnaire
+                    > Start Questionnaire
                     </Button>
                 </div>
                 </Container>

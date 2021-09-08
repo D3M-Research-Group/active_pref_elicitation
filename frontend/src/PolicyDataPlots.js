@@ -78,6 +78,9 @@ class PolicyDataPlot extends React.Component {
     cleanAxisLabels(labels){
         const reg_exp = /.*_/i
         var cleaned_labels = labels.map((label) => {
+            if(label === "Overall survival probability"){
+                label = "Survived";
+            }
             return(label.replace(reg_exp,""));
         })
         return(cleaned_labels);
@@ -94,7 +97,7 @@ class PolicyDataPlot extends React.Component {
 
         if(plotType === "pie"){
             dat.push((1-dat[0]));
-            labs.push("Overall Probability of not surviving");
+            labs.push("Deceased");
             bg_colors = backgroundColors.slice(0, (column_end - column_start + 2)); // do this so we get additional color for completment
             border_colors = borderColors.slice(0, (column_end - column_start + 2));
 

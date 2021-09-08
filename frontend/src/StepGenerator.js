@@ -8,10 +8,13 @@ import {
 class Step extends React.Component{
     constructor(props) {
         super(props)
+        this.maxSteps = this.props.maxSteps;
         this.stepNum = this.props.stepNum; // which step is this
         this.currentStep = this.props.currentStep; // which step is the app currently on?
         this.loading = this.props.loading;
         this.toggleLoading = this.props.toggleLoading;
+        this.wrapup = this.props.wrapup;
+        this.toggleWrapUp = this.props.toggleWrapUp;
         this.userChoices = this.props.userChoices;
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
@@ -28,9 +31,11 @@ class Step extends React.Component{
             // <Container fluid={true}>
                 <PairwiseComparison
                     // title={this.data['query_title']}
-                    title={"TEST"}
+                    maxSteps={this.maxSteps} 
                     loading={this.loading}
                     toggleLoading={this.toggleLoading}
+                    wrapup={this.wrapup}
+                    toggleWrapUp={this.toggleWrapUp}
                     userChoices = {this.userChoices}
                     incrementStep={this.incrementStep}
                     graphData={this.policyData}
@@ -55,6 +60,8 @@ class StepList extends React.Component{
         this.currentStep = this.props.currentStep;
         this.loading = this.props.loading;
         this.toggleLoading = this.props.toggleLoading;
+        this.wrapup = this.props.wrapup;
+        this.toggleWrapUp = this.props.toggleWrapUp;
         this.incrementStep = this.props.incrementStep;
         this.policyData=this.props.policyData;
         this.policy_ids=this.props.policy_ids;
@@ -79,16 +86,22 @@ class StepList extends React.Component{
                 {
                     numSteps.map((elem) => {
                             return (
-                            <Step key={elem.toString()} stepNum={elem} currentStep={this.currentStep}
-                             loading={this.loading} 
-                             toggleLoading={this.toggleLoading}
-                             userChoices={this.userChoices}
-                             incrementStep={this.incrementStep}
-                             policyData={this.policyData}
-                             policy_ids={this.policy_ids}
-                             sectionNames={this.sectionNames}
-                             updatePolicyIDs={this.updatePolicyIDs}
-                             /> 
+                            <Step 
+                                key={elem.toString()} 
+                                maxSteps={this.maxSteps} 
+                                stepNum={elem} 
+                                currentStep={this.currentStep}
+                                loading={this.loading} 
+                                toggleLoading={this.toggleLoading} 
+                                wrapup={this.wrapup}
+                                toggleWrapUp={this.toggleWrapUp}
+                                userChoices={this.userChoices}
+                                incrementStep={this.incrementStep}
+                                policyData={this.policyData}
+                                policy_ids={this.policy_ids}
+                                sectionNames={this.sectionNames}
+                                updatePolicyIDs={this.updatePolicyIDs}
+                            /> 
                              );
                     })
                 }

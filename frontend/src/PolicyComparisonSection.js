@@ -1,6 +1,5 @@
 import React from 'react';
 import { Col, Container, Row } from 'reactstrap';
-import PolicyDataBarChart from './PolicyDataBarChart';
 import PolicyNumberDisplay from './PolicyNumberDisplay';
 import './PolicyComparisonSection.css'
 import PolicyDataPlot from './PolicyDataPlots';
@@ -14,7 +13,8 @@ class PolicyComparisonSection extends React.Component{
         this.columnNums = this.props.columnNums;
         // console.log("Policy data: ", this.policyData);
         this.sectionNum = this.props.sectionNum;
-        this.title=this.props.title
+        this.title=this.props.title;
+        this.description=this.props.description;
         this.maxYVal = this.props.maxYVal;
         this.generatePlotColumn = this.generatePlotColumn.bind(this);
         
@@ -40,7 +40,8 @@ class PolicyComparisonSection extends React.Component{
             policyData.map((data, idx) => {
                 return(
                     <React.Fragment>
-                        <Col lg="6" className="text-center">
+                        <Col lg={this.plotType === "pie"? "4" : "6"}
+                        className="text-center">
                             <h3> Policy {(idx + 1) % 2 === 0 ? "B" : "A" }</h3>
                             {this.choosePlotType(this.sectionType, this.plotType, data, this.columnNums, idx)}
                         </Col>
@@ -57,11 +58,17 @@ class PolicyComparisonSection extends React.Component{
                     <h2>
                         {this.title}
                     </h2>
-                    <p>Among Those Who Contracted COVID-19 and Needed Critical Care</p>
+                    <p>{this.description}</p>
                     <Container fluid={true} style={{marginBottom: "5rem"}}>
+                        {this.plotType === "pie"? 
+                        <Row className="justify-content-center">
+                            {this.generatePlotColumn(this.policyData)}
+                        </Row>: 
                         <Row>
                             {this.generatePlotColumn(this.policyData)}
                         </Row>    
+                        }
+                        
                     </Container>
                     
                 </div>

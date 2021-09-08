@@ -1,31 +1,11 @@
 import React from 'react';
-// import Alert from 'react-bootstrap/Alert';
 import Loader from "./Loader";
 import BottomNavBar from './NavBar';
 import { Container} from 'reactstrap';
-// import PolicyDataBarChart from './PolicyDataBarChart';
 import PolicyComparisonSection from './PolicyComparisonSection';
 import './PolicyComparisonSection'
 import axios from 'axios';
 
-// function SelectionErrorAlert(props) {
-//     // const [show, setShow] = useState(false);
-  
-//     if (!props.showError) {
-//       return null
-//     }
-//     return (
-//       <div class="d-flex justify-content-center">
-//         <Alert variant="danger" className="text-center" onClose={() => props.updateShowError(false)} dismissible>
-//           <Alert.Heading>Error</Alert.Heading>
-//           <p>
-//             Please select one of the three options before clicking Next.
-//           </p>
-//         </Alert>
-//       </div>
-//     );
-    
-//   }
 
 const SERVER_URL = "http://localhost:3004";
 
@@ -35,15 +15,16 @@ class PairwiseComparison extends React.Component {
         this.state ={
             showError: false,
             selected: -1,
-            loading : false
+            loading: false,
+            wrapup: false,
         }
-        this.title = this.props.title;
         // this.loading = this.props.loading
         this.toggleLoading = this.props.toggleLoading;
         this.graphData = this.props.graphData;
         this.policy_ids = this.props.policy_ids;
         this.userChoices = this.props.userChoices;
         this.stepNum = this.props.stepNum;
+        this.maxSteps = this.props.maxSteps
         this.updatePolicyIDs=this.props.updatePolicyIDs
 
         this.incrementStep = this.props.incrementStep;
@@ -124,24 +105,36 @@ class PairwiseComparison extends React.Component {
             // record the choice made
             // console.log(this.state.selected);
             // this.pushBackChoice(this.state.selected);
-            // this.toggleLoading();
-            // this.toggleLoading();  
-
-            this.setState({loading: true}, () => {
-              axios.get(`${SERVER_URL}/next_query/${this.stepNum}`, {})
-              .then((response) => {
-                console.log(response.data);
-                this.updatePolicyIDs(response.data.policy_ids);
-                this.incrementStep();
-                console.log("selected", this.state.selected);
+            
+            // here we check if our next step will be greater than max steps
+            // if so, we will toggle loading and wrapup, push back final choice,
+            // post survey data and final choices, toggle loading and wrap up, and finally show the EndPage
+            if(this.stepNum + 1 > this.maxSteps){
+              this.setState({loading: true, wrapup: true}, () => {
+                // push back final choice
                 this.pushBackChoice(this.state.selected);
-                
-                this.setState({loading: false});
+                // need function scope to be in app to make it easier to post the form and final choices
               })
-              .catch((err) => {
-                console.log("got error: ", err.data)
+            } else {
+              this.setState({loading: true}, () => {
+                // this get request needs to pass data to the endpoint
+                axios.get(`${SERVER_URL}/next_query/${this.stepNum}`, {}) // shouldn't this be stepNum + 1? Does it matter?
+                .then((response) => {
+                  console.log(response.data);
+                  this.updatePolicyIDs(response.data.policy_ids);
+                  this.incrementStep();
+                  console.log("selected", this.state.selected);
+                  this.pushBackChoice(this.state.selected);
+                  
+                  this.setState({loading: false});
+                })
+                .catch((err) => {
+                  console.log("got error: ", err.data)
+                })
               })
-          })
+            }
+
+            
             
             
             
@@ -175,7 +168,7 @@ class PairwiseComparison extends React.Component {
             {this.state.loading ? null : 
             <div>
             <Container fluid={false}>
-              <h1 className="title">Query {this.stepNum}</h1>
+              <h1 className="title">Query {this.stepNum} / {this.maxSteps}</h1>
               {
                 this.sectionInfo.map((section, index) => {
                   const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);
