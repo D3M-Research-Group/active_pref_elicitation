@@ -20,6 +20,12 @@ class Step extends React.Component{
         this.policyData = this.props.policyData;
         this.policy_ids = this.props.policy_ids;
         this.updatePolicyIDs=this.props.updatePolicyIDs
+        this.postFinalData=this.props.postFinalData;
+        this.toggleEndPage = this.props.toggleEndPage;
+
+        this.userInfo = this.props.userInfo;
+        this.ip = this.props.ip;
+        this.uuid = this.props.uuid;
     }
 
     render() { 
@@ -36,12 +42,18 @@ class Step extends React.Component{
                     toggleLoading={this.toggleLoading}
                     wrapup={this.wrapup}
                     toggleWrapUp={this.toggleWrapUp}
+                    toggleEndPage={this.toggleEndPage}
                     userChoices = {this.userChoices}
                     incrementStep={this.incrementStep}
                     graphData={this.policyData}
                     policy_ids={this.policy_ids}
                     stepNum={this.stepNum}
                     updatePolicyIDs={this.updatePolicyIDs}
+                    postFinalData={this.postFinalData}
+                    
+                    userInfo={this.userInfo}
+                    ip={this.ip}
+                    uuid={this.uuid}
                     // pass userChoices all the way to PairwiseComparisons and from their lift up state by pushing
                     // choices back to userChoices in App's state
 
@@ -62,11 +74,17 @@ class StepList extends React.Component{
         this.toggleLoading = this.props.toggleLoading;
         this.wrapup = this.props.wrapup;
         this.toggleWrapUp = this.props.toggleWrapUp;
+        this.toggleEndPage = this.props.toggleEndPage;
         this.incrementStep = this.props.incrementStep;
         this.policyData=this.props.policyData;
         this.policy_ids=this.props.policy_ids;
         this.sectionNames=this.props.sectionNames;
         this.updatePolicyIDs=this.props.updatePolicyIDs
+        this.postFinalData=this.props.postFinalData;
+
+        this.userInfo = this.props.userInfo;
+        this.ip = this.props.ip;
+        this.uuid = this.props.uuid;
     }
 
 
@@ -93,6 +111,7 @@ class StepList extends React.Component{
                                 currentStep={this.currentStep}
                                 loading={this.loading} 
                                 toggleLoading={this.toggleLoading} 
+                                toggleEndPage={this.toggleEndPage}
                                 wrapup={this.wrapup}
                                 toggleWrapUp={this.toggleWrapUp}
                                 userChoices={this.userChoices}
@@ -101,6 +120,11 @@ class StepList extends React.Component{
                                 policy_ids={this.policy_ids}
                                 sectionNames={this.sectionNames}
                                 updatePolicyIDs={this.updatePolicyIDs}
+                                postFinalData={this.postFinalData}
+
+                                userInfo={this.userInfo}
+                                ip={this.ip}
+                                uuid={this.uuid}
                             /> 
                              );
                     })

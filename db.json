@@ -1,33 +1,55 @@
 {
-    "next_query": [
-        {
-            "id" : 0,
-            "policy_ids": [3,4]
-        },
-        {
-            "id" : 1,
-            "policy_ids": [1,4]
-        },
-        {
-            "id" : 2,
-            "policy_ids": [2,3]
-        },
-        {
-            "id" : 3,
-            "policy_ids": [2,4]
-        },
-        {
-            "id" : 4,
-            "policy_ids": [3,8]
-        },
-        {
-            "id" : 5,
-            "policy_ids": [2,8]
-        },
-        {
-            "id" : 6,
-            "policy_ids": [4,8]
-        }
-    ],
-    "user_choices" : []
+  "next_query": [
+    {
+      "id": 0,
+      "policy_ids": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": 1,
+      "policy_ids": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 2,
+      "policy_ids": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": 3,
+      "policy_ids": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": 4,
+      "policy_ids": [
+        3,
+        8
+      ]
+    },
+    {
+      "id": 5,
+      "policy_ids": [
+        2,
+        8
+      ]
+    },
+    {
+      "id": 6,
+      "policy_ids": [
+        4,
+        8
+      ]
+    }
+  ],
+  "user_data": [
+  ]
 }

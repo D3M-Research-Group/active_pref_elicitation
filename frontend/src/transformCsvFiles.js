@@ -1,9 +1,6 @@
 // read csv and transform into javascript object in long format
 // [ label: "col name", value: 32423, policy_id: 1]
-
-import { csv } from 'd3-fetch';
 import {nest} from 'd3-collection';
-import url from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25policies.csv';
 
 
 // const policy_data = csv(url).then((csv) => {

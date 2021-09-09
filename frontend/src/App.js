@@ -77,6 +77,7 @@ class App extends React.Component {
     this.toggleWrapUp = this.toggleWrapUp.bind(this);
     this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
     this.pushBackChoices = this.pushBackChoices.bind(this);
+    this.postFinalData = this.postFinalData.bind(this);
 
   }
 
@@ -129,6 +130,15 @@ class App extends React.Component {
     // remove form errors messages from the object
     var toUpdate = _.omit(data, ["defaultMessage", "selectFieldMessage",
      "usernameFieldMessage", "healthcareroleFieldMessage"])
+
+    toUpdate = Object.keys(toUpdate).reduce((obj,key) => {
+          if(_.isObject(toUpdate[key])){
+            obj[key] = toUpdate[key]['value']
+          } else{
+                obj[key] = toUpdate[key];
+          }
+        return obj;
+      }, {})
     this.setState({
       userInfo: toUpdate
     }, 
@@ -136,24 +146,56 @@ class App extends React.Component {
     )
   }
 
+  postFinalData(){
+    // TO-DO: add time start and time end?
+    const toPostData = JSON.stringify({
+      uuid: this.uuid,
+      ip: this.state.ip,
+      userChoices : this.state.userChoices,
+      userInfo : this.state.userInfo
+    })
+  axios.post(`${SERVER_URL}/user_data`, toPostData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+    // console.log(response)
+    .then((response) =>{
+      console.log(response)
+    })
+  }
+
   
   async componentDidMount() {
     
     // get IP info
-    // const response = await fetch('https://geolocation-db.com/json/');
-    // const data = await response.json();
-    // this.setState({ ip: data.IPv4 })
-    // // parse query string info
-    // const urlSearchParams = new URLSearchParams(window.location.search);
-    // const params = Object.fromEntries(urlSearchParams.entries());
-    // // only want param mturk
-    // if(params['mturk']){
-    //   this.mturk = true;
-    // }
+    const loc_response = await fetch('https://geolocation-db.com/json/');
+    const data = await loc_response.json();
+    this.setState({ ip: data.IPv4 })
+    // parse query string info
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    // only want param mturk
+    if(params['mturk']){
+      this.mturk = true;
+    }
 
     // for now we will get the first set of policies on mount
-    const response = await axios.get(`${SERVER_URL}/next_query/${this.state.currentStep}`);
+    const prevChoices = JSON.stringify({
+      policiesShown: [],
+      userChoices : []
+    })
+    const response = await axios({
+      method: "GET",
+      url: `${SERVER_URL}/next_query/${this.state.currentStep}`,
+      data: prevChoices
+    })
+    
+
     this.updatePolicyIDs(response.data.policy_ids);
+    console.log(response);
     console.log(this.state.policy_ids);
 
     const csvData = await csv(policy_data_path)
@@ -191,7 +233,14 @@ class App extends React.Component {
               incrementStep={this.incrementStep}
               toggleLoading={this.toggleLoading}
               toggleWrapUp={this.toggleWrapUp}
+              toggleEndPage={this.toggleEndPage}
               updatePolicyIDs={this.updatePolicyIDs}
+              postFinalData={this.postFinalData}
+
+              userInfo={this.state.userInfo}
+              ip={this.state.ip}
+              uuid={this.uuid}
+
             /> : 
             null
           }

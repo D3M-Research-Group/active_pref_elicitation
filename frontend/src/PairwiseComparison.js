@@ -22,7 +22,13 @@ class PairwiseComparison extends React.Component {
         this.toggleLoading = this.props.toggleLoading;
         this.graphData = this.props.graphData;
         this.policy_ids = this.props.policy_ids;
+
+        // post data
         this.userChoices = this.props.userChoices;
+        this.userInfo = this.props.userInfo;
+        this.ip = this.props.ip;
+        this.uuid = this.props.uuid;
+
         this.stepNum = this.props.stepNum;
         this.maxSteps = this.props.maxSteps
         this.updatePolicyIDs=this.props.updatePolicyIDs
@@ -32,6 +38,8 @@ class PairwiseComparison extends React.Component {
         this.onListChanged = this.onListChanged.bind(this);
         this.updateShowError = this.updateShowError.bind(this);
         this.prepareCardData = this.prepareCardData.bind(this);
+        this.postFinalData=this.props.postFinalData;
+        this.toggleEndPage = this.props.toggleEndPage;
 
 
         // lift up state function
@@ -90,6 +98,20 @@ class PairwiseComparison extends React.Component {
         })
     }
 
+    setStateAsync(state) {
+      return new Promise((resolve) => {
+        this.setState(state, resolve)
+      });
+    }
+
+    async handlePost(){
+      await this.setStateAsync({loading: true, wrapup: true});
+      this.postFinalData();
+      await this.setStateAsync({loading: false, wrapup: false});
+      // this.incrementStep();
+      // this.toggleEndPage();
+    }
+
     submitChoice = (e) => {
         e.preventDefault();
         if(this.state.selected === ""){
@@ -110,17 +132,61 @@ class PairwiseComparison extends React.Component {
             // if so, we will toggle loading and wrapup, push back final choice,
             // post survey data and final choices, toggle loading and wrap up, and finally show the EndPage
             if(this.stepNum + 1 > this.maxSteps){
+              // this.handlePost();
+              this.pushBackChoice(this.state.selected);
+
               this.setState({loading: true, wrapup: true}, () => {
-                // push back final choice
-                this.pushBackChoice(this.state.selected);
+                const toPostData = JSON.stringify({
+                  uuid: this.uuid,
+                  ip: this.ip,
+                  userChoices : this.userChoices,
+                  userInfo : this.userInfo
+                })
+
+                axios.post(`${SERVER_URL}/user_data`, toPostData,
+                  {
+                    headers: {
+                      'Content-Type': 'application/json'
+                    }
+                  }
+                )
+                // console.log(response)
+                .then((response) =>{
+                  console.log(response)
+
+                  this.setState({loading: false, wrapup: false});
+                  this.incrementStep();
+                  this.toggleEndPage();
+                })
                 // need function scope to be in app to make it easier to post the form and final choices
+                // this.setState({loading: true, wrapup: true}, () => {
+                  // this.postFinalData();
+                  // this.incrementStep();
+                  // this.toggleEndPage();
+                // });
+                
+
+                
+                  
               })
+              
+              // this.setState({loading: false, wrapup: false});
+              
             } else {
               this.setState({loading: true}, () => {
                 // this get request needs to pass data to the endpoint
-                axios.get(`${SERVER_URL}/next_query/${this.stepNum}`, {}) // shouldn't this be stepNum + 1? Does it matter?
+                const prevChoices = JSON.stringify({
+                  policiesShown: this.policy_ids,
+                  userChoices : this.userChoices
+                })
+                axios.get(`${SERVER_URL}/next_query/${this.stepNum}`, prevChoices,
+                  {
+                    headers: {
+                      'Content-Type': 'application/json'
+                    }
+                  }) // shouldn't this be stepNum + 1? Does it matter?
                 .then((response) => {
-                  console.log(response.data);
+                  console.log(response);
                   this.updatePolicyIDs(response.data.policy_ids);
                   this.incrementStep();
                   console.log("selected", this.state.selected);
@@ -163,7 +229,7 @@ class PairwiseComparison extends React.Component {
       return (
         // <div className="column">
         <React.Fragment>
-          {this.state.loading ? <Loader /> : null}
+          {this.state.loading ? <Loader wrapup={this.state.wrapup} /> : null}
 
             {this.state.loading ? null : 
             <div>
