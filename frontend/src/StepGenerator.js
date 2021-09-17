@@ -16,6 +16,8 @@ class Step extends React.Component{
         this.wrapup = this.props.wrapup;
         this.toggleWrapUp = this.props.toggleWrapUp;
         this.userChoices = this.props.userChoices;
+        this.policiesShown = this.props.policiesShown;
+        this.policyDataSet = this.props.policyDataSet;
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
         this.policy_ids = this.props.policy_ids;
@@ -44,6 +46,8 @@ class Step extends React.Component{
                     toggleWrapUp={this.toggleWrapUp}
                     toggleEndPage={this.toggleEndPage}
                     userChoices = {this.userChoices}
+                    policiesShown = {this.policiesShown}
+                    policyDataSet = {this.policyDataSet}
                     incrementStep={this.incrementStep}
                     graphData={this.policyData}
                     policy_ids={this.policy_ids}
@@ -67,6 +71,8 @@ class StepList extends React.Component{
     constructor(props) {
         super(props)
         this.userChoices = this.props.userChoices;
+        this.policiesShown = this.props.policiesShown;
+        this.policyDataSet = this.props.policyDataSet;
         this.maxSteps = this.props.maxSteps;
         this.choiceData = this.props.choiceData;
         this.currentStep = this.props.currentStep;
@@ -115,6 +121,8 @@ class StepList extends React.Component{
                                 wrapup={this.wrapup}
                                 toggleWrapUp={this.toggleWrapUp}
                                 userChoices={this.userChoices}
+                                policiesShown = {this.policiesShown}
+                                policyDataSet = {this.policyDataSet}
                                 incrementStep={this.incrementStep}
                                 policyData={this.policyData}
                                 policy_ids={this.policy_ids}

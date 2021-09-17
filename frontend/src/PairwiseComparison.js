@@ -7,7 +7,8 @@ import './PolicyComparisonSection'
 import axios from 'axios';
 
 
-const SERVER_URL = "http://localhost:3004";
+// const SERVER_URL = "http://localhost:3004";
+const SERVER_URL = "http://localhost:8000";
 
 class PairwiseComparison extends React.Component {
     constructor(props) {
@@ -25,6 +26,8 @@ class PairwiseComparison extends React.Component {
 
         // post data
         this.userChoices = this.props.userChoices;
+        this.policiesShown = this.props.policiesShown;
+        this.policyDataSet = this.props.policyDataSet;
         this.userInfo = this.props.userInfo;
         this.ip = this.props.ip;
         this.uuid = this.props.uuid;
@@ -132,18 +135,78 @@ class PairwiseComparison extends React.Component {
             // if so, we will toggle loading and wrapup, push back final choice,
             // post survey data and final choices, toggle loading and wrap up, and finally show the EndPage
             if(this.stepNum + 1 > this.maxSteps){
-              // this.handlePost();
+              
+              // push back final choice and final policies shown
               this.pushBackChoice(this.state.selected);
+              this.updatePolicyIDs(this.policy_ids);
 
               this.setState({loading: true, wrapup: true}, () => {
-                const toPostData = JSON.stringify({
-                  uuid: this.uuid,
-                  ip: this.ip,
-                  userChoices : this.userChoices,
-                  userInfo : this.userInfo
+                // const toPostData = JSON.stringify({
+                //   uuid: this.uuid,
+                //   ip: this.ip,
+                //   userChoices : this.userChoices,
+                //   userInfo : this.userInfo
+                // })
+
+                const sessionInfo = JSON.stringify({
+                  session_id : this.uuid,
+                  ip_address: this.ip,
+                  mturker: this.mturker
+                })
+                // map userChoices so we create array with objects
+                // that each contain the necessary info so we don't
+                // have to do that on the backend
+                console.log(this.policiesShown);
+                const choicesInfo = this.userChoices.map((choice, idx) =>{
+                  console.log(this.policiesShown[idx][0])
+                  const choiceInfo = {
+                    session_id: this.uuid,
+                    question_num: idx+1,
+                    policy_a: this.policiesShown[idx][0],
+                    policy_b: this.policiesShown[idx][1],
+                    policy_dataset: this.policyDataSet,
+                    user_choice: choice
+                  }
+                  // return JSON.stringify(choiceInfo);
+                  return choiceInfo;
+                })
+                console.log("choicesInfo:", choicesInfo);
+                // const choicesInfo = JSON.stringify({
+                //   session_id: this.uuid,
+                //   userChoices : this.userChoices,
+                //   policiesShown: this.policiesShown,
+                //   policyDataSet: this.policyDataSet
+                // })
+
+                // need to unpack user info object or just add session_id key to it
+                var userFormInfo = this.userInfo;
+                userFormInfo['session_id'] = this.uuid;
+                
+                userFormInfo = JSON.stringify(userFormInfo);
+                
+                // Post the choice info
+                axios.post(`${SERVER_URL}/choices/`, choicesInfo,
+                  {
+                    headers: {
+                      'Content-Type': 'application/json'
+                    }
+                  }
+                ).then((response) =>{
+                  console.log("Choices resonse", response)
                 })
 
-                axios.post(`${SERVER_URL}/user_data`, toPostData,
+                // Post the session info
+                axios.post(`${SERVER_URL}/sessioninfo/`, sessionInfo,
+                  {
+                    headers: {
+                      'Content-Type': 'application/json'
+                    }
+                  }
+                ).then((response) =>{
+                  console.log("Session info resonse", response)
+                })
+                // Post the form info and then show end page
+                axios.post(`${SERVER_URL}/forminfo/`, userFormInfo,
                   {
                     headers: {
                       'Content-Type': 'application/json'
@@ -152,7 +215,7 @@ class PairwiseComparison extends React.Component {
                 )
                 // console.log(response)
                 .then((response) =>{
-                  console.log(response)
+                  console.log("User form info", response)
 
                   this.setState({loading: false, wrapup: false});
                   this.incrementStep();
@@ -176,15 +239,18 @@ class PairwiseComparison extends React.Component {
               this.setState({loading: true}, () => {
                 // this get request needs to pass data to the endpoint
                 const prevChoices = JSON.stringify({
-                  policiesShown: this.policy_ids,
+                  policiesShown: this.policiesShown,
                   userChoices : this.userChoices
                 })
-                axios.get(`${SERVER_URL}/next_query/${this.stepNum}`, prevChoices,
+
+                // axios.get(`${SERVER_URL}/next_query/${this.stepNum}`,
+                axios.post(`http://127.0.0.1:8000/next_query/`,prevChoices,
                   {
                     headers: {
                       'Content-Type': 'application/json'
-                    }
-                  }) // shouldn't this be stepNum + 1? Does it matter?
+                    },
+                    
+                  })
                 .then((response) => {
                   console.log(response);
                   this.updatePolicyIDs(response.data.policy_ids);

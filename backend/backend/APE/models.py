@@ -2,11 +2,10 @@ from django.db import models
 
 # Session info
 class SessionInfo(models.Model):
+    session_id = models.CharField(max_length=50,primary_key=True,
+                                        verbose_name='session_id') # UUID generated on browser side
     ip_address = models.GenericIPAddressField()
-    datetime = models.DateTimeField('date test taken')
-    # We might want to keep user info in the form of a cookie?
-    session_id = models.UUIDField(primary_key=True,
-                                        verbose_name='session_id')
+    time_submitted = models.DateTimeField(auto_now_add=True, blank=True,verbose_name='date test taken')
     # To-do: want a way to differentiate between AMTurkers and regular people using the app
     # easiest would be to have a URI for the link given to AMTurkers like ?amturk=true
     mturker = models.BooleanField(default=False)
@@ -14,12 +13,31 @@ class SessionInfo(models.Model):
 # Each user choice is a row here with session_id connecting them together.
 # We insert this information in at the end by looping over the info stored user-side
 class Choices(models.Model):
-    session_id = models.UUIDField(primary_key=True,
-                                        verbose_name='session_id')# session id which relates this to SessionInfo
-    question_id = models.PositiveIntegerField() # id of the question shown to the user
-    user_choice = models.IntegerField(choices=[-1,0,1]) # which of the two options did the user choose?
-    left_choice = models.PositiveIntegerField() # when we showed this question to a user, which option was on the left side?
+    session_id = models.CharField(max_length=50, 
+                                verbose_name='session_id') # session id which relates this to SessionInfo
+    question_num = models.PositiveIntegerField() # id of the question shown to the user
+    policy_a = models.PositiveIntegerField() # id of the policy_A shown to the user
+    policy_b = models.PositiveIntegerField() # id of the policy_B shown to the user
+    policy_dataset = models.CharField(max_length=50) # name of the policy dataset e.g. COVID or LAHSA
+    user_choice = models.IntegerField() # which of the two options did the user choose?
 
+class FormInfo(models.Model):
+    # Need some fields to be nullable so that we can use this model for
+    # COVID and LAHSA forms
+    session_id = models.CharField(max_length=50,
+                            primary_key=True,
+                            verbose_name='session_id') # session id which relates this to SessionInfo
+    username = models.CharField(max_length=100, null=True)
+    age = models.CharField(max_length=15)
+    race_ethnicity = models.CharField(max_length=100)
+    gender = models.CharField(max_length=20)
+    marital_status = models.CharField(max_length=100)
+    education = models.CharField(max_length=100)
+    political = models.CharField(max_length=100)
+    positive_family = models.CharField(max_length=10, null=True)
+    positive_anyone = models.CharField(max_length=10, null=True)
+    healthcare_yn = models.CharField(max_length=10, null=True)
+    healthcare_role = models.CharField(max_length=10, null=True)
 
 # Which question to display next
 # class NextChoice(models.Model):

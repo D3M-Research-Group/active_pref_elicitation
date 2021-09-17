@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SessionInfo, Choices
+from .models import SessionInfo, Choices, FormInfo
 
 # The serializer converts model instances to JSON so that our frontend can work with the received data
 # class NextChoiceSerializer(serializers.ModelSerializer):
@@ -11,9 +11,30 @@ from .models import SessionInfo, Choices
 class SessionInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = SessionInfo
-        fields = ('ip_address', 'date', 'session_id', 'mturker')
+        fields = ('session_id', 'ip_address', 'time_submitted', 'mturker')
 
 class ChoicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choices
-        fields = ('session_id', 'question_id', 'user_choice', 'left_choice')
+        fields = ('session_id',
+                    'question_num',
+                    'policy_a',
+                    'policy_b',
+                    'policy_dataset',
+                    'user_choice')
+
+class FormInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormInfo
+        fields = ('session_id',
+                  'username',
+                  'age',
+                  'race_ethnicity',
+                  'gender',
+                  'marital_status',
+                  'education',
+                  'political',
+                  'positive_family',
+                  'positive_anyone',
+                  'healthcare_yn',
+                  'healthcare_role')

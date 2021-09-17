@@ -23,7 +23,8 @@ from APE import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('choices/', views.ChoicesView.as_view(), name="choices"),
-    path('sessioninfo/', views.SessionInfoView.as_view(), name="choices"),
-    path('nextchoice/', views.NextChoiceView.as_view(), name="next_choice")
+    path('choices/', views.ChoicesView.as_view(), name="choice"),
+    path('sessioninfo/', views.SessionInfoView.as_view(), name="session info"),
+    path('forminfo/', views.FormInfoView.as_view(), name="form info"),
+    path('next_query/', views.NextChoiceView.as_view(), name="next_query")
 ]

@@ -16,7 +16,8 @@ import './Card.scss';
 import axios from 'axios';
 import EndPage from './EndPage';
 
-const SERVER_URL = "http://localhost:3004";
+// const SERVER_URL = "http://localhost:3004";
+const SERVER_URL = "http://localhost:8000";
 
 class App extends React.Component {
   constructor(props){
@@ -25,6 +26,7 @@ class App extends React.Component {
       // track which step we are on and the choices made so far
       currentStep: 0,
       userChoices : [],
+      policiesShown: [], // store the policy ids we've seen so far as an array of arrays e.g., [[2,3], [3,4],...]
 
       // handle loading screen toggle
       loading: false,
@@ -46,6 +48,7 @@ class App extends React.Component {
 
       policy_ids: [],
       policyData: [],
+      policyDataSet: '',
 
       // form info
       userInfo: {
@@ -62,7 +65,7 @@ class App extends React.Component {
         healthcare_role: ''
       }
     }
-    this.maxSteps = 5;
+    this.maxSteps = 2;
     this.uuid = uuidv4();
 
 
@@ -90,8 +93,14 @@ class App extends React.Component {
       this.toggleShowSteps();
     }
   }
+  
 
   updatePolicyIDs(ids){
+    // take the current policy_ids and push that back to policiesShown
+    if(this.state.policy_ids.length > 0){
+      this.state.policiesShown.push(this.state.policy_ids);
+    }
+    
     this.setState({
       policy_ids : ids
     })
@@ -188,8 +197,8 @@ class App extends React.Component {
       userChoices : []
     })
     const response = await axios({
-      method: "GET",
-      url: `${SERVER_URL}/next_query/${this.state.currentStep}`,
+      method: "POST",
+      url: `${SERVER_URL}/next_query/`,
       data: prevChoices
     })
     
@@ -200,9 +209,14 @@ class App extends React.Component {
 
     const csvData = await csv(policy_data_path)
     const cleanedData = await getPolicyData(csvData);
+    const datasetName = "COVID Data";
     this.setState({
-      policyData: cleanedData
-    }, function(){console.log(this.state.policyData)})
+      policyData: cleanedData,
+      policyDataSet: datasetName
+    }, function(){
+      console.log(this.state.policyData);
+      console.log(this.state.policyDataSet);
+    })
 
 
   }
@@ -224,8 +238,10 @@ class App extends React.Component {
             <StepList 
               key={this.state.currentStep.toString()} // key necessary for ensuring re-render on state change
               userChoices={this.state.userChoices}
+              policiesShown={this.state.policiesShown}
               maxSteps={this.maxSteps}
               policyData={this.state.policyData}
+              policyDataSet={this.state.policyDataSet}
               policy_ids={this.state.policy_ids}
               currentStep={this.state.currentStep}
               loading={this.state.loading}
