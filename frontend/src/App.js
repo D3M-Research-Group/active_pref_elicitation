@@ -207,11 +207,17 @@ class App extends React.Component {
     console.log(response);
     console.log(this.state.policy_ids);
 
-    const csvData = await csv(policy_data_path)
-    const cleanedData = await getPolicyData(csvData);
-    const datasetName = "COVID Data";
+    // const csvData = await csv(policy_data_path)
+    // const cleanedData = await getPolicyData(csvData);
+    const datasetName = "COVID";
+    const policyDataResponse = await axios({
+      method: "GET",
+      url: `${SERVER_URL}/dataset?dataset=${datasetName}`
+    })
+    
     this.setState({
-      policyData: cleanedData,
+      policyData: policyDataResponse.data.data,
+      // policyData: cleanedData,
       policyDataSet: datasetName
     }, function(){
       console.log(this.state.policyData);

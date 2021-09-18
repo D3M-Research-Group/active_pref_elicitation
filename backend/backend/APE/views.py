@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import SessionInfoSerializer, ChoicesSerializer, FormInfoSerializer
 from .models import SessionInfo, Choices, FormInfo
+from .policy_data import covid_data
 
 from random import randrange
 from time import sleep
@@ -53,3 +54,16 @@ class NextChoiceView(APIView):
         response_dict = {"policy_ids": [randrange(1,6), randrange(1,6)]}
         sleep(0.5)
         return Response(response_dict)
+
+class PolicyDataView(APIView):
+    def get(self, request, format=None):
+        dataset_name = request.GET.get('dataset',None)
+        if dataset_name is not None:
+            if dataset_name == "COVID":
+                return Response({'data': covid_data})
+            if dataset_name == "LAHSA":
+                return Response({'data': lahsa_data})
+            else:
+                return Response(None)
+        else:
+            return Response(None)
