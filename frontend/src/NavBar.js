@@ -33,7 +33,7 @@ function BottomNavBar(props){
         <React.Fragment>
             <Navbar color="light" light expand="md" fixed='bottom' style={{paddingLeft: "1.5rem",paddingRight: "1.5rem"}}>
                 {/* <NavbarBrand href="/">reactstrap</NavbarBrand> */}
-                    <Nav className="mr-auto" navbar>
+                    <Nav className="mr-auto" id="sections" navbar>
                     {makeNavItem(sectionNames)}
                     </Nav>
                     <Nav className="ms-auto" navbar>

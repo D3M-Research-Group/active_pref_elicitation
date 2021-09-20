@@ -19,6 +19,7 @@
     "d3-collection": "^1.0.7",
     "d3-fetch": "^3.0.1",
     "formik": "^2.2.9",
+    "intro.js-react": "^0.5.0",
     "json-loader": "^0.5.7",
     "json-server": "^0.16.3",
     "papaparse": "^5.3.1",

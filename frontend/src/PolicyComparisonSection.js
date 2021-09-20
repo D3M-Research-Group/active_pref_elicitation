@@ -41,7 +41,7 @@ class PolicyComparisonSection extends React.Component{
                 return(
                     <React.Fragment>
                         <Col lg={this.plotType === "pie"? "4" : "6"}
-                        className="text-center">
+                        className="text-center" id={`section_${this.sectionNum}_policy_${(idx + 1) % 2 === 0 ? "B" : "A"}`}>
                             <h3> Policy {(idx + 1) % 2 === 0 ? "B" : "A" }</h3>
                             {this.choosePlotType(this.sectionType, this.plotType, data, this.columnNums, idx)}
                         </Col>

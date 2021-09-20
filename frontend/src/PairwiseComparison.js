@@ -5,6 +5,7 @@ import { Container} from 'reactstrap';
 import PolicyComparisonSection from './PolicyComparisonSection';
 import './PolicyComparisonSection'
 import axios from 'axios';
+import Intro from './Intro';
 
 
 // const SERVER_URL = "http://localhost:3004";
@@ -295,11 +296,13 @@ class PairwiseComparison extends React.Component {
       return (
         // <div className="column">
         <React.Fragment>
+          {this.stepNum === 1 ? <Intro/> : null}
           {this.state.loading ? <Loader wrapup={this.state.wrapup} /> : null}
 
             {this.state.loading ? null : 
             <div>
-            <Container fluid={false}>
+            <Container id="policy_comparison_container" fluid={false}>
+              
               <h1 className="title">Query {this.stepNum} / {this.maxSteps}</h1>
               {
                 this.sectionInfo.map((section, index) => {

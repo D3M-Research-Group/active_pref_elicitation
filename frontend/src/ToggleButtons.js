@@ -28,6 +28,7 @@ export default function ToggleButtons(props) {
       exclusive
       onChange={handleSelected}
       aria-label="policy choices"
+      id="choices_button_group"
     >
       <ToggleButton className="bottom_navbar" value="1" >
         Policy A
