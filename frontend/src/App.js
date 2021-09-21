@@ -1,20 +1,18 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
-
-
+import axios from 'axios';
+import ls from 'local-storage';
 import {Container} from 'reactstrap';
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
 import StepList from './StepGenerator';
-import getPolicyData from './transformCsvFiles';
-import policy_data_path from './COVID_and_LAHSA_datasets/COVID/UK_1360beds-25policies.csv';
-import { csv } from 'd3-fetch';
 import TopNavBar from './TopNavBar';
-import './Card.scss';
-import axios from 'axios';
 import EndPage from './EndPage';
+import './Card.scss';
+
+
 
 // const SERVER_URL = "http://localhost:3004";
 const SERVER_URL = "http://localhost:8000";
@@ -42,6 +40,8 @@ class App extends React.Component {
 
       // toggle show steps
       showSteps: false,
+
+      showResumeButton: false,
 
       // toggle which loading message we show. this is used for when we are submitting final responses
       wrapup: false,
@@ -81,9 +81,40 @@ class App extends React.Component {
     this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
     this.pushBackChoices = this.pushBackChoices.bind(this);
     this.postFinalData = this.postFinalData.bind(this);
+    this.writeStatetoLS = this.writeStatetoLS.bind(this);
+    this.readStatefromLS = this.readStatefromLS.bind(this);
+    this.removeStateFromLS = this.removeStateFromLS.bind(this);
+    this.handleUnload = this.handleUnload.bind(this);
 
   }
 
+  handleUnload(e){
+    // if they haven't gotten past the info form, don't save state when they navigate away
+    if((this.state.currentStep === 0 && this.state.userInfo.age.length === 0) || this.showEndPage){
+      this.removeStateFromLS();
+    } else {
+      this.writeStatetoLS();
+    }
+    
+  }
+
+  writeStatetoLS(){
+    ls.set('APE_state', JSON.stringify(this.state))
+  }
+
+  readStatefromLS(){
+    var loadedState = ls.get('APE_state');
+    if (!(loadedState === null)){
+      this.setState(JSON.parse(loadedState));
+    } 
+    
+  }
+
+  removeStateFromLS(){
+    // console.log(this.state.userInfo.age.length);
+    // console.log("removing state")
+    ls.remove('APE_state');
+  }
 
   incrementStep(){
     this.setState({
@@ -176,70 +207,104 @@ class App extends React.Component {
     })
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.handleUnload);
+  }
   
   async componentDidMount() {
-    
-    // get IP info
-    const loc_response = await fetch('https://geolocation-db.com/json/');
-    const data = await loc_response.json();
-    this.setState({ ip: data.IPv4 })
-    // parse query string info
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(urlSearchParams.entries());
-    // only want param mturk
-    if(params['mturk']){
-      this.mturk = true;
+    // add listener for when user leaves the page
+    window.addEventListener('beforeunload', this.handleUnload);
+    // check if state is in local storage
+    var loadableState = ls.get('APE_state');
+    if(loadableState){
+      // check that there is actually any info in the state object
+      var state_info = JSON.parse(loadableState);
+      console.log(state_info)
+      if(state_info['currentStep'] > 0 && state_info['userInfo']['age'].length > 0){
+        this.setState({
+          showResumeButton: true
+        })
+      }
+      // if we already have data in local storage, don't make requests
+    } else {
+      
+      // TO-DO: catch error here and use default value of 0.0.0.0
+      try{
+        const loc_response = await fetch('https://geolocation-db.com/json/');
+        const data = await loc_response.json();
+        this.setState({ ip: data.IPv4 })
+      } catch(err){
+        console.log("Got error trying to get IP address", err)
+        this.setState({ ip: "0.0.0.0" })
+      }
+      
+      
+      // parse query string info
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const params = Object.fromEntries(urlSearchParams.entries());
+      // only want param mturk
+      if(params['mturk']){
+        this.mturk = true;
+      }
+
+      // for now we will get the first set of policies on mount
+      const prevChoices = JSON.stringify({
+        policiesShown: [],
+        userChoices : []
+      })
+      const response = await axios({
+        method: "POST",
+        url: `${SERVER_URL}/next_query/`,
+        data: prevChoices
+      })
+      
+
+      this.updatePolicyIDs(response.data.policy_ids);
+      console.log(response);
+      console.log(this.state.policy_ids);
+
+      // const csvData = await csv(policy_data_path)
+      // const cleanedData = await getPolicyData(csvData);
+      const datasetName = "COVID";
+      const policyDataResponse = await axios({
+        method: "GET",
+        url: `${SERVER_URL}/dataset?dataset=${datasetName}`
+      })
+      
+      this.setState({
+        policyData: policyDataResponse.data.data,
+        // policyData: cleanedData,
+        policyDataSet: datasetName
+      }, function(){
+        console.log(this.state.policyData);
+        console.log(this.state.policyDataSet);
+      })
     }
-
-    // for now we will get the first set of policies on mount
-    const prevChoices = JSON.stringify({
-      policiesShown: [],
-      userChoices : []
-    })
-    const response = await axios({
-      method: "POST",
-      url: `${SERVER_URL}/next_query/`,
-      data: prevChoices
-    })
+    
     
 
-    this.updatePolicyIDs(response.data.policy_ids);
-    console.log(response);
-    console.log(this.state.policy_ids);
-
-    // const csvData = await csv(policy_data_path)
-    // const cleanedData = await getPolicyData(csvData);
-    const datasetName = "COVID";
-    const policyDataResponse = await axios({
-      method: "GET",
-      url: `${SERVER_URL}/dataset?dataset=${datasetName}`
-    })
     
-    this.setState({
-      policyData: policyDataResponse.data.data,
-      // policyData: cleanedData,
-      policyDataSet: datasetName
-    }, function(){
-      console.log(this.state.policyData);
-      console.log(this.state.policyDataSet);
-    })
-
+    
 
   }
   render() {
     return(
       <React.Fragment>
-        {/* <h1>Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span> </h1> */}
         <TopNavBar/>
         <Container fluid={true} style={{marginTop : "1rem", marginBottom: "10rem"}}>
           
           <StartPage showStartPage={this.state.showStartPage}
           toggleStartPage={this.toggleStartPage}
           toggleUserInfoForm={this.toggleUserInfoForm}
+          readStatefromLS={this.readStatefromLS}
+          showResumeButton={this.state.showResumeButton}
           />
           <UserInfoForm showForm={this.state.showUserInfoForm}
-          toggleUserInfoForm={this.toggleUserInfoForm} updateUserInfo={this.updateUserInfo}
-          incrementStep={this.incrementStep} />
+          toggleUserInfoForm={this.toggleUserInfoForm} 
+          updateUserInfo={this.updateUserInfo}
+          incrementStep={this.incrementStep} 
+          writeStatetoLS={this.writeStatetoLS}
+          />
           {this.state.showSteps ? 
             <StepList 
               key={this.state.currentStep.toString()} // key necessary for ensuring re-render on state change
@@ -258,6 +323,8 @@ class App extends React.Component {
               toggleEndPage={this.toggleEndPage}
               updatePolicyIDs={this.updatePolicyIDs}
               postFinalData={this.postFinalData}
+              writeStatetoLS={this.writeStatetoLS}
+              removeStateFromLS={this.removeStateFromLS}
 
               userInfo={this.state.userInfo}
               ip={this.state.ip}

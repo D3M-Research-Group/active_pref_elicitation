@@ -54,6 +54,8 @@ class Step extends React.Component{
                     stepNum={this.stepNum}
                     updatePolicyIDs={this.updatePolicyIDs}
                     postFinalData={this.postFinalData}
+                    writeStatetoLS={this.props.writeStatetoLS}
+                    removeStateFromLS={this.props.removeStateFromLS}
                     
                     userInfo={this.userInfo}
                     ip={this.ip}
@@ -129,6 +131,8 @@ class StepList extends React.Component{
                                 sectionNames={this.sectionNames}
                                 updatePolicyIDs={this.updatePolicyIDs}
                                 postFinalData={this.postFinalData}
+                                writeStatetoLS={this.props.writeStatetoLS}
+                                removeStateFromLS={this.props.removeStateFromLS}
 
                                 userInfo={this.userInfo}
                                 ip={this.ip}

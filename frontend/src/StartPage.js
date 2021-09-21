@@ -45,13 +45,23 @@ class StartPage extends React.Component {
                 <div>
                     <br></br>
                     <br></br>
-                    <Button
+                    {this.props.showResumeButton ? 
+                        <Button
+                        color='success'
+                        size="lg"
+                        type="submit"
+                        onClick={this.props.readStatefromLS}> 
+                            Resume Questionnaire
+                        </Button> : 
+                        <Button
                         color='primary'
                         size="lg"
                         type="submit"
-                        onClick={this.nextPage}
-                    > Start Questionnaire
-                    </Button>
+                        onClick={this.nextPage}> 
+                            Start Questionnaire
+                        </Button>
+                    }
+                    
                 </div>
                 </Container>
             </React.Fragment>

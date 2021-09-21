@@ -140,6 +140,7 @@ class PairwiseComparison extends React.Component {
               // push back final choice and final policies shown
               this.pushBackChoice(this.state.selected);
               this.updatePolicyIDs(this.policy_ids);
+              this.props.writeStatetoLS();
 
               this.setState({loading: true, wrapup: true}, () => {
                 // const toPostData = JSON.stringify({
@@ -221,6 +222,7 @@ class PairwiseComparison extends React.Component {
                   this.setState({loading: false, wrapup: false});
                   this.incrementStep();
                   this.toggleEndPage();
+                  this.props.removeStateFromLS();
                 })
                 // need function scope to be in app to make it easier to post the form and final choices
                 // this.setState({loading: true, wrapup: true}, () => {
@@ -258,6 +260,7 @@ class PairwiseComparison extends React.Component {
                   this.incrementStep();
                   console.log("selected", this.state.selected);
                   this.pushBackChoice(this.state.selected);
+                  this.props.writeStatetoLS();
                   
                   this.setState({loading: false});
                 })
@@ -301,9 +304,10 @@ class PairwiseComparison extends React.Component {
 
             {this.state.loading ? null : 
             <div>
+
             <Container id="policy_comparison_container" fluid={false}>
-              
-              <h1 className="title">Query {this.stepNum} / {this.maxSteps}</h1>
+
+              <h1 className="title">Question {this.stepNum} / {this.maxSteps}</h1>
               {
                 this.sectionInfo.map((section, index) => {
                   const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);

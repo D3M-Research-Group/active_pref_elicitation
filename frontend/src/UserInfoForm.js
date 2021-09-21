@@ -58,12 +58,16 @@ class UserInfoForm extends React.Component{
 		this.setState({ loading: true });
         // lift up form data to App component 
         this.props.updateUserInfo(this.state.formData);
+        
 		setTimeout(() => {
 			this.setState({ loading: false, success: true });
             
 		}, 1000);
         this.props.toggleUserInfoForm();
         this.props.incrementStep();
+        // save state here so state is at the beginning of the questionnaire
+        console.log(this.state.userInfo);
+        this.props.writeStatetoLS();
         
 	}
 

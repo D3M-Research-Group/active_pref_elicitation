@@ -66,7 +66,8 @@ export default class Intro extends React.Component{
               steps={steps}
               initialStep={initialStep}
               onExit={this.onExit}
-              options={{ hideNext: false }}
+              options={{ hideNext: false,
+                disableInteraction: true }}
             />
         );
       }
