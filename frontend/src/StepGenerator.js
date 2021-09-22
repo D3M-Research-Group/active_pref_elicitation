@@ -21,7 +21,8 @@ class Step extends React.Component{
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
         this.policy_ids = this.props.policy_ids;
-        this.updatePolicyIDs=this.props.updatePolicyIDs
+        this.updatePolicyIDs=this.props.updatePolicyIDs;
+        this.pushBackPolicyShown=this.props.pushBackPolicyShown;
         this.postFinalData=this.props.postFinalData;
         this.toggleEndPage = this.props.toggleEndPage;
 
@@ -53,6 +54,7 @@ class Step extends React.Component{
                     policy_ids={this.policy_ids}
                     stepNum={this.stepNum}
                     updatePolicyIDs={this.updatePolicyIDs}
+                    pushBackPolicyShown={this.pushBackPolicyShown}
                     postFinalData={this.postFinalData}
                     writeStatetoLS={this.props.writeStatetoLS}
                     removeStateFromLS={this.props.removeStateFromLS}
@@ -88,6 +90,7 @@ class StepList extends React.Component{
         this.policy_ids=this.props.policy_ids;
         this.sectionNames=this.props.sectionNames;
         this.updatePolicyIDs=this.props.updatePolicyIDs
+        this.pushBackPolicyShown=this.props.pushBackPolicyShown
         this.postFinalData=this.props.postFinalData;
 
         this.userInfo = this.props.userInfo;
@@ -130,6 +133,7 @@ class StepList extends React.Component{
                                 policy_ids={this.policy_ids}
                                 sectionNames={this.sectionNames}
                                 updatePolicyIDs={this.updatePolicyIDs}
+                                pushBackPolicyShown={this.pushBackPolicyShown}
                                 postFinalData={this.postFinalData}
                                 writeStatetoLS={this.props.writeStatetoLS}
                                 removeStateFromLS={this.props.removeStateFromLS}

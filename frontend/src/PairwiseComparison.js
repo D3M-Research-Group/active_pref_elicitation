@@ -8,7 +8,6 @@ import axios from 'axios';
 import Intro from './Intro';
 
 
-// const SERVER_URL = "http://localhost:3004";
 const SERVER_URL = "http://localhost:8000";
 
 class PairwiseComparison extends React.Component {
@@ -36,6 +35,7 @@ class PairwiseComparison extends React.Component {
         this.stepNum = this.props.stepNum;
         this.maxSteps = this.props.maxSteps
         this.updatePolicyIDs=this.props.updatePolicyIDs
+        this.pushBackPolicyShown=this.props.pushBackPolicyShown
 
         this.incrementStep = this.props.incrementStep;
 
@@ -140,6 +140,7 @@ class PairwiseComparison extends React.Component {
               // push back final choice and final policies shown
               this.pushBackChoice(this.state.selected);
               this.updatePolicyIDs(this.policy_ids);
+              this.pushBackPolicyShown(this.policy_ids);
               this.props.writeStatetoLS();
 
               this.setState({loading: true, wrapup: true}, () => {
@@ -194,7 +195,7 @@ class PairwiseComparison extends React.Component {
                     }
                   }
                 ).then((response) =>{
-                  console.log("Choices resonse", response)
+                  console.log("Choices response", response)
                 })
 
                 // Post the session info
@@ -224,15 +225,6 @@ class PairwiseComparison extends React.Component {
                   this.toggleEndPage();
                   this.props.removeStateFromLS();
                 })
-                // need function scope to be in app to make it easier to post the form and final choices
-                // this.setState({loading: true, wrapup: true}, () => {
-                  // this.postFinalData();
-                  // this.incrementStep();
-                  // this.toggleEndPage();
-                // });
-                
-
-                
                   
               })
               
@@ -240,6 +232,9 @@ class PairwiseComparison extends React.Component {
               
             } else {
               this.setState({loading: true}, () => {
+                this.pushBackChoice(this.state.selected);
+                this.pushBackPolicyShown(this.policy_ids);
+                this.props.writeStatetoLS();
                 // this get request needs to pass data to the endpoint
                 const prevChoices = JSON.stringify({
                   policiesShown: this.policiesShown,
@@ -255,11 +250,9 @@ class PairwiseComparison extends React.Component {
                     
                   })
                 .then((response) => {
-                  console.log(response);
                   this.updatePolicyIDs(response.data.policy_ids);
                   this.incrementStep();
-                  console.log("selected", this.state.selected);
-                  this.pushBackChoice(this.state.selected);
+                  // this.pushBackChoice(this.state.selected);
                   this.props.writeStatetoLS();
                   
                   this.setState({loading: false});

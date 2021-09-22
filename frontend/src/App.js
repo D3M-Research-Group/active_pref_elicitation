@@ -14,7 +14,6 @@ import './Card.scss';
 
 
 
-// const SERVER_URL = "http://localhost:3004";
 const SERVER_URL = "http://localhost:8000";
 
 class App extends React.Component {
@@ -46,6 +45,12 @@ class App extends React.Component {
       // toggle which loading message we show. this is used for when we are submitting final responses
       wrapup: false,
 
+      // Initially we randomly assign to one of two streams
+      // 0: adaptive, 1: fixed
+      // Then, once we've gotten our policy of interest, we switch to "evaluation"
+      // this info needs to be passed along when we make requests to get next query
+      algorithmStage: Math.floor(Math.random()*2) === 0 ? "adaptive" : "fixed",
+
       policy_ids: [],
       policyData: [],
       policyDataSet: '',
@@ -65,7 +70,7 @@ class App extends React.Component {
         healthcare_role: ''
       }
     }
-    this.maxSteps = 2;
+    this.maxSteps = 5;
     this.uuid = uuidv4();
 
 
@@ -80,6 +85,7 @@ class App extends React.Component {
     this.toggleWrapUp = this.toggleWrapUp.bind(this);
     this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
     this.pushBackChoices = this.pushBackChoices.bind(this);
+    this.pushBackPolicyShown = this.pushBackPolicyShown.bind(this);
     this.postFinalData = this.postFinalData.bind(this);
     this.writeStatetoLS = this.writeStatetoLS.bind(this);
     this.readStatefromLS = this.readStatefromLS.bind(this);
@@ -127,14 +133,15 @@ class App extends React.Component {
   
 
   updatePolicyIDs(ids){
-    // take the current policy_ids and push that back to policiesShown
-    if(this.state.policy_ids.length > 0){
-      this.state.policiesShown.push(this.state.policy_ids);
-    }
+
     
     this.setState({
       policy_ids : ids
     })
+  }
+
+  pushBackPolicyShown(policy_id){
+    this.state.policiesShown.push(this.state.policy_ids);
   }
 
   pushBackChoices(selected){
@@ -247,21 +254,29 @@ class App extends React.Component {
         this.mturk = true;
       }
 
-      // for now we will get the first set of policies on mount
+      // TO-DO: pass which stream a user is in
       const prevChoices = JSON.stringify({
         policiesShown: [],
         userChoices : []
       })
-      const response = await axios({
-        method: "POST",
-        url: `${SERVER_URL}/next_query/`,
-        data: prevChoices
+      const response = await axios.post(`${SERVER_URL}/next_query/`, prevChoices,{
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
+      // const response = await axios({
+      //   method: "POST",
+      //   url: `${SERVER_URL}/next_query/`,
+      //   data: prevChoices,
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      // })
       
 
       this.updatePolicyIDs(response.data.policy_ids);
       console.log(response);
-      console.log(this.state.policy_ids);
+      console.log("policy ids shown after async request", this.state.policiesShown);
 
       // const csvData = await csv(policy_data_path)
       // const cleanedData = await getPolicyData(csvData);
@@ -322,6 +337,7 @@ class App extends React.Component {
               toggleWrapUp={this.toggleWrapUp}
               toggleEndPage={this.toggleEndPage}
               updatePolicyIDs={this.updatePolicyIDs}
+              pushBackPolicyShown={this.pushBackPolicyShown}
               postFinalData={this.postFinalData}
               writeStatetoLS={this.writeStatetoLS}
               removeStateFromLS={this.removeStateFromLS}
