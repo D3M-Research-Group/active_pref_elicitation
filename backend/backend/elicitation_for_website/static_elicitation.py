@@ -6,10 +6,10 @@ from scipy.special import comb
 import itertools
 
 from .gurobi_functions import create_mip_model, optimize, M, TIME_LIM
-from .preference_classes import Query
-from .utils import U0_polyhedron
+from .preference_classes import Query, Item
+from .utils import U0_polyhedron, get_u0
 
-class StaticOptimalMIPFailed(Exception):
+class StaticMIPFailed(Exception):
     pass
 
 class FeasibilitySubproblemFailed(Exception):
@@ -85,42 +85,86 @@ def new_random_queries(items, num_new_queries, old_queries):
 
     return new_queries
 
-def static_mip_optimal(items, K, eps, valid_responses,
-                       time_lim=TIME_LIM,
-                       cut_1=True,
-                       cut_2=True,
-                       start_queries=None,
-                       fixed_queries=None,
-                       start_rec=None,
-                       response_subset=None,
-                       verbose=False):
-    '''
+def static_mip_optimal(
+    items,
+    K,
+    valid_responses,
+    time_lim=TIME_LIM,
+    cut_1=True,
+    cut_2=True,
+    start_queries=None,
+    fixed_queries=None,
+    fixed_responses=None,
+    start_rec=None,
+    subproblem_list=None,
+    displayinterval=None,
+    gamma_inconsistencies=0.0,
+    problem_type="maximin",
+    raise_gurobi_time_limit=True,
+    log_problem_size=False,
+    logger=None,
+    u0_type="positive_normed",
+    artificial_bounds=False,
+):
+    """
     finds the robust-optimal query set, given a set of items.
 
     input:
     - items : a list of Item objects
     - K : the number of queries to be selected
     - start_queries : list of K queries to use as a warm start. do not need to be sorted.
-    - fixed_queries : list of queries to FIX. length of this list must be <K. these are fixed as the FIRST queries (order is arbitrary anyhow)
+    - fixed_queries : list of queries to FIX. length of this list must be <=K. these are fixed as the FIRST queries (order is arbitrary anyhow)
+    - fixed_responses : list of responses for FIX, for the first n <= K queries. (alternative to using arg response_subset)
     - cut_1 : (bool) use cut restricting values of p and q (p < q)
     - cut_2 : (bool) use cut restricting order of queries (lexicographical order of (p,q) pairs)
     - valid_responses : list of ints, either [1, -1, 0] (indifference) or [1, -1] (no indifference)
     - response_subset : subset of scenarios S, where S[i] is a list of ints {-1, 0, 1}, of len K
-    - eps : epsilon for the decision boundary. if eps = 0, then indifferent responses are unnecessary.
-    - logfile: if specified, write a logfile at this path
+    - logfile: if specified, write a gurobi logfile at this path
+    - gamma_inconsistencies: (float). assumed upper bound of agent inconsistencies. increasing gamma increases the
+        size of the uncertainty set
+    - problem_type : (str). either 'maximin' or 'mmr'. if maximin, solve the maximin robust recommendation
+        problem. if mmr, solve the minimax regret problem.
 
     output:
     - query_list : a list of Query objects
     - start_rec : dict where keys are response scenarios, values are indices of recommended item
-    '''
+    """
 
-    assert sorted(valid_responses) == [-1, 0, 1] or sorted(valid_responses) == [-1, 1]
+    if fixed_queries is None:
+        fixed_queries = []
+
+
+    for query in fixed_queries:
+       it_a = query.item_A
+       it_b = query.item_B
+       res = query.response
+       if it_a.id > it_b.id:
+           if res == 1:
+              temp = it_a
+              query.item_A = it_b
+              query.item_B = temp
+              query.response = -1
+           elif res == -1:
+               temp = it_a
+               query.item_A = it_b
+               query.item_B = temp
+               query.response = 1
+           else:
+               temp = it_a
+               query.item_A = it_b
+               query.item_B = temp
+
+
+    assert problem_type in ["maximin", "mmr"]
+
+    # indifference responses not supported
+    assert set(valid_responses) == {-1, 0, 1}
 
     # number of features for each item
     num_features = len(items[0].features)
 
-    # generate B and b, such that U^0 = {u | B * u >= b}
-    B_mat, b_vec = U0_polyhedron(num_features)
+    # polyhedral definition for U^0, B_mat and b_vec
+    B_mat, b_vec = get_u0(u0_type, num_features)
 
     # number of items
     num_items = len(items)
@@ -131,102 +175,205 @@ def static_mip_optimal(items, K, eps, valid_responses,
     m_const = len(b_vec)
     assert B_mat.shape == (m_const, num_features)
 
+    # get the logfile from the logger, if there is one
+    if logger is not None:
+        log_file = logger.handlers[0].baseFilename
+    else:
+        log_file = None
+
     # define the mip model
-    m = create_mip_model(time_lim=time_lim,
-                         verbose=verbose)
+    m = create_mip_model(
+        time_lim=time_lim,
+    )
 
     # the objective
-    eta = m.addVar(vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='eta')
-    m.setObjective(eta, sense=GRB.MAXIMIZE)
+    tau = m.addVar(vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="tau")
 
-    # the possible responses to each query
-    if eps == 0.0 and set(valid_responses) == set([-1, 1, 0]):
-        raise Exception("with eps = 0, 0 is not a valid response")
+    if problem_type == "maximin":
+        m.setObjective(tau, sense=GRB.MAXIMIZE)
+        if artificial_bounds:
+            # artificial objective bound
+            obj_bound = 1000
+            m.addConstr(tau <= obj_bound, name="artificial_obj_bound")
+    if problem_type == "mmr":
+        m.setObjective(tau, sense=GRB.MINIMIZE)
+        # artificial objective bound
+        obj_bound = -1000
+        m.addConstr(tau >= obj_bound, name="artificial_obj_bound")
 
     # all possible agent response scenarios
-
-    if response_subset is None:
-        r_list = list(itertools.product(valid_responses, repeat=K))
+    if subproblem_list is None:
+        # each subproblem is a single response scenario
+        scenario_list = list(itertools.product(valid_responses, repeat=K))
         num_scenarios = int(np.power(len(valid_responses), K))
-        assert num_scenarios == len(r_list)
+        assert num_scenarios == len(scenario_list)
     else:
-        # validate response subset. assert that every response in the subset is a valid response
-        assert set([ri for r in response_subset for ri in r]).difference(set(valid_responses)) == set([])
-        # convert the response scenarios to tuples
-        r_list = [tuple(r) for r in response_subset]
-        num_scenarios = len(r_list)
+        # each subproblem should be a single response scenario
+        # assert that every response in the subset is a valid response
+        for r in subproblem_list:
+            assert set(r).difference(set(valid_responses)) == set([])
+        scenario_list = subproblem_list
 
-    # define integer variables
-    p_vars, q_vars, w_vars, y_vars = add_integer_variables(m, num_items, K, r_list,
-                                                           start_queries=start_queries,
-                                                           cut_1=cut_1,
-                                                           cut_2=cut_2,
-                                                           fixed_queries=fixed_queries,
-                                                           start_rec=start_rec)
+    if fixed_responses is not None:
+        # assert subproblem_list is None
+        # f = len(fixed_responses)
+        # t = tuple(fixed_responses)
+        # assert f <= K
+        # r_list = list(r for r in itertools.product(valid_responses, repeat=K) if r[:f] == t)
+        raise NotImplemented("not implemented")
+
+    # define integer variables - this is the same for both MMR and maximin problem types
+    p_vars, q_vars, w_vars = add_integer_variables(
+        m,
+        num_items,
+        K,
+        start_queries=start_queries,
+        cut_1=cut_1,
+        cut_2=cut_2,
+        fixed_queries=fixed_queries,
+    )
 
     # now add continuous variables for each response scenario
-    for i_r, r in enumerate(r_list):
-        alpha_vars, beta_vars, lam_vars, gam_vars = add_r_constraints(m,
-                                                                      eta,
-                                                                      p_vars,
-                                                                      q_vars,
-                                                                      y_vars,
-                                                                      K,
-                                                                      r,
-                                                                      i_r,
-                                                                      m_const,
-                                                                      items,
-                                                                      num_items,
-                                                                      num_features,
-                                                                      B_mat,
-                                                                      b_vec,
-                                                                      eps)
+    if problem_type == "maximin":
+        y_vars = {}
+        alpha_vars = {}
+        beta_vars = {}
+        v_bar_vars = {}
+        w_bar_vars = {}
+        for i, r in enumerate(scenario_list):
+            (
+                alpha_vars[r],
+                beta_vars[r],
+                v_bar_vars[r],
+                w_bar_vars[r],
+            ) = add_r_constraints(
+                m,
+                tau,
+                p_vars,
+                q_vars,
+                K,
+                r,
+                i,
+                m_const,
+                items,
+                num_items,
+                num_features,
+                B_mat,
+                b_vec,
+                y_vars=y_vars,
+                problem_type=problem_type,
+                fixed_queries=fixed_queries,
+                gamma_inconsistencies=gamma_inconsistencies,
+            )
+
+    if problem_type == "mmr":
+        # store y_vars for each scenario
+        y_vars = {}
+        alpha_vars = {}
+        beta_vars = {}
+        v_bar_vars = {}
+        w_bar_vars = {}
+        for i, r in enumerate(scenario_list):
+            for item in items:
+                (
+                    alpha_vars[r, item.id],
+                    beta_vars[r, item.id],
+                    v_bar_vars[r, item.id],
+                    w_bar_vars[r, item.id],
+                ) = add_r_constraints(
+                    m,
+                    tau,
+                    p_vars,
+                    q_vars,
+                    K,
+                    r,
+                    i,
+                    m_const,
+                    items,
+                    num_items,
+                    num_features,
+                    B_mat,
+                    b_vec,
+                    y_vars=y_vars,
+                    problem_type=problem_type,
+                    mmr_item=item,
+                    fixed_queries=fixed_queries,
+                    gamma_inconsistencies=gamma_inconsistencies,
+                )
 
     m.update()
+    # m.write("static_elicitation_single_agent.lp")
 
-    # uncomment if m.status == GRB.INF_OR_UNBD, to determine whether the model is infeasible or unbounded
-    m.params.DualReductions = 0
+    if log_problem_size and logger is not None:
+        logger.info(f"total variables: {m.numvars}")
+        logger.info(f"total constraints: {m.numconstrs}")
 
+    # m.params.DualReductions = 0
+    # try: #TODO: undo
     optimize(m, raise_warnings=False)
+
+    # except GurobiTimeLimit:
+    #     if raise_gurobi_time_limit:
+    #         raise GurobiTimeLimit
+
+
+    # for i in m.getVars():
+    #     print(i,i.x)
 
     if m.status == GRB.TIME_LIMIT:
         time_limit_reached = True
     else:
         time_limit_reached = False
 
-    # get the indices of the optimal queries
-    p_inds = [-1 for _ in range(K)]
-    q_inds = [-1 for _ in range(K)]
-    for k in range(K):
-        try:
+    if artificial_bounds and logger is not None:
+        if abs(tau.x - obj_bound) <= 1e-3:
+            logger.info(f"problem is likely unbounded: tau = obj_bound = {obj_bound}")
+    try:
+        # get the indices of the optimal queries
+        p_inds = [-1 for _ in range(K)]
+        q_inds = [-1 for _ in range(K)]
+
+        # m.computeIIS()
+        # m.write("model.ilp")
+
+        for k in range(K):
             p_list = [np.round(p_vars[i, k].x) for i in range(num_items)]
             p_inds[k] = int(np.argwhere(p_list))
+            # print(p_list[k])
             q_list = [np.round(q_vars[i, k].x) for i in range(num_items)]
             q_inds[k] = int(np.argwhere(q_list))
-        except:
-            raise Exception("static_mip_optimal decision variables are not available. time limit probably needs to be increased")
+            # print(q_list[k])
+        # print(p_list)
+        # print(q_list)
+    except:
+        # if failed for some reason...
 
-        # make sure queries don't ask about the same items
-        if p_inds[k] == q_inds[k]:
-            raise Exception("query number {} has the same item A and item B (item {})".format(k, q_inds[k]))
+        # lp_file = generate_filepath(os.getenv("HOME"), "static_milp_problem", "lp")
+        # m.write(lp_file)
+        # if logger is not None:
+        #     logger.info(
+        #         f"static MIP failed, model status = {m.status}, writing LP file to {lp_file}"
+        #     )
+        raise StaticMIPFailed
 
     # get indices of recommended items
     rec_inds = {}
-    for i_r, r in enumerate(r_list):
-        y_list = [np.round(y_vars[i_r][i].x) for i in range(num_items)]
-        rec_inds[r] = int(np.argwhere(y_list))
+    # for i_r, r in enumerate(r_list):
+    #     y_list = [np.round(y_vars[i_r][i].x) for i in range(num_items)]
+    #     rec_inds[r] = int(np.argwhere(y_list))
 
-    return [Query(items[p_inds[k]], items[q_inds[k]]) for k in range(K)], m.objVal, time_limit_reached, rec_inds
+    return (
+        [Query(items[p_inds[k]], items[q_inds[k]]) for k in range(K)],
+        m.objVal,
+        time_limit_reached,
+        rec_inds,
+    )
 
 
-def add_integer_variables(model, num_items, K, r_list,
-                          start_queries=None,
-                          cut_1=True,
-                          cut_2=True,
-                          use_sos=True,
-                          fixed_queries=None,
-                          start_rec=None):
-    '''
+def add_integer_variables(
+    model, num_items, K, start_queries=None, cut_1=True, cut_2=True, fixed_queries=[],
+):
+    """
     :param model:
     :param num_items:
     :param K:
@@ -234,56 +381,66 @@ def add_integer_variables(model, num_items, K, r_list,
     :param start_queries: list of K queries to use as a warm start. do not need to be sorted.
     :param cut_1:
     :param cut_2:
-    :param use_sos:
-    :param fixed_queries : list of queries to FIX. length of this list must be <K. these are fixed as the FIRST queries (order is arbitrary anyhow)
+    :param fixed_queries : list of queries to FIX. length of this list must be <=K. these are fixed as the FIRST queries (order is arbitrary anyhow)
     :param start_rec: a dict with keys corresponding to response scenarios, and values corresponding to the
             index of recommended item : { r : ind, r : ind , ...}, to be used for warm starts. the response scenarios
             here correspond to the start_queries -- i.e., if start_rec is used, then start_queries *must*
             be used as well
-    '''
-    # p and 1 vars : to select the k^th comparison
+    """
+    # p and q vars : to select the k^th comparison
     # z^k = \sum_i (p^k_i - q^k_i) x^i
     # p_vars[i,k] = p^k_i
     # q_vars[i,k] = q^k_i
-    p_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name='p')
-    q_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name='q')
+    # get the indices of non-fixed variables
 
-    # auxiliary variable
-    new_start_rec = None
+    p_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="p")
+    q_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="q")
+
+    # # auxiliary variable
+    # new_start_rec = None
 
     model.update()
-    for _, var in p_vars.iteritems():
+    for _, var in p_vars.items():
         var.BranchPriority = 1
 
-    for _, var in q_vars.iteritems():
+    for _, var in q_vars.items():
         var.BranchPriority = 2
 
     # exactly one item can be selected in p^k and q^k
 
     # fix queries if fixed_queries is specified
-    if fixed_queries is not None:
-        if len(fixed_queries) >= K:
-            raise Exception("number of fixed queries must be < K")
+    if len(fixed_queries) > 0:
+        if len(fixed_queries) > K:
+            raise Exception("number of fixed queries must be <= K")
 
         if cut_2:
             raise Exception("cut_2 must be off in order to use fixed queries")
 
         # item_A.id is the index of p, and item_B.id is the index of q
+        # print("fixed, query",fixed_queries)
         for i_q, q in enumerate(fixed_queries):
+            # print("i_q,q",i_q,q)
             model.addConstr(p_vars[q.item_A.id, i_q] == 1)
             model.addConstr(q_vars[q.item_B.id, i_q] == 1)
 
             # make sure this query isn't repeated later. ("cut off" this query, making it infeasible)
             for i_q_free in range(len(fixed_queries), K):
-                model.addConstr(p_vars[q.item_A.id, i_q_free] + q_vars[q.item_B.id, i_q_free] <= 1)
+                model.addConstr(
+                    p_vars[q.item_A.id, i_q_free] + q_vars[q.item_B.id, i_q_free] <= 1
+                )
 
     for k in range(K):
-        if use_sos:
-            model.addSOS(GRB.SOS_TYPE1, [p_vars[i, k] for i in range(num_items)])
-            model.addSOS(GRB.SOS_TYPE1, [q_vars[i, k] for i in range(num_items)])
+        model.addSOS(GRB.SOS_TYPE1, [p_vars[i, k] for i in range(num_items)])
+        model.addSOS(GRB.SOS_TYPE1, [q_vars[i, k] for i in range(num_items)])
 
-        model.addConstr(quicksum(p_vars[i, k] for i in range(num_items)) == 1, name=('p_constr_k%d' % k))
-        model.addConstr(quicksum(q_vars[i, k] for i in range(num_items)) == 1, name=('q_constr_k%d' % k))
+        model.addConstr(
+            quicksum(p_vars[i, k] for i in range(num_items)) == 1,
+            name=("p_constr_k%d" % k),
+        )
+        model.addConstr(
+            quicksum(q_vars[i, k] for i in range(num_items)) == 1,
+            name=("q_constr_k%d" % k),
+        )
 
     # add warm start queries if they're provided
     if start_queries is not None:
@@ -291,7 +448,10 @@ def add_integer_variables(model, num_items, K, r_list,
             raise Exception("must provide exactly K start queries")
 
         # build (p,q) list, and sort s.t. p<q for each
-        pq_list = [(min([q.item_A.id, q.item_B.id]), max([q.item_A.id, q.item_B.id])) for q in start_queries]
+        pq_list = [
+            (min([q.item_A.id, q.item_B.id]), max([q.item_A.id, q.item_B.id]))
+            for q in start_queries
+        ]
 
         # order the queries (w is an auxiliary base-10 number indicating the order of queries)
         w_list = [(num_items + 1) * a + b for a, b in pq_list]
@@ -300,12 +460,12 @@ def add_integer_variables(model, num_items, K, r_list,
         k_order = list(reversed(np.array(w_list).argsort()))
         pq_list_sorted = [pq_list[i] for i in k_order]
 
-        # if the start responses were added, re-order the keys (we assume they correspond to the new comparison
-        if start_rec is not None:
-            new_start_rec = {}
-            for key, val in start_rec.iteritems():
-                new_key = tuple([key[i] for i in k_order])
-                new_start_rec[new_key] = val
+        # # if the start responses were added, re-order the keys (we assume they correspond to the new comparison
+        # if start_rec is not None:
+        #     new_start_rec = {}
+        #     for key, val in start_rec.items():
+        #         new_key = tuple([key[i] for i in k_order])
+        #         new_start_rec[new_key] = val
 
         for k in range(K):
             for i in range(num_items):
@@ -325,156 +485,387 @@ def add_integer_variables(model, num_items, K, r_list,
         # cut 1: redundant comparison sequences
         for k in range(K):
             for i in range(num_items):
-                model.addConstr(1 - q_vars[i, k] >= quicksum([p_vars[j, k] for j in range(num_items) if j <= i]),
-                                name=('q_cut_k%d_i%d' % (k, i)))
+                model.addConstr(
+                    1 - q_vars[i, k]
+                    >= quicksum([p_vars[j, k] for j in range(num_items) if j >= i]),
+                    name=("q_cut_k%d_i%d" % (k, i)),
+                )
+
+    # w vars : w^k represents k^th comparison
+    # note: these are "y" in the paper
+    # w^k = p^k + q^k
+    # w_vars = model.addVars(num_items, K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='w')
+    w_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="w")
+    for i in range(num_items):
+        for k in range(K):
+            model.addConstr(
+                w_vars[i, k] == p_vars[i, k] + q_vars[i, k],
+                name=("w_constr_i%d_k%d" % (i, k)),
+            )
+            # add warm start values for w, if provided
+            if start_queries is not None:
+                w_vars[i, k].start = p_vars[i, k].start + q_vars[i, k].start
 
     if cut_2:
-        # w vars : w^k represents k^th comparison
-        # w^k = p^k + q^k
-        w_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name='w')
-        for i in range(num_items):
-            for k in range(K):
-                model.addConstr(w_vars[i, k] == p_vars[i, k] + q_vars[i, k], name=('w_constr_i%d_k%d' % (i, k)))
-                # add warm start values for w, if provided
-                if start_queries is not None:
-                    w_vars[i, k].start = p_vars[i, k].start + q_vars[i, k].start
 
-        # v^{kk'}_i = 1 iff w^k_i != w^k'_i
         # only need to define these for k<k'
-        v_vars = {}
-        for k in range(K - 1):
-            for k_prime in range(k + 1, K):
-                v_vars[k, k_prime] = model.addVars(num_items, vtype=GRB.BINARY, name=('v_k%d,kp%d' % (k, k_prime)))
-                for i in range(num_items):
-                    # constraints to define v_vars
-                    model.addConstr(v_vars[k, k_prime][i] <= w_vars[i, k] + w_vars[i, k_prime],
-                                    name=('v_constrA_k%d_kp%d_i%d' % (k, k_prime, i)))
-                    model.addConstr(v_vars[k, k_prime][i] <= 2 - w_vars[i, k] - w_vars[i, k_prime],
-                                    name=('v_constrB_k%d_kp%d_i%d' % (k, k_prime, i)))
-                    model.addConstr(v_vars[k, k_prime][i] >= w_vars[i, k] - w_vars[i, k_prime],
-                                    name=('v_constrC_k%d_kp%d_i%d' % (k, k_prime, i)))
-                    model.addConstr(v_vars[k, k_prime][i] >= - w_vars[i, k] + w_vars[i, k_prime],
-                                    name=('v_constrD_k%d_kp%d_i%d' % (k, k_prime, i)))
+        z_vars = {}
+        for k_prime in range(K):
+            for k in range(K):
+                if k < k_prime:
+                    z_vars[k, k_prime] = model.addVars(
+                        num_items, vtype=GRB.BINARY, name=("z_k%d_kp%d" % (k, k_prime))
+                    )
+                    for i in range(num_items):
+                        # constraints to define v_vars
+                        model.addConstr(
+                            z_vars[k, k_prime][i] <= w_vars[i, k] + w_vars[i, k_prime],
+                            name=("z_constrA_k%d_kp%d_i%d" % (k, k_prime, i)),
+                        )
+                        model.addConstr(
+                            z_vars[k, k_prime][i]
+                            <= 2 - w_vars[i, k] - w_vars[i, k_prime],
+                            name=("z_constrB_k%d_kp%d_i%d" % (k, k_prime, i)),
+                        )
+                        model.addConstr(
+                            z_vars[k, k_prime][i] >= w_vars[i, k] - w_vars[i, k_prime],
+                            name=("z_constrC_k%d_kp%d_i%d" % (k, k_prime, i)),
+                        )
+                        model.addConstr(
+                            z_vars[k, k_prime][i] >= -w_vars[i, k] + w_vars[i, k_prime],
+                            name=("z_constrD_k%d_kp%d_i%d" % (k, k_prime, i)),
+                        )
 
-                    # cut 2: now enforce lex. ordering of w vectors
-                    model.addConstr(w_vars[i, k_prime] >= w_vars[i, k] - quicksum(
-                        v_vars[k, k_prime][j] for j in range(num_items) if j < i),
-                                    name=('lex_cut_k%d_kp%d_i%d' % (k, k_prime, i)))
+                        # cut 2: now enforce lex. ordering of w vectors
+                        model.addConstr(
+                            w_vars[i, k_prime]
+                            >= w_vars[i, k]
+                            - quicksum(
+                                z_vars[k, k_prime][i_prime]
+                                for i_prime in range(num_items)
+                                if i_prime < i
+                            ),
+                            name=("lex_cut_k%d_kp%d_i%d" % (k, k_prime, i)),
+                        )
 
-        # finally, ban identical queries (using the v_vars..
-        for k in range(K - 1):
-            model.addConstr(quicksum(v_vars[k, k + 1]) >= 1)
+                    # finally, ban identical queries (using the z_vars..)
+                    model.addConstr(quicksum(z_vars[k, k_prime]) >= 1)
 
-    else:
-        w_vars = []
+    # else:
+    #     w_vars = []
+    #
+    # # loop over all response scenarios...
+    # y_vars_list = []
+    # for i_r, r in enumerate(r_list):
+    #     # Note: all variables defined here are only for the current response scenario r
+    #
+    #     # y vars : to select x^r, the recommended item in scenario r
+    #     y_vars = model.addVars(num_items, vtype=GRB.BINARY, name="y_r" + str(i_r))
+    #
+    #     if new_start_rec is None:
+    #         new_start_rec = start_rec
+    #
+    #     # if start y_vars are provided
+    #     if start_rec is not None:
+    #         for i_n in range(num_items):
+    #             y_vars[i_n].start = 0
+    #         model.update()
+    #         y_vars[new_start_rec[r]].start = 1
+    #         model.update()
+    #
+    #     y_vars_list.append(y_vars)
+    #     # exactly one item must be selected
+    #     if use_sos:
+    #         model.addSOS(GRB.SOS_TYPE1, [y_vars[i] for i in range(num_items)])
+    #
+    #     model.addConstr(quicksum(y_vars[i] for i in range(num_items)) == 1, name=('y_constr_r%d' % i_r))
 
-    # loop over all response scenarios...
-    y_vars_list = []
-    for i_r, r in enumerate(r_list):
-        # Note: all variables defined here are only for the current response scenario r
-
-        # y vars : to select x^r, the recommended item in scenario r
-        y_vars = model.addVars(num_items, vtype=GRB.BINARY, name="y_r" + str(i_r))
-
-        if new_start_rec is None:
-            new_start_rec = start_rec
-
-        # if start y_vars are provided
-        if start_rec is not None:
-            for i_n in range(num_items):
-                y_vars[i_n].start = 0
-            model.update()
-            y_vars[new_start_rec[r]].start = 1
-            model.update()
-
-        y_vars_list.append(y_vars)
-        # exactly one item must be selected
-        if use_sos:
-            model.addSOS(GRB.SOS_TYPE1, [y_vars[i] for i in range(num_items)])
-
-        model.addConstr(quicksum(y_vars[i] for i in range(num_items)) == 1, name=('y_constr_r%d' % i_r))
-
-    return p_vars, q_vars, w_vars, y_vars_list
+    return p_vars, q_vars, w_vars
 
 
-def add_r_constraints(m,
-                      eta,
-                      p_vars,
-                      q_vars,
-                      y_vars,
-                      K,
-                      r,
-                      i_r,
-                      m_const,
-                      items,
-                      num_items,
-                      num_features,
-                      B_mat,
-                      b_vec,
-                      eps):
-    '''
+def add_r_constraints(
+    m,
+    tau,
+    p_vars,
+    q_vars,
+    K,
+    response_scenario,
+    i_r,
+    m_const,
+    items,
+    num_items,
+    num_features,
+    B_mat,
+    b_vec,
+    y_vars,
+    problem_type="maximin",
+    mmr_item=None,
+    fixed_queries=[],
+    gamma_inconsistencies=0.0,
+):
+    """
     add constraints for a single response scenario
 
     input vars:
     - m : gurobi model
-    - eta : gurobi variable eta from the model
+    - tau : gurobi variable tau from the model
     - r : response scenario (K-length vector)
-    - i_r : index of r
+    - i_r : index of r (only used for printing and naming variables / constraints)
+    - problem_type : (str). either 'maximin' or 'mmr'. if maximin, add constraints for the maximin robust recommendation
+        problem. if mmr, add constraints for the minimax regret problem.
+    - mmr_item: if problem_type is mmr, then create constraints where x' on the RHS of the equality constraint is mmr_item
+    - y_vars: (dict) keys are response scenarios, values are arrays of binary y-variables. if y_vars[r] is not defined,
+        add this to the dict
+    """
 
-    '''
+    assert problem_type in ["mmr", "maximin"]
 
-    # define alpha vars (dual variables of the epigraph constraints)
-    alpha_vars = m.addVars(K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="alpha_r" + str(i_r))
+    for ri in response_scenario:
+        assert ri in [-1, 0,1]
 
-    # bound alpha according to r:
-    for k in range(K):
-        if (r[k] != 0):
-            m.addConstr(r[k] * alpha_vars[k] >= 0, name=('alpha_constr_r%d_k%d' % (i_r, k)))
+    if problem_type == "mmr":
+        assert isinstance(mmr_item, Item)
 
-    # define beta vars (more dual variables)
-    beta_vars = m.addVars(m_const, vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="beta_r" + str(i_r))
+    if problem_type == "mmr":
+        id_str = f"r{i_r}_i{mmr_item.id}"
+    if problem_type == "maximin":
+        id_str = f"r{i_r}"
 
-    # define lambda and gamma vars (dual variables of the epigraph constraints, for linearization)
-    gam_vars = m.addVars(num_items, K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY,
-                         name="gamma_r" + str(i_r))
-    lam_vars = m.addVars(num_items, K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY,
-                         name="lambda_r" + str(i_r))
+    if y_vars.get(response_scenario) is None:
+        # y vars : to select x^r, the recommended item in scenario r
+        y_vars[response_scenario] = m.addVars(
+            num_items, vtype=GRB.BINARY, name=(f"y_{id_str}")
+        )
 
-    # constraints defining gamma and lambda
-    for k in range(K):
+        m.addSOS(
+            GRB.SOS_TYPE1, [y_vars[response_scenario][i] for i in range(num_items)]
+        )
 
-        for i in range(num_items):
-            m.addConstr(gam_vars[i, k] <= M * p_vars[i, k], name=('gam_constrA_r%d_k%d_i%d' % (i_r, k, i)))
-            m.addConstr(gam_vars[i, k] >= - M * p_vars[i, k], name=('gam_constrB_r%d_k%d_i%d' % (i_r, k, i)))
-            m.addConstr(gam_vars[i, k] <= alpha_vars[k] + M * (1 - p_vars[i, k]),
-                        name=('gam_constrC_r%d_k%d_i%d' % (i_r, k, i)))
-            m.addConstr(gam_vars[i, k] >= alpha_vars[k] - M * (1 - p_vars[i, k]),
-                        name=('gam_constD_r%d_k%d_i%d' % (i_r, k, i)))
+        m.addConstr(
+            quicksum(y_vars[response_scenario][i] for i in range(num_items)) == 1,
+            name=f"y_constr_{id_str}",
+        )
 
-            m.addConstr(lam_vars[i, k] <= M * q_vars[i, k], name=('lam_constrA_r%d_k%d_i%d' % (i_r, k, i)))
-            m.addConstr(lam_vars[i, k] >= - M * q_vars[i, k], name=('lam_constrB_r%d_k%d_i%d' % (i_r, k, i)))
-            m.addConstr(lam_vars[i, k] <= alpha_vars[k] + M * (1 - q_vars[i, k]),
-                        name=('lam_constrC_r%d_k%d_i%d' % (i_r, k, i)))
-            m.addConstr(lam_vars[i, k] >= alpha_vars[k] - M * (1 - q_vars[i, k]),
-                        name=('lam_constrD_r%d_k%d_i%d' % (i_r, k, i)))
-
-    # the big constraint ...
-    for f in range(num_features):
-        lhs_1 = quicksum(
-            quicksum((gam_vars[i, k] - lam_vars[i, k]) * items[i].features[f] for i in range(num_items)) for k in
-            range(K))
-        lhs_2 = quicksum(B_mat[j, f] * beta_vars[j] for j in range(m_const))
-        m.addConstr(lhs_1 + lhs_2 == quicksum(y_vars[i_r][i] * items[i].features[f] for i in range(num_items)),
-                    name=('big_r%d_i%d' % (i_r, f)))
-
-    # bound eta
-    if eps == 0.0:
-        m.addConstr(eta <= quicksum(b_vec[j] * beta_vars[j] for j in range(m_const)), name=('eta_r%d' % i_r))
+    if gamma_inconsistencies > 0:
+        # dual variable for inconsistencies constraint
+        if problem_type == "maximin":
+            mu_var = m.addVar(
+                vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=0.0, name=f"mu_{id_str}"
+            )
+        if problem_type == "mmr":
+            mu_var = m.addVar(
+                vtype=GRB.CONTINUOUS, lb=0.0, ub=GRB.INFINITY, name=f"mu_{id_str}"
+            )
     else:
-        m.addConstr(eta <= eps * quicksum(r[k] * alpha_vars[k] for k in range(K)) + quicksum(
-            b_vec[j] * beta_vars[j] for j in range(m_const)), name=('eta_r%d' % i_r))
+        mu_var = 0
 
-    return alpha_vars, beta_vars, lam_vars, gam_vars
+    # the dual variables have a different sign for mmr and maximin
+    if problem_type == "maximin":
+        dual_lb = 0.0
+        dual_ub = GRB.INFINITY
+    if problem_type == "mmr":
+        dual_lb = -GRB.INFINITY
+        dual_ub = 0.0
+
+    beta_vars = m.addVars(
+        m_const, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=f"beta_r_{id_str}"
+    )
+    alpha_vars = m.addVars(
+        K, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=f"alpha_{id_str}"
+    )
+
+    # only define these variables for queries which are not fixed
+    # define v_bar, w_bar vars (dual variables of the epigraph constraints, for linearization)
+    # get the indices of non-fixed variables
+    K_free = [k for k in range(K) if k >= len(fixed_queries)]
+    K_fixed = [k for k in range(K) if k < len(fixed_queries)]
+
+    v_bar_vars = m.addVars(
+        num_items,
+        K_free,
+        vtype=GRB.CONTINUOUS,
+        lb=dual_lb,
+        ub=dual_ub,
+        name=f"gamma_{id_str}",
+    )
+    w_bar_vars = m.addVars(
+        num_items,
+        K_free,
+        vtype=GRB.CONTINUOUS,
+        lb=dual_lb,
+        ub=dual_ub,
+        name=f"lambda_{id_str}",
+    )
+    # print("vbar",v_bar_vars)
+    if gamma_inconsistencies > 0:
+        if problem_type == "maximin":
+            for k in range(K):
+                m.addConstr(
+                    alpha_vars[k] + mu_var <= 0, name=f"alpha_constr_k{k}_{id_str}",
+                )
+        if problem_type == "mmr":
+            for k in range(K):
+                m.addConstr(
+                    alpha_vars[k] + mu_var >= 0, name=f"alpha_constr_k{k}_{id_str}",
+                )
+
+    # constraints defining gamma and lambda - identical for mmr and maximin
+    if problem_type == "maximin":
+        for k in K_free:
+            for i in range(num_items):
+                m.addConstr(
+                    v_bar_vars[i, k] <= M * p_vars[i, k],
+                    name=f"p_constrA_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    v_bar_vars[i, k] <= alpha_vars[k],
+                    name=f"p_constrB_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    v_bar_vars[i, k] >= alpha_vars[k] - M * (1 - p_vars[i, k]),
+                    name=f"p_constrC_k{k}_i{i}_{id_str}",
+                )
+
+                m.addConstr(
+                    w_bar_vars[i, k] <= M * q_vars[i, k],
+                    name=f"q_constrA_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    w_bar_vars[i, k] <= alpha_vars[k],
+                    name=f"q_constrB_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    w_bar_vars[i, k] >= alpha_vars[k] - M * (1 - q_vars[i, k]),
+                    name=f"q_constrC_k{k}_i{i}_{id_str}",
+                )
+    if problem_type == "mmr":
+        for k in K_free:
+            for i in range(num_items):
+                m.addConstr(
+                    v_bar_vars[i, k] >= -M * p_vars[i, k],
+                    name=f"p_constrA_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    v_bar_vars[i, k] >= alpha_vars[k],
+                    name=f"p_constrB_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    v_bar_vars[i, k] <= alpha_vars[k] + M * (1 - p_vars[i, k]),
+                    name=f"p_constrC_k{k}_i{i}_{id_str}",
+                )
+
+                m.addConstr(
+                    w_bar_vars[i, k] >= -M * q_vars[i, k],
+                    name=f"q_constrA_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    w_bar_vars[i, k] >= alpha_vars[k],
+                    name=f"q_constrB_k{k}_i{i}_{id_str}",
+                )
+                m.addConstr(
+                    w_bar_vars[i, k] <= alpha_vars[k] + M * (1 - q_vars[i, k]),
+                    name=f"q_constrC_k{k}_i{i}_{id_str}",
+                )
+
+    # the big equality constraint
+    for f in range(num_features):
+        lhs_1_fixed = 0
+        if len(fixed_queries) > 0:
+            lhs_1_fixed = quicksum(
+                response_scenario[k]
+                * alpha_vars[k]
+                * (
+                    fixed_queries[i_q].item_A.features[f]
+                    - fixed_queries[i_q].item_B.features[f]
+                )
+                for i_q, k in enumerate(K_fixed)
+            )
+        lhs_1_free = quicksum(
+            items[i].features[f]
+            * quicksum(
+                response_scenario[k] * (v_bar_vars[i, k] - w_bar_vars[i, k])
+                for k in K_free
+            )
+            for i in range(num_items)
+        )
+        lhs_2 = quicksum(B_mat[j, f] * beta_vars[j] for j in range(m_const))
+
+        if problem_type == "maximin":
+            rhs = quicksum(
+                y_vars[response_scenario][i] * items[i].features[f]
+                for i in range(num_items)
+            )
+
+        if problem_type == "mmr":
+            rhs = mmr_item.features[f] - quicksum(
+                y_vars[response_scenario][i] * items[i].features[f]
+                for i in range(num_items)
+            )
+
+        m.addConstr(lhs_1_fixed + lhs_1_free + lhs_2 == rhs, name=f"big_f{f}_{id_str}")
+
+    # bound tau
+    if problem_type == "maximin":
+        m.addConstr(
+            tau
+            <= quicksum(b_vec[j] * beta_vars[j] for j in range(m_const))
+            + gamma_inconsistencies * mu_var,
+            name=f"tau_{id_str}",
+        )
+    if problem_type == "mmr":
+        m.addConstr(
+            tau
+            >= quicksum(b_vec[j] * beta_vars[j] for j in range(m_const))
+            + gamma_inconsistencies * mu_var,
+            name=f"tau_{id_str}",
+        )
+
+    return alpha_vars, beta_vars, v_bar_vars, w_bar_vars
+
+
+# def find_cluster_queries(queries, k):
+#     # queries based on cluster centers of z vectors (assume k clusters)
+#     queries_cluster = []
+#     # cluster z vectors
+#     Z = [np.array(q.z) for q in queries]
+#     kmeans = sklearn.cluster.KMeans(n_clusters=k, random_state=0).fit(Z)
+#
+#     # find the query with
+#     for center in kmeans.cluster_centers_:
+#         q_ind_min = np.argmin([np.linalg.norm(z_vec - center) for z_vec in Z])
+#         queries_cluster.append(queries[q_ind_min])
+#
+#     return queries_cluster
+#
+#
+# def greedy_CSS_queries(queries, k):
+#     # find k queries that are nearly orthogonal
+#     # algorithm 1 from : Greedy Column Subset Selection: New Bounds and Distributed Algorithms
+#     # goal: select columns of A matrix (each column is one Z vector
+#     Z = [np.array(q.z) for q in queries]
+#
+#     A = np.matrix(Z).T
+#
+#     queries_css = []
+#     for i in range(k):
+#         # find column that maximizes Frobenius norm of Proj(V)*A
+#         norms = np.zeros(len(queries))
+#         for i_q,q in enumerate(queries):
+#             if q not in queries_css:
+#                 q_aug = copy.copy(queries_css)
+#                 q_aug.append(q)
+#                 V = np.matrix([qq.z for qq in q_aug]).T
+#                 norms[i_q] = np.power(np.linalg.norm(np.matmul(proj_mat(V),A)),2)
+#
+#         # set the i^th query as that which maximizes the Frobenius norm ^2
+#         queries_css.append(queries[np.argmax(norms)])
+#
+#     return queries_css
+#
+# def proj_mat(A):
+#     # return the projection operator (onto the columns of A)
+#     # USE THE PSEUDOINVERSE, TO DEAL WITH SINGULAR MATRICES
+#     return np.matmul(np.matmul(A, np.linalg.pinv(np.matmul(A.T,A))),A.T)
 
 
 def solve_warm_start(items, K, eps, valid_responses,
@@ -617,7 +1008,7 @@ def solve_warm_start_decomp_heuristic(items, K, eps, valid_responses,
                                                                                   cut_2=False,
                                                                                   verbose=verbose,
                                                                                   time_lim=time_lim)
-    except StaticOptimalMIPFailed:
+    except StaticMIPFailed:
         raise WarmDecompHeuristicFailed("static MIP failed. time limit probably needs to be increased.")
 
     if time_lim_overall:

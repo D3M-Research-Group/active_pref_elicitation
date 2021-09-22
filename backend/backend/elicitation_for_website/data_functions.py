@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from .preference_classes import Item, Query, User
+from ..preference_classes import Item, Query, User
 
 def get_test_items():
     """
@@ -36,26 +36,26 @@ def get_test_users(items):
 
     a = User('a')
     a.answered_queries = [
-            Query(items[1], items[0], response=1),
+            Query(items[0], items[1], response=1),
         ]
 
     d = User('d')
     d.answered_queries = []
 
-    e = User('e')
-    e.answered_queries = [
-        Query(items[4], items[6], response=1),
-        Query(items[4], items[6], response=-1),
-        Query(items[2], items[4], response=0),
-        Query(items[3], items[1], response=0),
-    ]
+    # e = User('e')
+    # e.answered_queries = [
+    #     Query(items[4], items[6], response=1),
+    #     Query(items[4], items[6], response=-1),
+    #     Query(items[2], items[4], response=0),
+    #     Query(items[1], items[3], response=0),
+    # ]
 
     new_user = User('new_user')
     new_user.u_true = np.random.rand(num_features)
 
     user_dict = {'a': a,
                  'd': d,
-                 'e': e,
+                 # 'e': e,
                  'new_user': new_user,
                  }
 

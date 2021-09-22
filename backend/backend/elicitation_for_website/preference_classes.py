@@ -332,10 +332,12 @@ def u_set_model(answered_queries,
 
     # define the feasible set of utilities
 
-    u_vars = m.addVars(num_features, vtype=GRB.CONTINUOUS, lb=-1.0, ub=1.0)
+    u_vars = m.addVars(num_features, vtype=GRB.CONTINUOUS, lb=0.0, ub=1.0)
+
+    #partworth utilities
+    m.addConstr(quicksum(u_vars) == 1)
 
     K = len(answered_queries)
-
     # if we assume agent inconsistencies
     # TODO: change U0 when in gamma > 0 (needs to be normalized)
     if gamma_inconsistencies > 0:
@@ -345,7 +347,6 @@ def u_set_model(answered_queries,
         xi_vars = np.zeros(K)
 
     for i_q, q in enumerate(answered_queries):
-
         assert q.response in Query.valid_responses
         utility = quicksum([u_vars[i] * q.z[i] for i in range(num_features)])
 

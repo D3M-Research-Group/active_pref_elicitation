@@ -1,7 +1,7 @@
 # demonstrate the behavior of get_next_query()
 
 from ..get_next_query import get_next_query
-from ..data_functions import get_test_items, get_test_users, get_data_items
+from ..data_functions  import get_test_items, get_test_users, get_data_items
 from ..preference_classes import Query
 
 
@@ -19,13 +19,13 @@ def main():
         _ = get_next_query(user, items, verbose=True)
 
     # simulate elicitation
-    # username = 'new_user'
-    # user = user_dict[username]
-    # print('simulating get_next_query for user {}, with no answered queries'.format(username))
-    # for i in range(5):
-    #     a_id, b_id, _, objval = get_next_query(user_dict[username], items, verbose=True)
-    #     user.answer_query(Query(items[a_id], items[b_id]))
-    #     print('query {}: ({}, {}). answer: {}. objval: {}'.format(i, a_id, b_id, user.answered_queries[-1].response, objval))
+    username = 'new_user'
+    user = user_dict[username]
+    print('simulating get_next_query for user {}, with no answered queries'.format(username))
+    for i in range(5):
+        a_id, b_id, _, objval = get_next_query(user_dict[username], items, verbose=True)
+        user.answer_query(Query(items[a_id], items[b_id]))
+        print('query {}: ({}, {}). answer: {}. objval: {}'.format(i, a_id, b_id, user.answered_queries[-1].response, objval))
 
 
     # now simulate with data from the CSV
