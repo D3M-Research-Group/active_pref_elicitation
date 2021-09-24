@@ -22,7 +22,9 @@ class Step extends React.Component{
         this.policyData = this.props.policyData;
         this.policy_ids = this.props.policy_ids;
         this.updatePolicyIDs=this.props.updatePolicyIDs;
+        this.updateStage=this.props.updateStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown;
+        this.pushBackStage=this.props.pushBackStage;
         this.postFinalData=this.props.postFinalData;
         this.toggleEndPage = this.props.toggleEndPage;
 
@@ -54,10 +56,15 @@ class Step extends React.Component{
                     policy_ids={this.policy_ids}
                     stepNum={this.stepNum}
                     updatePolicyIDs={this.updatePolicyIDs}
+                    updateStage = {this.updateStage}
+                    prevStages={this.props.prevStages}
                     pushBackPolicyShown={this.pushBackPolicyShown}
+                    pushBackStage={this.pushBackStage}
                     postFinalData={this.postFinalData}
                     writeStatetoLS={this.props.writeStatetoLS}
                     removeStateFromLS={this.props.removeStateFromLS}
+                    pushBackPrediction={this.props.pushBackPrediction}
+                    prevPredictions={this.props.prevPredictions}
                     
                     userInfo={this.userInfo}
                     ip={this.ip}
@@ -90,7 +97,9 @@ class StepList extends React.Component{
         this.policy_ids=this.props.policy_ids;
         this.sectionNames=this.props.sectionNames;
         this.updatePolicyIDs=this.props.updatePolicyIDs
+        this.updateStage=this.props.updateStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown
+        this.pushBackStage=this.props.pushBackStage
         this.postFinalData=this.props.postFinalData;
 
         this.userInfo = this.props.userInfo;
@@ -133,10 +142,15 @@ class StepList extends React.Component{
                                 policy_ids={this.policy_ids}
                                 sectionNames={this.sectionNames}
                                 updatePolicyIDs={this.updatePolicyIDs}
+                                updateStage={this.updateStage}
+                                prevStages={this.props.prevStages}
+                                prevPredictions={this.props.prevPredictions}
                                 pushBackPolicyShown={this.pushBackPolicyShown}
+                                pushBackStage={this.pushBackStage}
                                 postFinalData={this.postFinalData}
                                 writeStatetoLS={this.props.writeStatetoLS}
                                 removeStateFromLS={this.props.removeStateFromLS}
+                                pushBackPrediction={this.props.pushBackPrediction}
 
                                 userInfo={this.userInfo}
                                 ip={this.ip}

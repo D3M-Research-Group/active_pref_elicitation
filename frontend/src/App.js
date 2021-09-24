@@ -23,6 +23,7 @@ class App extends React.Component {
       // track which step we are on and the choices made so far
       currentStep: 0,
       userChoices : [],
+      predictions : [],
       policiesShown: [], // store the policy ids we've seen so far as an array of arrays e.g., [[2,3], [3,4],...]
 
       // handle loading screen toggle
@@ -49,7 +50,8 @@ class App extends React.Component {
       // 0: adaptive, 1: fixed
       // Then, once we've gotten our policy of interest, we switch to "evaluation"
       // this info needs to be passed along when we make requests to get next query
-      algorithmStage: Math.floor(Math.random()*2) === 0 ? "adaptive" : "fixed",
+      algorithmStage: Math.floor(Math.random()*2) === 0 ? "adaptive" : "random",
+      prevStages: [],
 
       policy_ids: [],
       policyData: [],
@@ -70,7 +72,9 @@ class App extends React.Component {
         healthcare_role: ''
       }
     }
-    this.maxSteps = 5;
+    this.numExploration = 10;
+    this.numValidation = 5;
+    this.maxSteps = this.numExploration+this.numValidation;
     this.uuid = uuidv4();
 
 
@@ -84,8 +88,11 @@ class App extends React.Component {
     this.toggleLoading = this.toggleLoading.bind(this);
     this.toggleWrapUp = this.toggleWrapUp.bind(this);
     this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
+    this.updateStage = this.updateStage.bind(this);
     this.pushBackChoices = this.pushBackChoices.bind(this);
+    this.pushBackPrediction = this.pushBackPrediction.bind(this);
     this.pushBackPolicyShown = this.pushBackPolicyShown.bind(this);
+    this.pushBackStage = this.pushBackStage.bind(this);
     this.postFinalData = this.postFinalData.bind(this);
     this.writeStatetoLS = this.writeStatetoLS.bind(this);
     this.readStatefromLS = this.readStatefromLS.bind(this);
@@ -96,7 +103,9 @@ class App extends React.Component {
 
   handleUnload(e){
     // if they haven't gotten past the info form, don't save state when they navigate away
-    if((this.state.currentStep === 0 && this.state.userInfo.age.length === 0) || this.showEndPage){
+    console.log("showEndPage", this.state.showEndPage);
+    console.log("userInfo.age", this.state.userInfo.age.length);
+    if((this.state.currentStep === 0 && this.state.userInfo.age.length === 0) || this.state.showEndPage){
       this.removeStateFromLS();
     } else {
       this.writeStatetoLS();
@@ -131,19 +140,31 @@ class App extends React.Component {
     }
   }
   
-
   updatePolicyIDs(ids){
-
-    
     this.setState({
       policy_ids : ids
     })
   }
 
-  pushBackPolicyShown(policy_id){
+  updateStage(){
+    var stage = this.state.currentStep <= this.numExploration ? this.state.algorithmStage : "validation"
+    this.setState({
+      algorithmStage : stage
+    })
+  }
+
+  pushBackPolicyShown(){
     this.state.policiesShown.push(this.state.policy_ids);
   }
 
+  pushBackStage(){
+    this.state.prevStages.push(this.state.algorithmStage);
+  }
+
+  pushBackPrediction(prediction){
+    this.state.predictions.push(prediction);
+    console.log(this.state.predictions);
+  }
   pushBackChoices(selected){
     this.state.userChoices.push(selected);
     console.log(this.state.userChoices);
@@ -257,7 +278,8 @@ class App extends React.Component {
       // TO-DO: pass which stream a user is in
       const prevChoices = JSON.stringify({
         policiesShown: [],
-        userChoices : []
+        userChoices : [],
+        prevStages: [this.state.algorithmStage]
       })
       const response = await axios.post(`${SERVER_URL}/next_query/`, prevChoices,{
         headers: {
@@ -275,6 +297,7 @@ class App extends React.Component {
       
 
       this.updatePolicyIDs(response.data.policy_ids);
+      this.pushBackPrediction(response.data.prediction);
       console.log(response);
       console.log("policy ids shown after async request", this.state.policiesShown);
 
@@ -337,7 +360,12 @@ class App extends React.Component {
               toggleWrapUp={this.toggleWrapUp}
               toggleEndPage={this.toggleEndPage}
               updatePolicyIDs={this.updatePolicyIDs}
+              updateStage={this.updateStage}
               pushBackPolicyShown={this.pushBackPolicyShown}
+              pushBackStage={this.pushBackStage}
+              pushBackPrediction={this.pushBackPrediction}
+              prevPredictions={this.state.predictions}
+              prevStages={this.state.prevStages}
               postFinalData={this.postFinalData}
               writeStatetoLS={this.writeStatetoLS}
               removeStateFromLS={this.removeStateFromLS}

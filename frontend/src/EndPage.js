@@ -17,7 +17,7 @@ class EndPage extends React.Component {
             
             <React.Fragment>
                 <Container>
-                <h2>Thank you for taking the quzi!</h2>
+                <h2>Thank you for taking the quiz!</h2>
                 <p className="lead">
                     You may now close this page.
                 </p>

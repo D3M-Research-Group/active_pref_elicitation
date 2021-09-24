@@ -10,6 +10,20 @@ import Intro from './Intro';
 
 const SERVER_URL = "http://localhost:8000";
 
+const USER_CHOICES_MAP = {
+  "1" : "policy_A",
+  "-1" : "policy_B",
+  "0" : "indifferent",
+}
+
+const PREDICTIONS_MAP = {
+  "1" : "policy_A",
+  "-1" : "policy_B",
+  "0" : "indifferent",
+  "garbage_validation": "garbage_validation"
+}
+
+
 class PairwiseComparison extends React.Component {
     constructor(props) {
         super(props);
@@ -33,9 +47,11 @@ class PairwiseComparison extends React.Component {
         this.uuid = this.props.uuid;
 
         this.stepNum = this.props.stepNum;
-        this.maxSteps = this.props.maxSteps
-        this.updatePolicyIDs=this.props.updatePolicyIDs
-        this.pushBackPolicyShown=this.props.pushBackPolicyShown
+        this.maxSteps = this.props.maxSteps;
+        this.updatePolicyIDs=this.props.updatePolicyIDs;
+        this.updateStage = this.props.updateStage;
+        this.pushBackPolicyShown=this.props.pushBackPolicyShown;
+        this.pushBackStage=this.props.pushBackStage;
 
         this.incrementStep = this.props.incrementStep;
 
@@ -139,8 +155,9 @@ class PairwiseComparison extends React.Component {
               
               // push back final choice and final policies shown
               this.pushBackChoice(this.state.selected);
+              this.pushBackStage();
               this.updatePolicyIDs(this.policy_ids);
-              this.pushBackPolicyShown(this.policy_ids);
+              this.pushBackPolicyShown();
               this.props.writeStatetoLS();
 
               this.setState({loading: true, wrapup: true}, () => {
@@ -160,15 +177,19 @@ class PairwiseComparison extends React.Component {
                 // that each contain the necessary info so we don't
                 // have to do that on the backend
                 console.log(this.policiesShown);
+                console.log(this.props.prevStages);
                 const choicesInfo = this.userChoices.map((choice, idx) =>{
-                  console.log(this.policiesShown[idx][0])
+                  // console.log(this.policiesShown[idx][0])
+                  console.log(this.props.prevStages[idx]);
                   const choiceInfo = {
                     session_id: this.uuid,
                     question_num: idx+1,
                     policy_a: this.policiesShown[idx][0],
                     policy_b: this.policiesShown[idx][1],
                     policy_dataset: this.policyDataSet,
-                    user_choice: choice
+                    user_choice: USER_CHOICES_MAP[choice],
+                    prediction: PREDICTIONS_MAP[this.props.prevPredictions[idx]],
+                    algorithm_stage: this.props.prevStages[idx]
                   }
                   // return JSON.stringify(choiceInfo);
                   return choiceInfo;
@@ -232,13 +253,18 @@ class PairwiseComparison extends React.Component {
               
             } else {
               this.setState({loading: true}, () => {
+                // before we send the previous choices to the server, we need to update:
+                // selected, current stage, and policy shown
                 this.pushBackChoice(this.state.selected);
-                this.pushBackPolicyShown(this.policy_ids);
+                this.pushBackStage();
+                this.pushBackPolicyShown();
                 this.props.writeStatetoLS();
+                console.log(this.props.prevStages);
                 // this get request needs to pass data to the endpoint
                 const prevChoices = JSON.stringify({
                   policiesShown: this.policiesShown,
-                  userChoices : this.userChoices
+                  userChoices : this.userChoices,
+                  prevStages: this.props.prevStages
                 })
 
                 // axios.get(`${SERVER_URL}/next_query/${this.stepNum}`,
@@ -251,7 +277,10 @@ class PairwiseComparison extends React.Component {
                   })
                 .then((response) => {
                   this.updatePolicyIDs(response.data.policy_ids);
+                  this.props.pushBackPrediction(response.data.prediction)
+                  // move to next step and update stage for the next step
                   this.incrementStep();
+                  this.updateStage();
                   // this.pushBackChoice(this.state.selected);
                   this.props.writeStatetoLS();
                   
