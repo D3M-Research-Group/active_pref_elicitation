@@ -6,7 +6,7 @@ from .gurobi_functions import create_mip_model, optimize
 from .preference_classes import robust_utility, Query, is_feasible, Item, User
 from .static_elicitation import  static_mip_optimal
 from .utils import U0_positive_normed
-from random import randint
+from random import randint, uniform
 from time import sleep
 
 def get_next_query(items, answered_queries, gamma=0.0, problem_type="maximin",
@@ -131,12 +131,13 @@ def find_random_query_prediction(answered_queries,items,item_a,item_b,gamma=0.0,
     K = len(answered_queries) + 1
 
 
-    item_a_opt = items[item_a]
-    item_b_opt = items[item_b]
+    item_a_opt = items[item_a.id]
+    item_b_opt = items[item_b.id]
 
     robust_utility_a, _ = robust_utility(item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
     robust_utility_b, _ = robust_utility(item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
-    sleep(randint(2, 5))
+    # sleep(randint(2, 5)) # this is a long time to sleep...
+    sleep(round(uniform(0.5, 1),2))
     if robust_utility_a is None or robust_utility_b is None:
         return item_a_opt.id, item_b_opt.id, "infeasible"
     # predict the agent's response

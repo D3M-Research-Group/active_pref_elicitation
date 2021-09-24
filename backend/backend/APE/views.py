@@ -107,8 +107,7 @@ class NextChoiceView(APIView):
     # TO-DO: Do we need to track gamma?
     # TO-DO: add logic for once we are in the validation stage
     def post(self, request, format=None):
-        print(request.data)
-        print(request.data['prevStages'])
+        print(dict(request.data))
         current_stage = get_last_stage(request.data['prevStages'])
         f_random = ALGO_STAGE_MAP[current_stage]
         answered_queries, current_gamma = elicitation_data_prep(covid_data, request.data)
