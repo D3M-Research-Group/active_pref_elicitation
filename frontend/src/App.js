@@ -72,8 +72,9 @@ class App extends React.Component {
         healthcare_role: ''
       }
     }
-    this.numExploration = 10;
-    this.numValidation = 5;
+    this.randomize = true;
+    this.numExploration = 3;
+    this.numValidation = 1;
     this.maxSteps = this.numExploration+this.numValidation;
     this.uuid = uuidv4();
 
@@ -98,8 +99,66 @@ class App extends React.Component {
     this.readStatefromLS = this.readStatefromLS.bind(this);
     this.removeStateFromLS = this.removeStateFromLS.bind(this);
     this.handleUnload = this.handleUnload.bind(this);
+    this.randomizePolicyids = this.randomizePolicyids.bind(this);
+    this.flipPrediction = this.flipPrediction.bind(this);
 
   }
+
+  // helper functions for randomizing plots
+  arrayEquals(a, b) {
+    return Array.isArray(a) &&
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((val, index) => val === b[index]);
+  }
+
+  flipPrediction(orig_id, permuted_id, prediction){
+    if(orig_id[0] === permuted_id[0]){
+      return(prediction);
+    } else {
+      // if the two arrays are not equal, then our values were fliped and we need to
+      // flip the prediction
+      if(prediction === 1){
+        return(-1);
+      }
+      else if(prediction === -1){
+        return(1);
+      } else{
+        // this handles the validation case where our prediction is "garbage_validation"
+        return(prediction)
+      }
+    }
+  }
+
+  shuffle(array){
+    var new_array = [...array];;
+    let currentIndex = new_array.length,  randomIndex;
+  
+    // While there remain elements to shuffle...
+    while (currentIndex !== 0) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      // And swap it with the current element.
+      [new_array[currentIndex], new_array[randomIndex]] = [
+        new_array[randomIndex], new_array[currentIndex]];
+    }
+  
+    return new_array;
+  }
+  // function for randomizing the display of policy ids. Passed down to PairwiseComparison Component
+  randomizePolicyids(policy_ids, prediction){
+    const shuffled_ids = this.shuffle(policy_ids);
+    console.log("randomized policy_id" , shuffled_ids);
+    const updatedPrediction = this.flipPrediction(policy_ids, shuffled_ids, prediction);
+    
+    console.log("flipped prediction" , updatedPrediction);
+    this.pushBackPrediction(updatedPrediction);
+    this.updatePolicyIDs(shuffled_ids);
+  }
+
 
   handleUnload(e){
     // if they haven't gotten past the info form, don't save state when they navigate away
@@ -369,6 +428,9 @@ class App extends React.Component {
               postFinalData={this.postFinalData}
               writeStatetoLS={this.writeStatetoLS}
               removeStateFromLS={this.removeStateFromLS}
+              randomizePolicyids={this.randomizePolicyids}
+              flipPrediction={this.flipPrediction}
+              randomize={this.randomize}
 
               userInfo={this.state.userInfo}
               ip={this.state.ip}

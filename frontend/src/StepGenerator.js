@@ -65,6 +65,9 @@ class Step extends React.Component{
                     removeStateFromLS={this.props.removeStateFromLS}
                     pushBackPrediction={this.props.pushBackPrediction}
                     prevPredictions={this.props.prevPredictions}
+                    randomizePolicyids={this.props.randomizePolicyids}
+                    flipPrediction={this.props.flipPrediction}
+                    randomize={this.props.randomize}
                     
                     userInfo={this.userInfo}
                     ip={this.ip}
@@ -151,6 +154,9 @@ class StepList extends React.Component{
                                 writeStatetoLS={this.props.writeStatetoLS}
                                 removeStateFromLS={this.props.removeStateFromLS}
                                 pushBackPrediction={this.props.pushBackPrediction}
+                                randomizePolicyids={this.props.randomizePolicyids}
+                                randomize={this.props.randomize}
+                                flipPrediction={this.props.flipPrediction}
 
                                 userInfo={this.userInfo}
                                 ip={this.ip}

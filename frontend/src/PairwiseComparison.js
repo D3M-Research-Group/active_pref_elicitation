@@ -178,22 +178,69 @@ class PairwiseComparison extends React.Component {
                 // have to do that on the backend
                 console.log(this.policiesShown);
                 console.log(this.props.prevStages);
-                const choicesInfo = this.userChoices.map((choice, idx) =>{
-                  // console.log(this.policiesShown[idx][0])
-                  console.log(this.props.prevStages[idx]);
-                  const choiceInfo = {
-                    session_id: this.uuid,
-                    question_num: idx+1,
-                    policy_a: this.policiesShown[idx][0],
-                    policy_b: this.policiesShown[idx][1],
-                    policy_dataset: this.policyDataSet,
-                    user_choice: USER_CHOICES_MAP[choice],
-                    prediction: PREDICTIONS_MAP[this.props.prevPredictions[idx]],
-                    algorithm_stage: this.props.prevStages[idx]
+                var choicesInfo;
+                // if we randomized the display of choices, then we need to flip the choices and polices
+                if(this.props.randomize){
+                  var policiesShown = [];
+                  var userChoices = [];
+                  var predictions = [];
+
+                  for(var i=0; i < this.policiesShown.length; i++){
+                    var policy = [...this.policiesShown[i]]
+                    const sortedPolicies = [...policy].sort((a,b) => a-b);
+                    console.log(policy);
+                    console.log(sortedPolicies);
+                    // use the flipPrediction function now going from 
+                    // permuted policies -> sorted policies (original policies)
+                    // and flip our userChoice to match
+                    // Remember, userChoice is a string and this function needs number, but we want to send string prediction
+                    // at the end
+                    const flippedChoice = String(this.props.flipPrediction(policy, sortedPolicies, Number(this.userChoices[i])));
+                    const flippedPrediction = this.props.flipPrediction(policy, sortedPolicies, this.props.prevPredictions[i]);
+                    policiesShown[i] = sortedPolicies;
+                    userChoices[i] = flippedChoice;
+                    predictions[i] = flippedPrediction;
                   }
-                  // return JSON.stringify(choiceInfo);
-                  return choiceInfo;
-                })
+                  console.log("policiesShown", policiesShown);
+                  console.log("userChoices", userChoices);
+                  console.log("predictions", predictions);
+                  choicesInfo = userChoices.map((choice, idx) =>{
+                    // console.log(this.policiesShown[idx][0])
+                    console.log(this.props.prevStages[idx]);
+                    const choiceInfo = {
+                      session_id: this.uuid,
+                      question_num: idx+1,
+                      policy_a: policiesShown[idx][0],
+                      policy_b: policiesShown[idx][1],
+                      policy_dataset: this.policyDataSet,
+                      user_choice: USER_CHOICES_MAP[choice],
+                      prediction: PREDICTIONS_MAP[predictions[idx]],
+                      algorithm_stage: this.props.prevStages[idx]
+                    }
+                    // return JSON.stringify(choiceInfo);
+                    return choiceInfo;
+                  })
+                } else {
+                  choicesInfo = this.userChoices.map((choice, idx) =>{
+                    // console.log(this.policiesShown[idx][0])
+                    console.log(this.props.prevStages[idx]);
+                    const choiceInfo = {
+                      session_id: this.uuid,
+                      question_num: idx+1,
+                      policy_a: this.policiesShown[idx][0],
+                      policy_b: this.policiesShown[idx][1],
+                      policy_dataset: this.policyDataSet,
+                      user_choice: USER_CHOICES_MAP[choice],
+                      prediction: PREDICTIONS_MAP[this.props.prevPredictions[idx]],
+                      algorithm_stage: this.props.prevStages[idx]
+                    }
+                    // return JSON.stringify(choiceInfo);
+                    return choiceInfo;
+                  })
+                }
+                
+
+                
                 console.log("choicesInfo:", choicesInfo);
                 // const choicesInfo = JSON.stringify({
                 //   session_id: this.uuid,
@@ -260,13 +307,40 @@ class PairwiseComparison extends React.Component {
                 this.pushBackPolicyShown();
                 this.props.writeStatetoLS();
                 console.log(this.props.prevStages);
-                // this get request needs to pass data to the endpoint
-                const prevChoices = JSON.stringify({
-                  policiesShown: this.policiesShown,
-                  userChoices : this.userChoices,
-                  prevStages: this.props.prevStages
-                })
+                // this request needs to pass data to the endpoint
+                // if we are randomizing the display of policies, we need to reorder them before 
+                // sending them back to the backend to avoid Gurobi crashing
+                var prevChoices = '';
+                if(this.props.randomize){
+                  var policiesShown = [];
+                  var userChoices = [];
 
+                  for(var i=0; i < this.policiesShown.length; i++){
+                    var policy = [...this.policiesShown[i]]
+                    const sortedPolicies = policy.sort((a,b) => a-b);
+                    // use the flipPrediction function now going from 
+                    // permuted policies -> sorted policies (original policies)
+                    // and flip our userChoice to match
+                    // Remember, userChoice is a string and this function needs number, but we want to send string prediction
+                    // at the end
+                    const flippedChoice = String(this.props.flipPrediction(policy, sortedPolicies, Number(this.userChoices[i])));
+                    policiesShown[i] = sortedPolicies;
+                    userChoices[i] = flippedChoice;
+                  }
+                  prevChoices = JSON.stringify({
+                    policiesShown: policiesShown,
+                    userChoices : userChoices,
+                    prevStages: this.props.prevStages
+                  })
+                } else{
+                  prevChoices = JSON.stringify({
+                    policiesShown: this.policiesShown,
+                    userChoices : this.userChoices,
+                    prevStages: this.props.prevStages
+                  })
+  
+                }
+                
                 // axios.get(`${SERVER_URL}/next_query/${this.stepNum}`,
                 axios.post(`http://127.0.0.1:8000/next_query/`,prevChoices,
                   {
@@ -276,8 +350,17 @@ class PairwiseComparison extends React.Component {
                     
                   })
                 .then((response) => {
-                  this.updatePolicyIDs(response.data.policy_ids);
-                  this.props.pushBackPrediction(response.data.prediction)
+                  console.log(this.props.randomize);
+                  if(this.props.randomize){
+                    console.log("original policy_id" , response.data.policy_ids)
+                    console.log("original prediction" , response.data.prediction)
+                    this.props.randomizePolicyids(response.data.policy_ids, response.data.prediction)
+                    
+                  } else{
+                    this.updatePolicyIDs(response.data.policy_ids);
+                    this.props.pushBackPrediction(response.data.prediction)
+                  }
+                  
                   // move to next step and update stage for the next step
                   this.incrementStep();
                   this.updateStage();
@@ -287,7 +370,7 @@ class PairwiseComparison extends React.Component {
                   this.setState({loading: false});
                 })
                 .catch((err) => {
-                  console.log("got error: ", err.data)
+                  console.log("got error: ", err)
                 })
               })
             }
@@ -298,6 +381,8 @@ class PairwiseComparison extends React.Component {
             
         }
     }
+
+    
 
     prepareCardData(graphData,policy_ids, columnNums){
         var maxVals = []
