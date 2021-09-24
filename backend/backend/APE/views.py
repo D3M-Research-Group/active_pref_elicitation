@@ -8,9 +8,16 @@ from .serializers import SessionInfoSerializer, ChoicesSerializer, FormInfoSeria
 from .models import SessionInfo, Choices, FormInfo
 from .policy_data import covid_data
 from elicitation_for_website.preference_classes import Item, Query
-
 import random
-from time import sleep
+
+ALGO_STAGE_MAP = {
+    "adaptive": 0,
+    "random": 1,
+    "validation": 0
+}
+
+def get_last_stage(algo_stage_list):
+    return algo_stage_list[-1]
 
 # TO-DO: perhaps move this function to a util file?
 def create_all_policies_list(json_data):
@@ -94,15 +101,18 @@ def elicitation_data_prep(json_data, response_data):
 
 # NextChoice is a generic view
 class NextChoiceView(APIView):
+    # TO-DO: do checks on request data 
+    # dynamic way to choose which data set?
+    # maybe add dataset name to request?
+    # TO-DO: Do we need to track gamma?
+    # TO-DO: add logic for once we are in the validation stage
     def post(self, request, format=None):
         print(request.data)
-
-        # TO-DO: do checks on request data 
-        # dynamic way to choose which data set?
-        # maybe add dataset name to request?
-        # TO-DO: Do we need to track gamma?
+        print(request.data['prevStages'])
+        current_stage = get_last_stage(request.data['prevStages'])
+        f_random = ALGO_STAGE_MAP[current_stage]
         answered_queries, current_gamma = elicitation_data_prep(covid_data, request.data)
-        item_A, item_B, predicted_response, objval = get_next_query(all_policies, answered_queries)
+        item_A, item_B, predicted_response, objval = get_next_query(all_policies, answered_queries,f_random=f_random, verbose=True)
         print(f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}")
         # just randomly select policies to show and sleep to simulate latency
         response_dict = {"policy_ids": [item_A, item_B], "prediction" : predicted_response}

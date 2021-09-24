@@ -21,7 +21,9 @@ class ChoicesSerializer(serializers.ModelSerializer):
                     'policy_a',
                     'policy_b',
                     'policy_dataset',
-                    'user_choice')
+                    'user_choice',
+                    'prediction',
+                    'algorithm_stage')
 
 class FormInfoSerializer(serializers.ModelSerializer):
     class Meta:

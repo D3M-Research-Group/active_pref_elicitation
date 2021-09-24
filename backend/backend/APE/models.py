@@ -14,12 +14,14 @@ class SessionInfo(models.Model):
 # We insert this information in at the end by looping over the info stored user-side
 class Choices(models.Model):
     session_id = models.CharField(max_length=50, 
-                                verbose_name='session_id') # session id which relates this to SessionInfo
-    question_num = models.PositiveIntegerField() # id of the question shown to the user
+                                verbose_name='Session ID') # session id which relates this to SessionInfo
+    question_num = models.PositiveIntegerField(verbose_name="Question Number") # id of the question shown to the user
     policy_a = models.PositiveIntegerField() # id of the policy_A shown to the user
     policy_b = models.PositiveIntegerField() # id of the policy_B shown to the user
     policy_dataset = models.CharField(max_length=50) # name of the policy dataset e.g. COVID or LAHSA
-    user_choice = models.IntegerField() # which of the two options did the user choose?
+    user_choice = models.CharField(max_length=20) # which of the two options did the user choose?
+    prediction = models.CharField(max_length=20)
+    algorithm_stage = models.CharField(max_length=50, verbose_name="algorithm stage")
 
 class FormInfo(models.Model):
     # Need some fields to be nullable so that we can use this model for

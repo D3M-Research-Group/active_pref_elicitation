@@ -15,7 +15,9 @@ class ChoicesAdmin(admin.ModelAdmin):
                     'policy_a',
                     'policy_b',
                     'policy_dataset',
-                    'user_choice'
+                    'user_choice',
+                    'prediction',
+                    'algorithm_stage'
     )
 
 admin.site.register(Choices, ChoicesAdmin)

@@ -42,7 +42,13 @@ def get_next_query(items, answered_queries, gamma=0.0, problem_type="maximin",
             if item_a.id < item_b.id:
                 if (item_a.id,item_b.id) not in answers:
                     done = False
-        predicted_response = 'garbage_validation'
+        
+        if len(answered_queries) > 10: #in validation we do not care about the prediction (it should always be fixed policy)
+            predicted_response = 'garbage_validation'
+
+        else: #must be random exploration stage, so find the predicted choice
+            _, _, predicted_response = find_random_query_prediction(answered_queries, items, item_a, item_b, gamma=gamma,
+                                                                problem_type=problem_type, eps=0.0)
         objval = None
 
     else:
