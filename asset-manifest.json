@@ -1,26 +1,25 @@
 {
   "files": {
-    "main.css": "/active_pref_elicitation/static/css/main.2bede0f9.chunk.css",
-    "main.js": "/active_pref_elicitation/static/js/main.8c4ef88f.chunk.js",
-    "main.js.map": "/active_pref_elicitation/static/js/main.8c4ef88f.chunk.js.map",
-    "runtime-main.js": "/active_pref_elicitation/static/js/runtime-main.1e8d92c9.js",
-    "runtime-main.js.map": "/active_pref_elicitation/static/js/runtime-main.1e8d92c9.js.map",
-    "static/css/2.983f79de.chunk.css": "/active_pref_elicitation/static/css/2.983f79de.chunk.css",
-    "static/js/2.d35711ba.chunk.js": "/active_pref_elicitation/static/js/2.d35711ba.chunk.js",
-    "static/js/2.d35711ba.chunk.js.map": "/active_pref_elicitation/static/js/2.d35711ba.chunk.js.map",
-    "static/js/3.f5283b00.chunk.js": "/active_pref_elicitation/static/js/3.f5283b00.chunk.js",
-    "static/js/3.f5283b00.chunk.js.map": "/active_pref_elicitation/static/js/3.f5283b00.chunk.js.map",
+    "main.css": "/active_pref_elicitation/static/css/main.e2da6c61.chunk.css",
+    "main.js": "/active_pref_elicitation/static/js/main.3b16f8f8.chunk.js",
+    "main.js.map": "/active_pref_elicitation/static/js/main.3b16f8f8.chunk.js.map",
+    "runtime-main.js": "/active_pref_elicitation/static/js/runtime-main.709c5955.js",
+    "runtime-main.js.map": "/active_pref_elicitation/static/js/runtime-main.709c5955.js.map",
+    "static/css/2.2fbe9b88.chunk.css": "/active_pref_elicitation/static/css/2.2fbe9b88.chunk.css",
+    "static/js/2.bd29c1bf.chunk.js": "/active_pref_elicitation/static/js/2.bd29c1bf.chunk.js",
+    "static/js/2.bd29c1bf.chunk.js.map": "/active_pref_elicitation/static/js/2.bd29c1bf.chunk.js.map",
+    "static/js/3.b374b083.chunk.js": "/active_pref_elicitation/static/js/3.b374b083.chunk.js",
+    "static/js/3.b374b083.chunk.js.map": "/active_pref_elicitation/static/js/3.b374b083.chunk.js.map",
     "index.html": "/active_pref_elicitation/index.html",
-    "static/css/2.983f79de.chunk.css.map": "/active_pref_elicitation/static/css/2.983f79de.chunk.css.map",
-    "static/css/main.2bede0f9.chunk.css.map": "/active_pref_elicitation/static/css/main.2bede0f9.chunk.css.map",
-    "static/js/2.d35711ba.chunk.js.LICENSE.txt": "/active_pref_elicitation/static/js/2.d35711ba.chunk.js.LICENSE.txt",
-    "static/media/UK_1360beds-25policies.175504d1.csv": "/active_pref_elicitation/static/media/UK_1360beds-25policies.175504d1.csv"
+    "static/css/2.2fbe9b88.chunk.css.map": "/active_pref_elicitation/static/css/2.2fbe9b88.chunk.css.map",
+    "static/css/main.e2da6c61.chunk.css.map": "/active_pref_elicitation/static/css/main.e2da6c61.chunk.css.map",
+    "static/js/2.bd29c1bf.chunk.js.LICENSE.txt": "/active_pref_elicitation/static/js/2.bd29c1bf.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.1e8d92c9.js",
-    "static/css/2.983f79de.chunk.css",
-    "static/js/2.d35711ba.chunk.js",
-    "static/css/main.2bede0f9.chunk.css",
-    "static/js/main.8c4ef88f.chunk.js"
+    "static/js/runtime-main.709c5955.js",
+    "static/css/2.2fbe9b88.chunk.css",
+    "static/js/2.bd29c1bf.chunk.js",
+    "static/css/main.e2da6c61.chunk.css",
+    "static/js/main.3b16f8f8.chunk.js"
   ]
 }
