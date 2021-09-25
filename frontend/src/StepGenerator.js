@@ -29,7 +29,6 @@ class Step extends React.Component{
         this.toggleEndPage = this.props.toggleEndPage;
 
         this.userInfo = this.props.userInfo;
-        this.ip = this.props.ip;
         this.uuid = this.props.uuid;
     }
 
@@ -70,7 +69,6 @@ class Step extends React.Component{
                     randomize={this.props.randomize}
                     
                     userInfo={this.userInfo}
-                    ip={this.ip}
                     uuid={this.uuid}
                     // pass userChoices all the way to PairwiseComparisons and from their lift up state by pushing
                     // choices back to userChoices in App's state
@@ -106,7 +104,6 @@ class StepList extends React.Component{
         this.postFinalData=this.props.postFinalData;
 
         this.userInfo = this.props.userInfo;
-        this.ip = this.props.ip;
         this.uuid = this.props.uuid;
     }
 
@@ -159,7 +156,6 @@ class StepList extends React.Component{
                                 flipPrediction={this.props.flipPrediction}
 
                                 userInfo={this.userInfo}
-                                ip={this.ip}
                                 uuid={this.uuid}
                             /> 
                              );

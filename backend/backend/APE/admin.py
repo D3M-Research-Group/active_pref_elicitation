@@ -5,7 +5,9 @@ from .models import SessionInfo, Choices, FormInfo
 
 
 class SessionInfoAdmin(admin.ModelAdmin):
-    list_display = ('session_id', 'ip_address', 'time_submitted', 'mturker')
+    list_display = ('session_id',
+                    'time_submitted',
+                     'mturker')
 
 admin.site.register(SessionInfo, SessionInfoAdmin)
 

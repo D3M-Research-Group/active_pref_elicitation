@@ -73,8 +73,8 @@ class App extends React.Component {
       }
     }
     this.randomize = true;
-    this.numExploration = 3;
-    this.numValidation = 1;
+    this.numExploration = 10;
+    this.numValidation = 5;
     this.maxSteps = this.numExploration+this.numValidation;
     this.uuid = uuidv4();
 
@@ -315,15 +315,6 @@ class App extends React.Component {
       // if we already have data in local storage, don't make requests
     } else {
       
-      // TO-DO: catch error here and use default value of 0.0.0.0
-      try{
-        const loc_response = await fetch('https://geolocation-db.com/json/');
-        const data = await loc_response.json();
-        this.setState({ ip: data.IPv4 })
-      } catch(err){
-        console.log("Got error trying to get IP address", err)
-        this.setState({ ip: "0.0.0.0" })
-      }
       
       
       // parse query string info

@@ -43,7 +43,6 @@ class PairwiseComparison extends React.Component {
         this.policiesShown = this.props.policiesShown;
         this.policyDataSet = this.props.policyDataSet;
         this.userInfo = this.props.userInfo;
-        this.ip = this.props.ip;
         this.uuid = this.props.uuid;
 
         this.stepNum = this.props.stepNum;
@@ -163,14 +162,12 @@ class PairwiseComparison extends React.Component {
               this.setState({loading: true, wrapup: true}, () => {
                 // const toPostData = JSON.stringify({
                 //   uuid: this.uuid,
-                //   ip: this.ip,
                 //   userChoices : this.userChoices,
                 //   userInfo : this.userInfo
                 // })
 
                 const sessionInfo = JSON.stringify({
                   session_id : this.uuid,
-                  ip_address: this.ip,
                   mturker: this.mturker
                 })
                 // map userChoices so we create array with objects

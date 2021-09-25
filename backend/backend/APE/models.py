@@ -4,7 +4,6 @@ from django.db import models
 class SessionInfo(models.Model):
     session_id = models.CharField(max_length=50,primary_key=True,
                                         verbose_name='session_id') # UUID generated on browser side
-    ip_address = models.GenericIPAddressField()
     time_submitted = models.DateTimeField(auto_now_add=True, blank=True,verbose_name='date test taken')
     # To-do: want a way to differentiate between AMTurkers and regular people using the app
     # easiest would be to have a URI for the link given to AMTurkers like ?amturk=true
