@@ -8,7 +8,8 @@ import axios from 'axios';
 import Intro from './Intro';
 
 
-const SERVER_URL = "http://localhost:8000";
+// const SERVER_URL = "http://localhost:8000";
+const SERVER_URL = "http://35.165.201.246";
 
 const USER_CHOICES_MAP = {
   "1" : "policy_A",
@@ -339,7 +340,7 @@ class PairwiseComparison extends React.Component {
                 }
                 
                 // axios.get(`${SERVER_URL}/next_query/${this.stepNum}`,
-                axios.post(`http://127.0.0.1:8000/next_query/`,prevChoices,
+                axios.post(`${SERVER_URL}/next_query/`,prevChoices,
                   {
                     headers: {
                       'Content-Type': 'application/json'
