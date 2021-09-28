@@ -11,7 +11,9 @@ from .models import SessionInfo, Choices, FormInfo
 class SessionInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = SessionInfo
-        fields = ('session_id', 'ip_address', 'time_submitted', 'mturker')
+        fields = ('session_id',
+                  'time_submitted',
+                  'mturker')
 
 class ChoicesSerializer(serializers.ModelSerializer):
     class Meta:
