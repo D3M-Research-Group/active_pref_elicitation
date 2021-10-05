@@ -137,5 +137,5 @@ CORS_ORIGIN_WHITELIST = [
 CORS_ALLOWED_ORIGINS = [
     'http://api.cais-preference-elicitation.com',
     'http://localhost:3000',
-    'https://d3m-research-group.github.io/active_pref_elicitation'
+    'https://d3m-research-group.github.io'
 ]
