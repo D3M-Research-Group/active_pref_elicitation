@@ -9,7 +9,7 @@ import Intro from './Intro';
 
 
 // const SERVER_URL = "http://localhost:8000";
-const SERVER_URL = "http://35.165.201.246";
+const SERVER_URL = "https://api.cais-preference-elicitation.com/";
 
 const USER_CHOICES_MAP = {
   "1" : "policy_A",
