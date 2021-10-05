@@ -130,11 +130,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 CORS_ORIGIN_WHITELIST = [
-    'http://35.165.201.246',
+    'http://api.cais-preference-elicitation.com',
     'http://localhost:3000'
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://35.165.201.246',
+    'http://api.cais-preference-elicitation.com',
     'http://localhost:3000'
 ]
