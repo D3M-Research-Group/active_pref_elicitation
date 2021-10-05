@@ -15,7 +15,7 @@ import './Card.scss';
 
 
 // const SERVER_URL = "http://localhost:8000";
-const SERVER_URL = "https://api.cais-preference-elicitation.com/";
+const SERVER_URL = "https://api.cais-preference-elicitation.com";
 
 class App extends React.Component {
   constructor(props){
