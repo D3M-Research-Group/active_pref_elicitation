@@ -4,11 +4,8 @@
   "private": true,
   "proxy": "http://localhost:8000",
   "dependencies": {
-    "@agney/react-loading": "^0.1.2",
-    "@flipbyte/formik-json": "^0.6.1",
     "@material-ui/core": "^4.12.3",
     "@material-ui/lab": "^4.0.0-alpha.60",
-    "@rjsf/core": "^3.1.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
@@ -17,29 +14,20 @@
     "chart.js": "^3.5.1",
     "chartjs-plugin-datalabels": "^2.0.0",
     "d3-collection": "^1.0.7",
-    "d3-fetch": "^3.0.1",
-    "formik": "^2.2.9",
+    "intro.js": "^4.2.2",
     "intro.js-react": "^0.5.0",
-    "json-loader": "^0.5.7",
-    "json-server": "^0.16.3",
     "local-storage": "^2.0.0",
-    "papaparse": "^5.3.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-bootstrap": "^2.0.0-beta.5",
     "react-chartjs-2": "^3.0.4",
     "react-dom": "^17.0.2",
-    "react-hook-form": "^7.13.0",
     "react-jsonschema-form-validation": "^0.5.6",
-    "react-router": "^5.2.1",
-    "react-router-dom": "^5.3.0",
     "react-scripts": "^4.0.3",
     "react-select": "^4.3.1",
     "reactstrap": "^8.9.0",
-    "reactstrap-scrollspy": "^0.1.1",
     "uuid": "^8.3.2",
-    "web-vitals": "^1.1.2",
-    "yup": "^0.32.9"
+    "web-vitals": "^1.1.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -72,5 +60,5 @@
     "gh-pages": "^3.2.3",
     "sass": "^1.37.5"
   },
-  "homepage": "https://patrickvossler18.github.io/active_pref_elicitation/"
+  "homepage": "."
 }
