@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from .serializers import SessionInfoSerializer, ChoicesSerializer, FormInfoSerializer
 from .models import SessionInfo, Choices, FormInfo
 from .policy_data import covid_data
+from .choice_paths import choices_data
 from elicitation_for_website.preference_classes import Item, Query
 import random
 
@@ -97,8 +98,32 @@ def elicitation_data_prep(json_data, response_data):
     return answered_queries, current_gamma
 
 
+def choice_path_data_prep(response_data):
+    """ transform the response data and json data to return a tuple of tuples to use as a look up key in the choices path dictionary
+    Args:
+        json_data: the policy data set
+        response_data: a dictionary with policiesShown as list of list of policies
+        and userChoices as as list of the choices of the user
+    """
+    answered_queries = ()
+    user_choices = [int(val) for val in response_data.get('userChoices')]
+    policies_shown = response_data.get('policiesShown')
+    # TO-DO: safer way to loop through or maybe assert equal length of the lists
+    for i in range(len(policies_shown)):
+        # generate the items for each policy
+        current_policy = policies_shown[i]
+        current_choice = user_choices[i]
+        policy_A = current_policy[0]
+        policy_B = current_policy[1]
+        answered_queries.append((policy_A, policy_B, current_choice))
+    return answered_queries
 
-
+def look_up_choice(answered_queries,  choices_data):
+    next_query_tuple = choices_data.get(answered_queries, None)
+    item_A, item_B = next_query_tuple[1]
+    predicted_response = next_query_tuple[2]
+    recommended_item = next_query_tuple[0]
+    return item_A, item_B, predicted_response, recommended_item
 # NextChoice is a generic view
 class NextChoiceView(APIView):
     # TO-DO: do checks on request data 
@@ -111,11 +136,18 @@ class NextChoiceView(APIView):
         print(request.data)
         current_stage = get_last_stage(request.data['prevStages'])
         f_random = ALGO_STAGE_MAP[current_stage]
-        answered_queries, current_gamma = elicitation_data_prep(covid_data, request.data)
-        item_A, item_B, predicted_response, objval = get_next_query(all_policies, answered_queries,f_random=f_random, verbose=True)
-        print(f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}")
-        # just randomly select policies to show and sleep to simulate latency
-        response_dict = {"policy_ids": [item_A, item_B], "prediction" : predicted_response}
+        recommended_item = None
+        # need to handle different logic for if random or adaptive here. usually this is done in get next_query
+        if f_random == 1:
+            answered_queries, current_gamma = elicitation_data_prep(covid_data, request.data)
+            item_A, item_B, predicted_response, objval = get_next_query(all_policies, answered_queries,f_random=f_random, verbose=True)
+        else:
+            # what if we are in the validation stage?
+            answered_queries = choice_path_data_prep(request.data)
+            item_A, item_B, predicted_response, recommended_item = look_up_choice(answered_queries, choices_data)
+        print(f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}")
+        # we need to store the recommended item information on the front end
+        response_dict = {"policy_ids": [item_A, item_B], "prediction" : predicted_response, "recommended_item": recommended_item}
         return Response(response_dict)
 
 class PolicyDataView(APIView):
