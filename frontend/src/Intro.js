@@ -7,24 +7,29 @@ export default class Intro extends React.Component{
     constructor(props){
         super(props);
         this.state = {
+            screenX: 0,
+            screenY: 0,
             stepsEnabled: true,
             initialStep: 0,
             steps: [
               {
-                element: "#policy_comparison_container",
+                element: "#container-fluid",
                 intro: "Throughout the questionnaire, different policies will be displayed under the headings Policy A and Policy B"
               },
               {
-                element: "#section_2",
-                intro: "The outcomes of each policy are displayed in the form of bar and pie charts"
+                // element: "#section_2",
+                intro: "The outcomes of each policy are displayed in the form of bar and pie charts",
+                position: "bottom"
               },
               {
                 element: "#section_2_policy_A",
-                intro: "This plot shows the outcomes from policy A"
+                intro: "This plot shows the outcomes from policy A",
+                position: "right"
               },
               {
                 element: "#section_2_policy_B",
-                intro: "This plot shows the outcomes from policy B"
+                intro: "This plot shows the outcomes from policy B",
+                position: "left"
               },
               {
                 element: "#section_1",
@@ -36,7 +41,8 @@ export default class Intro extends React.Component{
             //   },
               {
                 element: "#sections",
-                intro: "Clicking here allows you to jump to the different sections"
+                intro: "Clicking here allows you to jump to the different sections",
+                position: "right"
               },
               {
                 element: "#choices_button_group",
@@ -66,8 +72,14 @@ export default class Intro extends React.Component{
               steps={steps}
               initialStep={initialStep}
               onExit={this.onExit}
+              // onChange={this.getScreenLocation}
+              // // onPreventChange={this.scrollTop}
+              // onAfterChange={this.keepSpot}
               options={{ hideNext: false,
-                disableInteraction: true }}
+                disableInteraction: true,
+                // scrollToElement: true,
+                // scrollPadding: "1px"
+              }}
             />
         );
       }
@@ -75,4 +87,21 @@ export default class Intro extends React.Component{
     onExit = () => {
     this.setState(() => ({ stepsEnabled: false }));
     };
+
+    getScreenLocation = () => {
+      // console.log(window.screenY)
+      console.log(this.state.screenY)
+      this.setState(() => ({
+        screenX: window.screenX,
+        screenY: window.screenY,
+      }));
+      // this.setState({
+      //   screenX: window.screenX,
+      //   screenY: window.screenY,
+      // })
+    }
+
+    keepSpot = () => {
+      window.scrollTo(this.state.screenX, this.state.screenY)
+    }
 }
