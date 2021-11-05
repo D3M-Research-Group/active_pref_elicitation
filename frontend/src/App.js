@@ -165,7 +165,10 @@ class App extends React.Component {
     // if they haven't gotten past the info form, don't save state when they navigate away
     console.log("showEndPage", this.state.showEndPage);
     console.log("userInfo.age", this.state.userInfo.age.length);
+    console.log("userInfo", this.state.userInfo);
     if((this.state.currentStep === 0 && this.state.userInfo.age.length === 0) || this.state.showEndPage){
+    // if(this.state.showEndPage){
+      console.log("removing state")
       this.removeStateFromLS();
     } else {
       this.writeStatetoLS();
@@ -174,6 +177,7 @@ class App extends React.Component {
   }
 
   writeStatetoLS(){
+    console.log(this.state.userInfo);
     ls.set('APE_state', JSON.stringify(this.state))
   }
 
@@ -270,7 +274,10 @@ class App extends React.Component {
     this.setState({
       userInfo: toUpdate
     }, 
-    function(){console.log(this.state.userInfo)}
+    function(){
+      console.log(this.state.userInfo);
+      this.writeStatetoLS();
+    }
     )
   }
 
@@ -295,26 +302,22 @@ class App extends React.Component {
     })
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('beforeunload', this.handleUnload);
-  }
+
   
   async componentDidMount() {
-    // add listener for when user leaves the page
-    window.addEventListener('beforeunload', this.handleUnload);
     // check if state is in local storage
     var loadableState = ls.get('APE_state');
     if(loadableState){
       // check that there is actually any info in the state object
       var state_info = JSON.parse(loadableState);
-      console.log(state_info)
+      console.log("loaded state_info", state_info)
       if(state_info['currentStep'] > 0 && state_info['userInfo']['age'].length > 0){
         this.setState({
           showResumeButton: true
         })
       }
       // if we already have data in local storage, don't make requests
-    } else {
+    } 
       
       
       
@@ -368,13 +371,6 @@ class App extends React.Component {
         console.log(this.state.policyData);
         console.log(this.state.policyDataSet);
       })
-    }
-    
-    
-
-    
-    
-
   }
   render() {
     return(
