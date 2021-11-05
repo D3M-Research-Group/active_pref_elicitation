@@ -66,7 +66,7 @@ class UserInfoForm extends React.Component{
         this.props.toggleUserInfoForm();
         this.props.incrementStep();
         // save state here so state is at the beginning of the questionnaire
-        console.log(this.state.userInfo);
+        console.log(this.state.formData);
         this.props.writeStatetoLS();
         
 	}
