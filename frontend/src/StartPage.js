@@ -32,15 +32,15 @@ class StartPage extends React.Component {
                     of different policies and learning your choices. New policy outcomes are displayed
                     after each choice you make. The questionnaire is tailored to ask
                     questions based on your previous choices.
-                    You can start the questionnaire by clicking on the button below. Please take the survey <b>only once</b>. 
-                    Once you've started the questionnaire, <b>please do not refresh or leave the page</b>. For the survey to be accepted please take it only once and complete it in one sitting.
+                    You can start the questionnaire by clicking on the button below. Please take the survey <b style={{"font-weight":'bold'}}>only once</b>. 
+                    Once you've started the questionnaire, <b style={{"font-weight":'bold'}}>please do not refresh or leave the page</b>. For the survey to be accepted please take it only once and complete it in one sitting.
                     <br></br>
                     <br></br>
                     <br></br>
                     What happens if there isn’t enough medical equipment available to treat every person who gets sick with COVID-19?
                     Who gets an ICU bed? Who gets a ventilator? Our goal is meant to find a set of guidelines to help healthcare providers
                     decide which patients would get a bed, ventilator, or receive other lifesaving treatments in a critical care unit in an
-                    <b> event where there are more patients than necessary resources. </b>
+                    <b style={{"font-weight":'bold'}}> event where there are more patients than necessary resources. </b>
                 </p>
                 <div>
                     <br></br>
