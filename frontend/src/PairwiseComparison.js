@@ -415,10 +415,12 @@ class PairwiseComparison extends React.Component {
               <h1 className="title">Question {this.stepNum} / {this.maxSteps}</h1>
               {
                 this.sectionInfo.map((section, index) => {
+                  console.log(index);
                   const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);
                   return(
                     <PolicyComparisonSection
-                      key={index}
+                      key={index.toString()}
+                      idx_key={index.toString()}
                       plotType={section.plotType}
                       sectionType={section.sectionType}
                       policyData={prepped_dat['dat']}

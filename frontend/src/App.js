@@ -36,6 +36,9 @@ class App extends React.Component {
       // toggle show Start page
       showStartPage: true,
 
+      // show modal in start page for clearing state
+      showModal: false,
+
       // toggle show End page,
       showEndPage: false,
 
@@ -84,6 +87,7 @@ class App extends React.Component {
     // binding functions
     this.toggleUserInfoForm = this.toggleUserInfoForm.bind(this);
     this.toggleStartPage = this.toggleStartPage.bind(this);
+    this.toggleShowModal = this.toggleShowModal.bind(this);
     this.toggleEndPage = this.toggleEndPage.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.incrementStep = this.incrementStep.bind(this);
@@ -99,6 +103,7 @@ class App extends React.Component {
     this.writeStatetoLS = this.writeStatetoLS.bind(this);
     this.readStatefromLS = this.readStatefromLS.bind(this);
     this.removeStateFromLS = this.removeStateFromLS.bind(this);
+    this.removeStateAndRestart = this.removeStateAndRestart.bind(this);
     this.handleUnload = this.handleUnload.bind(this);
     this.randomizePolicyids = this.randomizePolicyids.bind(this);
     this.flipPrediction = this.flipPrediction.bind(this);
@@ -195,6 +200,11 @@ class App extends React.Component {
     ls.remove('APE_state');
   }
 
+  removeStateAndRestart(){
+    this.removeStateFromLS();
+    window.location.reload(false);
+  }
+
   incrementStep(){
     this.setState({
       currentStep : this.state.currentStep + 1
@@ -244,6 +254,10 @@ class App extends React.Component {
 
   toggleStartPage(){
     this.setState({ showStartPage: !this.state.showStartPage})
+  }
+
+  toggleShowModal(){
+    this.setState({ showModal: !this.state.showModal}, function(){console.log("fired!")})
   }
 
   toggleEndPage(){
@@ -380,9 +394,12 @@ class App extends React.Component {
           
           <StartPage showStartPage={this.state.showStartPage}
           toggleStartPage={this.toggleStartPage}
+          toggleShowModal={this.toggleShowModal}
           toggleUserInfoForm={this.toggleUserInfoForm}
           readStatefromLS={this.readStatefromLS}
           showResumeButton={this.state.showResumeButton}
+          showModal={this.state.showModal}
+          removeStateAndRestart={this.removeStateAndRestart}
           />
           <UserInfoForm showForm={this.state.showUserInfoForm}
           toggleUserInfoForm={this.toggleUserInfoForm} 
