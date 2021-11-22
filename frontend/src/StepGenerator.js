@@ -41,6 +41,7 @@ class Step extends React.Component{
             // <Container fluid={true}>
                 <PairwiseComparison
                     // title={this.data['query_title']}
+                    key={this.stepNum}
                     maxSteps={this.maxSteps} 
                     loading={this.loading}
                     toggleLoading={this.toggleLoading}

@@ -7,6 +7,8 @@ import PolicyDataPlot from './PolicyDataPlots';
 class PolicyComparisonSection extends React.Component{
     constructor(props){
         super(props)
+        this.key = this.props.idx_key;
+        console.log(this.props.idx_key);
         this.sectionType = this.props.sectionType;
         this.plotType = this.props.plotType;
         this.policyData = this.props.policyData;
@@ -21,21 +23,22 @@ class PolicyComparisonSection extends React.Component{
 
     }
 
-    choosePlotType(sectionType, plotType, data, columnNums, idx){
+    choosePlotType(sectionType, plotType, data, columnNums, key){
         // console.log("sectionType ", sectionType);
+        console.log("key", key)
         switch(sectionType){
             case "plot":
-                return( <PolicyDataPlot key={idx} plotType={plotType}
+                return( <PolicyDataPlot key={key} plotType={plotType}
                      data={data['graphData']} columnNums={columnNums} 
                      maxYVal={this.maxYVal}/>);
             case "number":
-                return(<PolicyNumberDisplay key={idx} data={data['graphData']} columnNums={columnNums} />);
+                return(<PolicyNumberDisplay key={key} data={data['graphData']} columnNums={columnNums} />);
             default:
                 return(null);
         }
     }
 
-    generatePlotColumn(policyData){
+    generatePlotColumn(policyData, key){
         return(
             policyData.map((data, idx) => {
                 return(
@@ -43,7 +46,7 @@ class PolicyComparisonSection extends React.Component{
                         <Col lg={this.plotType === "pie"? "4" : "6"}
                         className="text-center" id={`section_${this.sectionNum}_policy_${(idx + 1) % 2 === 0 ? "B" : "A"}`}>
                             <h3> Policy {(idx + 1) % 2 === 0 ? "B" : "A" }</h3>
-                            {this.choosePlotType(this.sectionType, this.plotType, data, this.columnNums, idx)}
+                            {this.choosePlotType(this.sectionType, this.plotType, data, this.columnNums, key)}
                         </Col>
                     </React.Fragment>
                 )
@@ -59,13 +62,13 @@ class PolicyComparisonSection extends React.Component{
                         {this.title}
                     </h2>
                     <p>{this.description}</p>
-                    <Container fluid={true} style={{marginBottom: "5rem"}}>
+                    <Container fluid={true} style={{marginBottom: "5rem"}} key={this.key}>
                         {this.plotType === "pie"? 
-                        <Row className="justify-content-center">
-                            {this.generatePlotColumn(this.policyData)}
+                        <Row className="justify-content-center" key={this.key}>
+                            {this.generatePlotColumn(this.policyData, this.key)}
                         </Row>: 
-                        <Row>
-                            {this.generatePlotColumn(this.policyData)}
+                        <Row key={this.key}>
+                            {this.generatePlotColumn(this.policyData, this.key)}
                         </Row>    
                         }
                         

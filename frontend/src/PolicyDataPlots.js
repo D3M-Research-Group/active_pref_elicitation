@@ -31,6 +31,7 @@ const borderColors = [
 class PolicyDataPlot extends React.Component {
     constructor(props){
         super(props);
+        this.key = this.props.key;
         this.plotType = this.props.plotType;
         this.updateMaxYVal = this.props.updateMaxYVal;
         this.maxYVal = this.props.maxYVal;
@@ -159,11 +160,11 @@ class PolicyDataPlot extends React.Component {
     choosePlotType(){
         switch(this.plotType){
             case "bar":
-                return(<Bar data={this.createChartJsData(this.data, this.plotType, this.columnNums[0], this.columnNums[1])}
+                return(<Bar key={this.key} data={this.createChartJsData(this.data, this.plotType, this.columnNums[0], this.columnNums[1])}
                     options={this.plotOptions} redraw={false} plugins={[ChartDataLabels]}
                 />)
             case "pie":
-                return(<Pie data={this.createChartJsData(this.data, this.plotType, this.columnNums[0], this.columnNums[1])}
+                return(<Pie key={this.key} data={this.createChartJsData(this.data, this.plotType, this.columnNums[0], this.columnNums[1])}
                 options={this.plotOptions} redraw={false} plugins={[ChartDataLabels]}
             />)
             default:
