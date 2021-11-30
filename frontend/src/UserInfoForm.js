@@ -111,7 +111,7 @@ class UserInfoForm extends React.Component{
                     
                 </FormGroup>
                 <FormGroup>
-                <Label style={{width: "100%"}}>What is your age group?</Label>
+                <Label style={{width: "100%"}}>What is your age group? *</Label>
                     <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -158,7 +158,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>What is your race/ethnicity?</Label>
+					<Label style={{width: "100%"}}>What is your race/ethnicity? *</Label>
                     <Col style={{width: "100%"}} md="4">
                     <Field
 						className=""
@@ -214,7 +214,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>What is your gender?</Label>
+					<Label style={{width: "100%"}}>What is your gender? *</Label>
                     < Col style={{width: "100%"}} md="4"> 
                         <Field
                             className=""
@@ -253,7 +253,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>What is your marital status?</Label>
+					<Label style={{width: "100%"}}>What is your marital status? *</Label>
                     <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -300,7 +300,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>What is the highest degree or level of school you have completed?</Label>
+					<Label style={{width: "100%"}}>What is the highest degree or level of school you have completed? *</Label>
                     <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -367,7 +367,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>What is your political party affiliation?</Label>
+					<Label style={{width: "100%"}}>What is your political party affiliation? *</Label>
 					<Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -421,7 +421,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>Do you have family members who tested positive for COVID-19?</Label>
+					<Label style={{width: "100%"}}>Do you have family members who tested positive for COVID-19? *</Label>
 					<Col  style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -455,7 +455,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}} >Do you know anyone (other than family members) who tested positive for COVID-19?</Label>
+					<Label style={{width: "100%"}} >Do you know anyone (other than family members) who tested positive for COVID-19? *</Label>
                     <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -490,7 +490,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>Do you work in health care?</Label>
+					<Label style={{width: "100%"}}>Do you work in health care? *</Label>
                     <Col  style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -521,13 +521,13 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-                    <Label style={{width: "100%"}}>If you answered yes to the above question, what is your role? Otherwise enter "NA".</Label>
+                    <Label style={{width: "100%"}}>If you answered yes to the above question, what is your role? Otherwise enter "N/A".</Label>
                     <Col style={{width: "100%"}} md="4" >
                         <Field className=""
                             name="healthcare_role"
                             value={formData.healthcare_role}
                             type="input"
-                            placeholder="NA"
+                            placeholder=""
                         />
                         <FieldError 
                         errorMessages={{

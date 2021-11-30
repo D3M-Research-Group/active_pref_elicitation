@@ -82,7 +82,7 @@ const schema = {
       }
 
     },
-    required: ["username", "age", "race_ethnicity", "gender", "marital_status", "education", "political",
+    required: ["age", "race_ethnicity", "gender", "marital_status", "education", "political",
     "positive_family", "positive_anyone","healthcare_yn", "healthcare_role"]
 }
 export default schema;

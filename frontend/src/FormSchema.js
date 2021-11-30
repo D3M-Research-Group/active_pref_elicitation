@@ -2,7 +2,7 @@ const schema = {
     "title": "User Information",
     "description": "",
     "type": "object",
-    "required": ["username", "age", "race_ethnicity", "gender", "marital_status", "education", "political",
+    "required": ["age", "race_ethnicity", "gender", "marital_status", "education", "political",
     "positive_family", "positive_anyone","healthcare_yn"],
     "properties": {
         "username": {
