@@ -328,13 +328,15 @@ class PairwiseComparison extends React.Component {
                   prevChoices = JSON.stringify({
                     policiesShown: policiesShown,
                     userChoices : userChoices,
-                    prevStages: this.props.prevStages
+                    prevStages: this.props.prevStages,
+                    datasetName: this.policyDataSet
                   })
                 } else{
                   prevChoices = JSON.stringify({
                     policiesShown: this.policiesShown,
                     userChoices : this.userChoices,
-                    prevStages: this.props.prevStages
+                    prevStages: this.props.prevStages,
+                    datasetName: this.policyDataSet
                   })
   
                 }

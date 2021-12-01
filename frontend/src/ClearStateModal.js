@@ -9,7 +9,6 @@ import {
 
 class ClearStateModal extends React.Component {
     render(){
-        console.log(this.props)
         return (
             <Modal
             toggle={this.props.toggle}

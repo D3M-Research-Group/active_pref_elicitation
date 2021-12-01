@@ -1,7 +1,7 @@
 const schema = {
     type: "object",
     properties: {
-        username: {
+        turker_id: {
             type: 'string', minLength: 1
         },
       age: {

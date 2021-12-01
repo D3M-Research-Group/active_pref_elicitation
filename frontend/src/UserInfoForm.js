@@ -26,7 +26,7 @@ class UserInfoForm extends React.Component{
         super(props);
         this.state = {
             formData: {
-                username: '',
+                turker_id: '',
                 age: '',
                 race_ethnicity: '',
                 gender: '',
@@ -98,15 +98,15 @@ class UserInfoForm extends React.Component{
                     <Label style={{width: "100%"}} >Worker ID (Please use the MTurk Worker ID that we use to verify payment)</Label>
                     <Col  style={{width: "100%"}} md="4">
                         <Field
-                            name="username"
-                            value={formData.username}
+                            name="turker_id"
+                            value={formData.turker_id}
                             type="input"
                         />
                         <FieldError 
                         errorMessages={{
                             required: () => formData.usernameFieldMessage
                         }}
-                        name="username" />
+                        name="turker_id" />
                     </Col>
                     
                 </FormGroup>

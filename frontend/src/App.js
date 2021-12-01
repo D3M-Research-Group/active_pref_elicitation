@@ -16,6 +16,7 @@ import './Card.scss';
 
 // const SERVER_URL = "http://localhost:8000";
 const SERVER_URL = "https://api.cais-preference-elicitation.com";
+const DATASET_NAME = "UK_1360beds-25policies";
 
 class App extends React.Component {
   constructor(props){
@@ -63,7 +64,7 @@ class App extends React.Component {
 
       // form info
       userInfo: {
-        username: '',
+        turker_id: '',
         age: '',
         race_ethnicity: '',
         gender: '',
@@ -347,7 +348,8 @@ class App extends React.Component {
       const prevChoices = JSON.stringify({
         policiesShown: [],
         userChoices : [],
-        prevStages: [this.state.algorithmStage]
+        prevStages: [this.state.algorithmStage],
+        datasetName: DATASET_NAME
       })
       const response = await axios.post(`${SERVER_URL}/next_query/`, prevChoices,{
         headers: {
@@ -371,16 +373,16 @@ class App extends React.Component {
 
       // const csvData = await csv(policy_data_path)
       // const cleanedData = await getPolicyData(csvData);
-      const datasetName = "COVID";
+      // const datasetName = "COVID";
       const policyDataResponse = await axios({
         method: "GET",
-        url: `${SERVER_URL}/dataset?dataset=${datasetName}`
+        url: `${SERVER_URL}/dataset?dataset=${DATASET_NAME}`
       })
       
       this.setState({
         policyData: policyDataResponse.data.data,
         // policyData: cleanedData,
-        policyDataSet: datasetName
+        policyDataSet: DATASET_NAME
       }, function(){
         console.log(this.state.policyData);
         console.log(this.state.policyDataSet);
