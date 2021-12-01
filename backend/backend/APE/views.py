@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import SessionInfoSerializer, ChoicesSerializer, FormInfoSerializer
 from .models import SessionInfo, Choices, FormInfo
-from .policy_data import covid_data
+from .policy_data import covid_data_dict, all_policies_dict
 from .choice_paths import choices_data
 from elicitation_for_website.preference_classes import Item, Query
 import random
@@ -22,12 +22,13 @@ def get_last_stage(algo_stage_list):
 
 # TO-DO: perhaps move this function to a util file?
 def create_all_policies_list(json_data):
+    all_policies_dict = {}
     all_policies = []
     for i in range(len(json_data)):
         all_policies.append(Item(json_data[i]['values'], i, json_data[i]['labels']))
     return all_policies
 
-all_policies = create_all_policies_list(covid_data)
+# all_policies = create_all_policies_list(covid_data)
 
 # The viewsets base class provides an implementation of CRUD operations by default
 # But we only want to create new data, not anything else
@@ -137,6 +138,10 @@ class NextChoiceView(APIView):
         current_stage = get_last_stage(request.data['prevStages'])
         f_random = ALGO_STAGE_MAP[current_stage]
         recommended_item = None
+        covid_data = covid_data_dict.get(request.data['datasetName'], None)
+        all_policies = all_policies_dict.get(request.data['datasetName'], None)
+        if covid_data is None or all_policies is None:
+            print(f"got {request.data['datasetName']} as the datasetName")
         # need to handle different logic for if random or adaptive here. usually this is done in get next_query
         if f_random == 1:
             answered_queries, current_gamma = elicitation_data_prep(covid_data, request.data)

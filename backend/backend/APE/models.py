@@ -28,7 +28,7 @@ class FormInfo(models.Model):
     session_id = models.CharField(max_length=50,
                             primary_key=True,
                             verbose_name='session_id') # session id which relates this to SessionInfo
-    username = models.CharField(max_length=100, null=True)
+    turker_id = models.CharField(max_length=100, null=True)
     age = models.CharField(max_length=15)
     race_ethnicity = models.CharField(max_length=100)
     gender = models.CharField(max_length=20)

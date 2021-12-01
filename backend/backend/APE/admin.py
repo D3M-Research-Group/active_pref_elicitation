@@ -27,7 +27,7 @@ admin.site.register(Choices, ChoicesAdmin)
 
 class FormInfoAdmin(admin.ModelAdmin):
     list_display = ('session_id',
-                  'username',
+                  'turker_id',
                   'age',
                   'race_ethnicity',
                   'gender',

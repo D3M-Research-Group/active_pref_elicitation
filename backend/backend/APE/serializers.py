@@ -31,7 +31,7 @@ class FormInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormInfo
         fields = ('session_id',
-                  'username',
+                  'turker_id',
                   'age',
                   'race_ethnicity',
                   'gender',
