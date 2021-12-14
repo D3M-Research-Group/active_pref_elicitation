@@ -19,6 +19,7 @@ def get_next_query(items, answered_queries, gamma=0.0, problem_type="maximin",
         user: (User object). a User object
         items: (list(Item)). a list of preference_classes.Item objects
         eps: (optional). assumed indifference threshold of the agent.
+        answers: set of tuple pairs ((item_a.id, item_b.id))
 
     Outputs:
         policy_A: (int). the item ID of policy A for the next query
