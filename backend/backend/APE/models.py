@@ -20,6 +20,7 @@ class Choices(models.Model):
     policy_dataset = models.CharField(max_length=50) # name of the policy dataset e.g. COVID or LAHSA
     user_choice = models.CharField(max_length=20) # which of the two options did the user choose?
     prediction = models.CharField(max_length=20)
+    recommended_item = models.PositiveIntegerField(null=True)
     algorithm_stage = models.CharField(max_length=50, verbose_name="algorithm stage")
 
 class FormInfo(models.Model):
