@@ -6,10 +6,10 @@ import PolicyComparisonSection from './PolicyComparisonSection';
 import './PolicyComparisonSection'
 import axios from 'axios';
 import Intro from './Intro';
+import DEBUG from './App';
 
 
-// const SERVER_URL = "http://localhost:8000";
-const SERVER_URL = "https://api.cais-preference-elicitation.com";
+const SERVER_URL = DEBUG ? "http://localhost:8000" : "https://api.cais-preference-elicitation.com";
 
 const USER_CHOICES_MAP = {
   "1" : "policy_A",
@@ -51,6 +51,8 @@ class PairwiseComparison extends React.Component {
         this.updatePolicyIDs=this.props.updatePolicyIDs;
         this.updateStage = this.props.updateStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown;
+        this.updateRecommendedItem=this.props.updateRecommendedItem;
+        console.log("recommended policy", this.props.recommended_policy);
         this.pushBackStage=this.props.pushBackStage;
 
         this.incrementStep = this.props.incrementStep;
@@ -213,6 +215,7 @@ class PairwiseComparison extends React.Component {
                       policy_dataset: this.policyDataSet,
                       user_choice: USER_CHOICES_MAP[choice],
                       prediction: PREDICTIONS_MAP[predictions[idx]],
+                      recommended_item: idx < this.props.numExploration ? null : this.props.recommended_policy,
                       algorithm_stage: this.props.prevStages[idx]
                     }
                     // return JSON.stringify(choiceInfo);
@@ -230,6 +233,7 @@ class PairwiseComparison extends React.Component {
                       policy_dataset: this.policyDataSet,
                       user_choice: USER_CHOICES_MAP[choice],
                       prediction: PREDICTIONS_MAP[this.props.prevPredictions[idx]],
+                      recommended_item: idx < this.props.numExploration ? null : this.props.recommended_policy,
                       algorithm_stage: this.props.prevStages[idx]
                     }
                     // return JSON.stringify(choiceInfo);
@@ -250,7 +254,7 @@ class PairwiseComparison extends React.Component {
                 // need to unpack user info object or just add session_id key to it
                 var userFormInfo = this.userInfo;
                 userFormInfo['session_id'] = this.uuid;
-                
+                userFormInfo['turker_id']= userFormInfo['turker_id'].length === 0 ? null : userFormInfo['turker_id'];
                 userFormInfo = JSON.stringify(userFormInfo);
                 
                 // Post the choice info
@@ -272,7 +276,7 @@ class PairwiseComparison extends React.Component {
                     }
                   }
                 ).then((response) =>{
-                  console.log("Session info resonse", response)
+                  console.log("Session info response", response)
                 })
                 // Post the form info and then show end page
                 axios.post(`${SERVER_URL}/forminfo/`, userFormInfo,
@@ -297,6 +301,8 @@ class PairwiseComparison extends React.Component {
               // this.setState({loading: false, wrapup: false});
               
             } else {
+              // Need condition here to check if we are transitioning to validation stage
+              // if yes, then we need to update algorithm stage or maybe use algorithm_stage: this.props.prevStages[idx]?
               this.setState({loading: true}, () => {
                 // before we send the previous choices to the server, we need to update:
                 // selected, current stage, and policy shown
@@ -305,6 +311,10 @@ class PairwiseComparison extends React.Component {
                 this.pushBackPolicyShown();
                 this.props.writeStatetoLS();
                 console.log(this.props.prevStages);
+                console.log("nextStage", this.props.nextStage);
+                // var nextStage = this.props.prevStages.length < this.props.numExploration ? this.props.algorithmStage : "validation";
+                // console.log("algorithm", this.props.algorithmStage);
+                // console.log("nextStage", nextStage);
                 // this request needs to pass data to the endpoint
                 // if we are randomizing the display of policies, we need to reorder them before 
                 // sending them back to the backend to avoid Gurobi crashing
@@ -329,14 +339,18 @@ class PairwiseComparison extends React.Component {
                     policiesShown: policiesShown,
                     userChoices : userChoices,
                     prevStages: this.props.prevStages,
-                    datasetName: this.policyDataSet
+                    datasetName: this.policyDataSet,
+                    nextStage: this.props.nextStage,
+                    recommended_item: this.props.recommended_policy
                   })
                 } else{
                   prevChoices = JSON.stringify({
                     policiesShown: this.policiesShown,
                     userChoices : this.userChoices,
                     prevStages: this.props.prevStages,
-                    datasetName: this.policyDataSet
+                    datasetName: this.policyDataSet,
+                    nextStage: this.props.nextStage,
+                    recommended_item: this.props.recommended_policy
                   })
   
                 }
@@ -352,15 +366,15 @@ class PairwiseComparison extends React.Component {
                 .then((response) => {
                   console.log(this.props.randomize);
                   if(this.props.randomize){
-                    console.log("original policy_id" , response.data.policy_ids)
-                    console.log("original prediction" , response.data.prediction)
-                    this.props.randomizePolicyids(response.data.policy_ids, response.data.prediction)
+                    console.log("original policy_id" , response.data.policy_ids);
+                    console.log("original prediction" , response.data.prediction);
+                    this.props.randomizePolicyids(response.data.policy_ids, response.data.prediction);
                     
                   } else{
                     this.updatePolicyIDs(response.data.policy_ids);
-                    this.props.pushBackPrediction(response.data.prediction)
+                    this.props.pushBackPrediction(response.data.prediction);
                   }
-                  
+                  this.updateRecommendedItem(response.data.recommended_item);
                   // move to next step and update stage for the next step
                   this.incrementStep();
                   this.updateStage();
@@ -417,7 +431,6 @@ class PairwiseComparison extends React.Component {
               <h1 className="title">Question {this.stepNum} / {this.maxSteps}</h1>
               {
                 this.sectionInfo.map((section, index) => {
-                  console.log(index);
                   const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);
                   return(
                     <PolicyComparisonSection

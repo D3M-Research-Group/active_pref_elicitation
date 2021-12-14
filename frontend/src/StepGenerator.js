@@ -23,7 +23,10 @@ class Step extends React.Component{
         this.policy_ids = this.props.policy_ids;
         this.updatePolicyIDs=this.props.updatePolicyIDs;
         this.updateStage=this.props.updateStage;
+        this.numExploration=this.props.numExploration;
+        this.algorithmStage=this.props.algorithmStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown;
+        this.updateRecommendedItem=this.props.updateRecommendedItem;
         this.pushBackStage=this.props.pushBackStage;
         this.postFinalData=this.props.postFinalData;
         this.toggleEndPage = this.props.toggleEndPage;
@@ -56,9 +59,14 @@ class Step extends React.Component{
                     policy_ids={this.policy_ids}
                     stepNum={this.stepNum}
                     updatePolicyIDs={this.updatePolicyIDs}
+                    numExploration={this.props.numExploration}
+                    algorithmStage={this.props.algorithmStage}
+                    nextStage={this.props.nextStage}
                     updateStage = {this.updateStage}
                     prevStages={this.props.prevStages}
                     pushBackPolicyShown={this.pushBackPolicyShown}
+                    updateRecommendedItem={this.props.updateRecommendedItem}
+                    recommended_policy={this.props.recommended_policy}
                     pushBackStage={this.pushBackStage}
                     postFinalData={this.postFinalData}
                     writeStatetoLS={this.props.writeStatetoLS}
@@ -100,6 +108,9 @@ class StepList extends React.Component{
         this.sectionNames=this.props.sectionNames;
         this.updatePolicyIDs=this.props.updatePolicyIDs
         this.updateStage=this.props.updateStage;
+        this.numExploration=this.props.numExploration;
+        this.algorithmStage=this.props.algorithmStage;
+        this.nextStage=this.props.nextStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown
         this.pushBackStage=this.props.pushBackStage
         this.postFinalData=this.props.postFinalData;
@@ -143,6 +154,9 @@ class StepList extends React.Component{
                                 policy_ids={this.policy_ids}
                                 sectionNames={this.sectionNames}
                                 updatePolicyIDs={this.updatePolicyIDs}
+                                numExploration={this.props.numExploration}
+                                algorithmStage={this.props.algorithmStage}
+                                nextStage={this.props.nextStage}
                                 updateStage={this.updateStage}
                                 prevStages={this.props.prevStages}
                                 prevPredictions={this.props.prevPredictions}
@@ -152,6 +166,8 @@ class StepList extends React.Component{
                                 writeStatetoLS={this.props.writeStatetoLS}
                                 removeStateFromLS={this.props.removeStateFromLS}
                                 pushBackPrediction={this.props.pushBackPrediction}
+                                updateRecommendedItem={this.props.updateRecommendedItem}
+                                recommended_policy={this.props.recommended_policy}
                                 randomizePolicyids={this.props.randomizePolicyids}
                                 randomize={this.props.randomize}
                                 flipPrediction={this.props.flipPrediction}

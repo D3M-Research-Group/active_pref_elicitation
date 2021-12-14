@@ -12,10 +12,9 @@ import TopNavBar from './TopNavBar';
 import EndPage from './EndPage';
 import './Card.scss';
 
+export const DEBUG = false;
 
-
-// const SERVER_URL = "http://localhost:8000";
-const SERVER_URL = "https://api.cais-preference-elicitation.com";
+const SERVER_URL = DEBUG ? "http://localhost:8000" : "https://api.cais-preference-elicitation.com";
 const DATASET_NAME = "UK_1360beds-25policies";
 
 class App extends React.Component {
@@ -26,6 +25,7 @@ class App extends React.Component {
       currentStep: 0,
       userChoices : [],
       predictions : [],
+      recommended_policy: null,
       policiesShown: [], // store the policy ids we've seen so far as an array of arrays e.g., [[2,3], [3,4],...]
 
       // handle loading screen toggle
@@ -55,7 +55,9 @@ class App extends React.Component {
       // 0: adaptive, 1: fixed
       // Then, once we've gotten our policy of interest, we switch to "evaluation"
       // this info needs to be passed along when we make requests to get next query
-      algorithmStage: Math.floor(Math.random()*2) === 0 ? "adaptive" : "random",
+      // algorithmStage: Math.floor(Math.random()*2) === 0 ? "adaptive" : "random",
+      algorithmStage: "adaptive",
+      nextStage: '',
       prevStages: [],
 
       policy_ids: [],
@@ -81,6 +83,7 @@ class App extends React.Component {
     this.numExploration = 10;
     this.numValidation = 5;
     this.maxSteps = this.numExploration+this.numValidation;
+    this.state.nextStage=this.state.algorithmStage;
     this.uuid = uuidv4();
 
 
@@ -99,6 +102,7 @@ class App extends React.Component {
     this.pushBackChoices = this.pushBackChoices.bind(this);
     this.pushBackPrediction = this.pushBackPrediction.bind(this);
     this.pushBackPolicyShown = this.pushBackPolicyShown.bind(this);
+    this.updateRecommendedItem = this.updateRecommendedItem.bind(this);
     this.pushBackStage = this.pushBackStage.bind(this);
     this.postFinalData = this.postFinalData.bind(this);
     this.writeStatetoLS = this.writeStatetoLS.bind(this);
@@ -183,7 +187,6 @@ class App extends React.Component {
   }
 
   writeStatetoLS(){
-    console.log(this.state.userInfo);
     ls.set('APE_state', JSON.stringify(this.state))
   }
 
@@ -209,7 +212,7 @@ class App extends React.Component {
   incrementStep(){
     this.setState({
       currentStep : this.state.currentStep + 1
-    }, function(){ console.log(this.state.currentStep)})
+    }, function(){ console.log("Current step:", this.state.currentStep)})
     if(this.state.currentStep === 0){
       this.toggleShowSteps();
     }
@@ -222,9 +225,11 @@ class App extends React.Component {
   }
 
   updateStage(){
-    var stage = this.state.currentStep <= this.numExploration ? this.state.algorithmStage : "validation"
+    var stage = this.state.currentStep <= this.numExploration ? this.state.algorithmStage : "validation";
+    var nextStage = this.state.currentStep + 1 < this.numExploration ? this.state.algorithmStage : "validation"
     this.setState({
-      algorithmStage : stage
+      algorithmStage : stage,
+      nextStage: nextStage
     })
   }
 
@@ -239,6 +244,12 @@ class App extends React.Component {
   pushBackPrediction(prediction){
     this.state.predictions.push(prediction);
     console.log(this.state.predictions);
+  }
+
+  updateRecommendedItem(item){
+    this.setState({
+      recommended_policy: item
+    })
   }
   pushBackChoices(selected){
     this.state.userChoices.push(selected);
@@ -334,7 +345,7 @@ class App extends React.Component {
       // if we already have data in local storage, don't make requests
     } 
       
-      
+    console.log(this.state.algorithmStage);  
       
       // parse query string info
       const urlSearchParams = new URLSearchParams(window.location.search);
@@ -349,7 +360,8 @@ class App extends React.Component {
         policiesShown: [],
         userChoices : [],
         prevStages: [this.state.algorithmStage],
-        datasetName: DATASET_NAME
+        datasetName: DATASET_NAME,
+        nextStage: this.state.nextStage
       })
       const response = await axios.post(`${SERVER_URL}/next_query/`, prevChoices,{
         headers: {
@@ -368,6 +380,7 @@ class App extends React.Component {
 
       this.updatePolicyIDs(response.data.policy_ids);
       this.pushBackPrediction(response.data.prediction);
+      this.updateRecommendedItem(response.data.recommended_item);
       console.log(response);
       console.log("policy ids shown after async request", this.state.policiesShown);
 
@@ -427,9 +440,14 @@ class App extends React.Component {
               toggleEndPage={this.toggleEndPage}
               updatePolicyIDs={this.updatePolicyIDs}
               updateStage={this.updateStage}
+              numExploration={this.numExploration}
+              algorithmStage={this.state.algorithmStage}
+              nextStage={this.state.nextStage}
               pushBackPolicyShown={this.pushBackPolicyShown}
               pushBackStage={this.pushBackStage}
               pushBackPrediction={this.pushBackPrediction}
+              recommended_policy={this.state.recommended_policy}
+              updateRecommendedItem={this.updateRecommendedItem}
               prevPredictions={this.state.predictions}
               prevStages={this.state.prevStages}
               postFinalData={this.postFinalData}
