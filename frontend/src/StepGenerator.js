@@ -17,6 +17,7 @@ class Step extends React.Component{
         this.toggleWrapUp = this.props.toggleWrapUp;
         this.userChoices = this.props.userChoices;
         this.policiesShown = this.props.policiesShown;
+        this.timeOnPage = this.props.timeOnPage;
         this.policyDataSet = this.props.policyDataSet;
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
@@ -26,6 +27,7 @@ class Step extends React.Component{
         this.numExploration=this.props.numExploration;
         this.algorithmStage=this.props.algorithmStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown;
+        this.pushBackTimeElapsed=this.props.pushBackTimeElapsed;
         this.updateRecommendedItem=this.props.updateRecommendedItem;
         this.pushBackStage=this.props.pushBackStage;
         this.postFinalData=this.props.postFinalData;
@@ -53,6 +55,7 @@ class Step extends React.Component{
                     toggleEndPage={this.toggleEndPage}
                     userChoices = {this.userChoices}
                     policiesShown = {this.policiesShown}
+                    timeOnPage={this.timeOnPage}
                     policyDataSet = {this.policyDataSet}
                     incrementStep={this.incrementStep}
                     graphData={this.policyData}
@@ -65,6 +68,7 @@ class Step extends React.Component{
                     updateStage = {this.updateStage}
                     prevStages={this.props.prevStages}
                     pushBackPolicyShown={this.pushBackPolicyShown}
+                    pushBackTimeElapsed={this.pushBackTimeElapsed}
                     updateRecommendedItem={this.props.updateRecommendedItem}
                     recommended_policy={this.props.recommended_policy}
                     pushBackStage={this.pushBackStage}
@@ -93,6 +97,7 @@ class StepList extends React.Component{
         super(props)
         this.userChoices = this.props.userChoices;
         this.policiesShown = this.props.policiesShown;
+        this.timeOnPage = this.props.timeOnPage;
         this.policyDataSet = this.props.policyDataSet;
         this.maxSteps = this.props.maxSteps;
         this.choiceData = this.props.choiceData;
@@ -111,8 +116,9 @@ class StepList extends React.Component{
         this.numExploration=this.props.numExploration;
         this.algorithmStage=this.props.algorithmStage;
         this.nextStage=this.props.nextStage;
-        this.pushBackPolicyShown=this.props.pushBackPolicyShown
-        this.pushBackStage=this.props.pushBackStage
+        this.pushBackPolicyShown=this.props.pushBackPolicyShown;
+        this.pushBackTimeElapsed=this.props.pushBackTimeElapsed;
+        this.pushBackStage=this.props.pushBackStage;
         this.postFinalData=this.props.postFinalData;
 
         this.userInfo = this.props.userInfo;
@@ -148,6 +154,7 @@ class StepList extends React.Component{
                                 toggleWrapUp={this.toggleWrapUp}
                                 userChoices={this.userChoices}
                                 policiesShown = {this.policiesShown}
+                                timeOnPage = {this.timeOnPage}
                                 policyDataSet = {this.policyDataSet}
                                 incrementStep={this.incrementStep}
                                 policyData={this.policyData}
@@ -161,6 +168,7 @@ class StepList extends React.Component{
                                 prevStages={this.props.prevStages}
                                 prevPredictions={this.props.prevPredictions}
                                 pushBackPolicyShown={this.pushBackPolicyShown}
+                                pushBackTimeElapsed={this.pushBackTimeElapsed}
                                 pushBackStage={this.pushBackStage}
                                 postFinalData={this.postFinalData}
                                 writeStatetoLS={this.props.writeStatetoLS}

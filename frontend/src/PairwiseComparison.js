@@ -6,23 +6,10 @@ import PolicyComparisonSection from './PolicyComparisonSection';
 import './PolicyComparisonSection'
 import axios from 'axios';
 import Intro from './Intro';
-import DEBUG from './App';
+import * as Constants from "./constants";
 
+const SERVER_URL = Constants.SERVER_URL;
 
-const SERVER_URL = DEBUG ? "http://localhost:8000" : "https://api.cais-preference-elicitation.com";
-
-const USER_CHOICES_MAP = {
-  "1" : "policy_A",
-  "-1" : "policy_B",
-  "0" : "indifferent",
-}
-
-const PREDICTIONS_MAP = {
-  "1" : "policy_A",
-  "-1" : "policy_B",
-  "0" : "indifferent",
-  "garbage_validation": "garbage_validation"
-}
 
 
 class PairwiseComparison extends React.Component {
@@ -42,6 +29,7 @@ class PairwiseComparison extends React.Component {
         // post data
         this.userChoices = this.props.userChoices;
         this.policiesShown = this.props.policiesShown;
+        this.timeOnPage = this.props.timeOnPage;
         this.policyDataSet = this.props.policyDataSet;
         this.userInfo = this.props.userInfo;
         this.uuid = this.props.uuid;
@@ -51,6 +39,7 @@ class PairwiseComparison extends React.Component {
         this.updatePolicyIDs=this.props.updatePolicyIDs;
         this.updateStage = this.props.updateStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown;
+        this.pushBackTimeElapsed=this.props.pushBackTimeElapsed;
         this.updateRecommendedItem=this.props.updateRecommendedItem;
         console.log("recommended policy", this.props.recommended_policy);
         this.pushBackStage=this.props.pushBackStage;
@@ -126,6 +115,10 @@ class PairwiseComparison extends React.Component {
       });
     }
 
+    componentDidMount(){
+      this.setState({timeStart: Date.now()}, function(){console.log(this.state.timeStart)})
+    }
+
     async handlePost(){
       await this.setStateAsync({loading: true, wrapup: true});
       this.postFinalData();
@@ -143,13 +136,9 @@ class PairwiseComparison extends React.Component {
             // })
             
         } else{
-            // get next query
-            // this.getNextQuery(this.stepNum, this.state.selected);
-            // this.incrementStep();
-            // record the choice made
-            // console.log(this.state.selected);
-            // this.pushBackChoice(this.state.selected);
-            
+          // timeout after an hour
+          var elapsed_time = Math.min((Date.now() - this.state.timeStart)/1000, 3600000);
+          console.log("time elapsed: ", elapsed_time);
             // here we check if our next step will be greater than max steps
             // if so, we will toggle loading and wrapup, push back final choice,
             // post survey data and final choices, toggle loading and wrap up, and finally show the EndPage
@@ -160,6 +149,7 @@ class PairwiseComparison extends React.Component {
               this.pushBackStage();
               this.updatePolicyIDs(this.policy_ids);
               this.pushBackPolicyShown();
+              this.pushBackTimeElapsed(elapsed_time);
               this.props.writeStatetoLS();
 
               this.setState({loading: true, wrapup: true}, () => {
@@ -204,6 +194,7 @@ class PairwiseComparison extends React.Component {
                   console.log("policiesShown", policiesShown);
                   console.log("userChoices", userChoices);
                   console.log("predictions", predictions);
+                  console.log("timeOnPage", this.timeOnPage);
                   choicesInfo = userChoices.map((choice, idx) =>{
                     // console.log(this.policiesShown[idx][0])
                     console.log(this.props.prevStages[idx]);
@@ -213,10 +204,11 @@ class PairwiseComparison extends React.Component {
                       policy_a: policiesShown[idx][0],
                       policy_b: policiesShown[idx][1],
                       policy_dataset: this.policyDataSet,
-                      user_choice: USER_CHOICES_MAP[choice],
-                      prediction: PREDICTIONS_MAP[predictions[idx]],
+                      user_choice: Constants.USER_CHOICES_MAP[choice],
+                      prediction: Constants.PREDICTIONS_MAP[predictions[idx]],
                       recommended_item: idx < this.props.numExploration ? null : this.props.recommended_policy,
-                      algorithm_stage: this.props.prevStages[idx]
+                      algorithm_stage: this.props.prevStages[idx],
+                      time_on_page: this.timeOnPage[idx]
                     }
                     // return JSON.stringify(choiceInfo);
                     return choiceInfo;
@@ -231,10 +223,11 @@ class PairwiseComparison extends React.Component {
                       policy_a: this.policiesShown[idx][0],
                       policy_b: this.policiesShown[idx][1],
                       policy_dataset: this.policyDataSet,
-                      user_choice: USER_CHOICES_MAP[choice],
-                      prediction: PREDICTIONS_MAP[this.props.prevPredictions[idx]],
+                      user_choice: Constants.USER_CHOICES_MAP[choice],
+                      prediction: Constants.PREDICTIONS_MAP[this.props.prevPredictions[idx]],
                       recommended_item: idx < this.props.numExploration ? null : this.props.recommended_policy,
-                      algorithm_stage: this.props.prevStages[idx]
+                      algorithm_stage: this.props.prevStages[idx],
+                      time_on_page: this.timeOnPage[idx]
                     }
                     // return JSON.stringify(choiceInfo);
                     return choiceInfo;
@@ -309,6 +302,7 @@ class PairwiseComparison extends React.Component {
                 this.pushBackChoice(this.state.selected);
                 this.pushBackStage();
                 this.pushBackPolicyShown();
+                this.pushBackTimeElapsed(elapsed_time);
                 this.props.writeStatetoLS();
                 console.log(this.props.prevStages);
                 console.log("nextStage", this.props.nextStage);

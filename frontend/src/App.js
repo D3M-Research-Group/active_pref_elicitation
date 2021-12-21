@@ -11,11 +11,10 @@ import StepList from './StepGenerator';
 import TopNavBar from './TopNavBar';
 import EndPage from './EndPage';
 import './Card.scss';
+import * as Constants from "./constants";
 
-export const DEBUG = false;
-
-const SERVER_URL = DEBUG ? "http://localhost:8000" : "https://api.cais-preference-elicitation.com";
-const DATASET_NAME = "UK_1360beds-25policies";
+const SERVER_URL = Constants.SERVER_URL;
+const DATASET_NAME = Constants.DATASET_NAME;
 
 class App extends React.Component {
   constructor(props){
@@ -25,6 +24,7 @@ class App extends React.Component {
       currentStep: 0,
       userChoices : [],
       predictions : [],
+      timeOnPage: [],
       recommended_policy: null,
       policiesShown: [], // store the policy ids we've seen so far as an array of arrays e.g., [[2,3], [3,4],...]
 
@@ -55,8 +55,8 @@ class App extends React.Component {
       // 0: adaptive, 1: fixed
       // Then, once we've gotten our policy of interest, we switch to "evaluation"
       // this info needs to be passed along when we make requests to get next query
-      // algorithmStage: Math.floor(Math.random()*2) === 0 ? "adaptive" : "random",
-      algorithmStage: "adaptive",
+      algorithmStage: Math.floor(Math.random()*2) === 0 ? "adaptive" : "random",
+      // algorithmStage: "adaptive",
       nextStage: '',
       prevStages: [],
 
@@ -102,6 +102,7 @@ class App extends React.Component {
     this.pushBackChoices = this.pushBackChoices.bind(this);
     this.pushBackPrediction = this.pushBackPrediction.bind(this);
     this.pushBackPolicyShown = this.pushBackPolicyShown.bind(this);
+    this.pushBackTimeElapsed = this.pushBackTimeElapsed.bind(this);
     this.updateRecommendedItem = this.updateRecommendedItem.bind(this);
     this.pushBackStage = this.pushBackStage.bind(this);
     this.postFinalData = this.postFinalData.bind(this);
@@ -231,6 +232,10 @@ class App extends React.Component {
       algorithmStage : stage,
       nextStage: nextStage
     })
+  }
+
+  pushBackTimeElapsed(time){
+    this.state.timeOnPage.push(time);
   }
 
   pushBackPolicyShown(){
@@ -427,6 +432,7 @@ class App extends React.Component {
               key={this.state.currentStep.toString()} // key necessary for ensuring re-render on state change
               userChoices={this.state.userChoices}
               policiesShown={this.state.policiesShown}
+              timeOnPage={this.state.timeOnPage}
               maxSteps={this.maxSteps}
               policyData={this.state.policyData}
               policyDataSet={this.state.policyDataSet}
@@ -444,6 +450,7 @@ class App extends React.Component {
               algorithmStage={this.state.algorithmStage}
               nextStage={this.state.nextStage}
               pushBackPolicyShown={this.pushBackPolicyShown}
+              pushBackTimeElapsed={this.pushBackTimeElapsed}
               pushBackStage={this.pushBackStage}
               pushBackPrediction={this.pushBackPrediction}
               recommended_policy={this.state.recommended_policy}
