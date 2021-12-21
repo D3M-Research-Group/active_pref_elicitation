@@ -22,6 +22,7 @@ class Choices(models.Model):
     prediction = models.CharField(max_length=20)
     recommended_item = models.PositiveIntegerField(null=True)
     algorithm_stage = models.CharField(max_length=50, verbose_name="algorithm stage")
+    time_on_page = models.FloatField(verbose_name="Time Spent on Question (seconds)")
 
 class FormInfo(models.Model):
     # Need some fields to be nullable so that we can use this model for

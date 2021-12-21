@@ -191,7 +191,6 @@ class NextChoiceView(APIView):
     # TO-DO: Do we need to track gamma?
     # TO-DO: add logic for once we are in the validation stage
     def post(self, request, format=None):
-        print(dict(request.data))
         print(request.data)
         # current_stage = get_last_stage(request.data['prevStages'])
         # f_random = ALGO_STAGE_MAP[current_stage]
@@ -204,33 +203,40 @@ class NextChoiceView(APIView):
             print(f"got {request.data['datasetName']} as the datasetName")
         answered_queries, current_gamma = elicitation_data_prep(covid_data, request.data)
         # need to handle different logic for if random or adaptive here. usually this is done in get next_query
-        if f_random == 1:
-            item_A, item_B, predicted_response, objval = get_next_query(all_policies, answered_queries,f_random=f_random, verbose=True)
-        elif f_random == 2:
-            # now we need to choose a random policy to compare to:
-            previous_validation_shown = get_shown_validation_policies(request)
-            print(f"previous_validation_shown: {previous_validation_shown}")
-            if len(previous_validation_shown) == 0:
-                # we are in the validation phase and we want to call the robust_recommend_subproblem function
-                recommended_item, _ , _ = robust_recommend_subproblem(answered_queries, all_policies, problem_type="maximin",
-                                    verbose=False,
-                                    gamma=0.0)
-                print(f"recommended_item: {recommended_item.id}")
-                rand_policy = choose_random_comparison_policy(all_policies, recommended_item.id,set(previous_validation_shown))
-                item_A = recommended_item.id
-                item_B = rand_policy.id
-                recommended_item = recommended_item.id
-            else:
-                # get recommended item id from response data 
-                recommended_item = request.data['recommended_item']
-                rand_policy = choose_random_comparison_policy(all_policies, recommended_item,set(previous_validation_shown))
-                item_A = recommended_item
-                item_B = rand_policy.id
-            predicted_response = 1 # setting as item_A since we are in validation and comparing our recommended item to a randomly chosen policy
-        else:
-            # what if we are in the validation stage?
-            answered_queries_tuple = choice_path_data_prep(request.data)
+        answered_queries_tuple = choice_path_data_prep(request.data)
+        if len(answered_queries_tuple) == 0:
+            # we haven't answered any queries yet, give the same query to both streams
             item_A, item_B, predicted_response, recommended_item = look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid_data)
+        else:
+            # we have answered at least one query, now we tailor queries based on the group the user was assigned to
+            if f_random == 1:
+                # we are in the random stream
+                item_A, item_B, predicted_response, objval = get_next_query(all_policies, answered_queries,f_random=f_random, verbose=True)
+            elif f_random == 2:
+                # now we need to choose a random policy to compare to:
+                previous_validation_shown = get_shown_validation_policies(request)
+                print(f"previous_validation_shown: {previous_validation_shown}")
+                if len(previous_validation_shown) == 0:
+                    # we are in the validation phase and we want to call the robust_recommend_subproblem function
+                    recommended_item, _ , _ = robust_recommend_subproblem(answered_queries, all_policies, problem_type="maximin",
+                                        verbose=False,
+                                        gamma=0.0)
+                    print(f"recommended_item: {recommended_item.id}")
+                    rand_policy = choose_random_comparison_policy(all_policies, recommended_item.id,set(previous_validation_shown))
+                    item_A = recommended_item.id
+                    item_B = rand_policy.id
+                    recommended_item = recommended_item.id
+                else:
+                    # get recommended item id from response data 
+                    recommended_item = request.data['recommended_item']
+                    rand_policy = choose_random_comparison_policy(all_policies, recommended_item,set(previous_validation_shown))
+                    item_A = recommended_item
+                    item_B = rand_policy.id
+                predicted_response = 1 # setting as item_A since we are in validation and comparing our recommended item to a randomly chosen policy
+            else:
+                # else we are in the adaptive stream
+                answered_queries_tuple = choice_path_data_prep(request.data)
+                item_A, item_B, predicted_response, recommended_item = look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid_data)
         print(f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}")
         # we need to store the recommended item information on the front end
         response_dict = {"policy_ids": [item_A, item_B], "prediction" : predicted_response, "recommended_item": recommended_item}

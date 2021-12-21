@@ -26,7 +26,8 @@ class ChoicesSerializer(serializers.ModelSerializer):
                     'user_choice',
                     'prediction',
                     'algorithm_stage',
-                    'recommended_item')
+                    'recommended_item',
+                    'time_on_page')
 
 class FormInfoSerializer(serializers.ModelSerializer):
     class Meta:
