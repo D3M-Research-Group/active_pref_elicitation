@@ -19,15 +19,19 @@ ALGO_STAGE_MAP = {
     "validation": 2
 }
 
+
 def get_last_stage(algo_stage_list):
     return algo_stage_list[-1]
 
 # TO-DO: perhaps move this function to a util file?
+
+
 def create_all_policies_list(json_data):
     all_policies_dict = {}
     all_policies = []
     for i in range(len(json_data)):
-        all_policies.append(Item(json_data[i]['values'], i, json_data[i]['labels']))
+        all_policies.append(
+            Item(json_data[i]['values'], i, json_data[i]['labels']))
     return all_policies
 
 # all_policies = create_all_policies_list(covid_data)
@@ -37,11 +41,13 @@ def create_all_policies_list(json_data):
 # class SessionInfoView(viewsets.ModelViewSet):
 #     serializer_class = SessionInfoSerializer
 #     queryset = SessionInfo.objects.all()
+
+
 class SessionInfoView(mixins.CreateModelMixin,
-                  GenericAPIView):
+                      GenericAPIView):
     queryset = SessionInfo.objects.all()
     serializer_class = SessionInfoSerializer
-    
+
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
@@ -54,6 +60,7 @@ class CreateListModelMixin(object):
             kwargs['many'] = True
         return super(CreateListModelMixin, self).get_serializer(*args, **kwargs)
 
+
 class ChoicesView(CreateListModelMixin, CreateAPIView):
     # Here we are expecting to get a JSON object with the session id,
     # an array of user choices
@@ -65,12 +72,15 @@ class ChoicesView(CreateListModelMixin, CreateAPIView):
 class FormInfoView(mixins.CreateModelMixin, GenericAPIView):
     queryset = FormInfo.objects.all()
     serializer_class = FormInfoSerializer
+
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
 
 def get_smallest_gamma_stub():
     print("[WARN]: Using get_smallest_gamma_stub() function")
     return random.randint(1, 100) / 100.0
+
 
 def make_item(json_data, policy_id):
     """ generate an Item class object using the policy data set and a given policy id
@@ -78,7 +88,8 @@ def make_item(json_data, policy_id):
         policy_id: an integer id
     """
     return Item(json_data[policy_id]['values'], policy_id,
-         json_data[policy_id]['labels'])
+                json_data[policy_id]['labels'])
+
 
 def elicitation_data_prep(json_data, response_data):
     """ transform the response data and json data to return a list of Query objects
@@ -99,11 +110,11 @@ def elicitation_data_prep(json_data, response_data):
         policy_B = current_policy[1]
         # Item(features, id, feature_names)
         item_A = Item(json_data[policy_A]['values'], policy_A,
-         json_data[policy_A]['labels'])
+                      json_data[policy_A]['labels'])
         item_B = Item(json_data[policy_B]['values'], policy_B,
-         json_data[policy_B]['labels'])
+                      json_data[policy_B]['labels'])
         answered_queries.append(Query(item_A, item_B, current_choice))
-    
+
     # looks like the current gamma just chooses a random integer?
     current_gamma = get_smallest_gamma_stub()
     return answered_queries, current_gamma
@@ -129,6 +140,7 @@ def choice_path_data_prep(response_data):
         answered_queries.append((policy_A, policy_B, current_choice))
     return tuple(answered_queries)
 
+
 def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0):
     """ this function is just the last part of `get_next_query` where we calculate the robust utility for the two suggested options
     Args:
@@ -137,8 +149,10 @@ def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0):
         answered_queries: list of Query class objects
         gamma: gamma value, default is 0.0
     """
-    robust_utility_a, _ = robust_utility(item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
-    robust_utility_b, _ = robust_utility(item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
+    robust_utility_a, _ = robust_utility(
+        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
+    robust_utility_b, _ = robust_utility(
+        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
 
     # predict the agent's response
     if robust_utility_a > robust_utility_b:
@@ -149,16 +163,20 @@ def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0):
         predicted_response = 0
     return predicted_response
 
+
 def look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid_data):
     print(f"answered_queries: {answered_queries_tuple}")
-    print(f"next_query_tuple: {choices_data.get(answered_queries_tuple, None)}")
+    print(
+        f"next_query_tuple: {choices_data.get(answered_queries_tuple, None)}")
     next_query_tuple = choices_data.get(answered_queries_tuple, None)
     item_A_id, item_B_id = next_query_tuple
     item_A = make_item(covid_data, item_A_id)
     item_B = make_item(covid_data, item_B_id)
-    predicted_response = get_predicted_response(item_A, item_B, answered_queries, gamma=0.0)
+    predicted_response = get_predicted_response(
+        item_A, item_B, answered_queries, gamma=0.0)
     recommended_item = None
     return item_A_id, item_B_id, predicted_response, recommended_item
+
 
 def choose_random_comparison_policy(items, fixed_policy_id, answers=set()):
     done = True
@@ -166,9 +184,10 @@ def choose_random_comparison_policy(items, fixed_policy_id, answers=set()):
         item_b = np.random.choice(items, 1, replace=False)
         item_b_id = item_b[0].id
         if fixed_policy_id != item_b_id:
-            if (fixed_policy_id,item_b_id) not in answers:
+            if (fixed_policy_id, item_b_id) not in answers:
                 done = False
     return item_b[0]
+
 
 def get_shown_validation_policies(request_data):
     stage_list = request_data.data['prevStages']
@@ -184,8 +203,10 @@ def get_shown_validation_policies(request_data):
     return tuple(tuple(sub) for sub in validation_shown)
 
 # NextChoice is a generic view
+
+
 class NextChoiceView(APIView):
-    # TO-DO: do checks on request data 
+    # TO-DO: do checks on request data
     # dynamic way to choose which data set?
     # maybe add dataset name to request?
     # TO-DO: Do we need to track gamma?
@@ -201,50 +222,56 @@ class NextChoiceView(APIView):
         all_policies = all_policies_dict.get(request.data['datasetName'], None)
         if covid_data is None or all_policies is None:
             print(f"got {request.data['datasetName']} as the datasetName")
-        answered_queries, current_gamma = elicitation_data_prep(covid_data, request.data)
+        answered_queries, current_gamma = elicitation_data_prep(
+            covid_data, request.data)
         # need to handle different logic for if random or adaptive here. usually this is done in get next_query
-        answered_queries_tuple = choice_path_data_prep(request.data)
-        if len(answered_queries_tuple) == 0:
-            # we haven't answered any queries yet, give the same query to both streams
-            item_A, item_B, predicted_response, recommended_item = look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid_data)
-        else:
-            # we have answered at least one query, now we tailor queries based on the group the user was assigned to
-            if f_random == 1:
-                # we are in the random stream
-                item_A, item_B, predicted_response, objval = get_next_query(all_policies, answered_queries,f_random=f_random, verbose=True)
-            elif f_random == 2:
-                # now we need to choose a random policy to compare to:
-                previous_validation_shown = get_shown_validation_policies(request)
-                print(f"previous_validation_shown: {previous_validation_shown}")
-                if len(previous_validation_shown) == 0:
-                    # we are in the validation phase and we want to call the robust_recommend_subproblem function
-                    recommended_item, _ , _ = robust_recommend_subproblem(answered_queries, all_policies, problem_type="maximin",
-                                        verbose=False,
-                                        gamma=0.0)
-                    print(f"recommended_item: {recommended_item.id}")
-                    rand_policy = choose_random_comparison_policy(all_policies, recommended_item.id,set(previous_validation_shown))
-                    item_A = recommended_item.id
-                    item_B = rand_policy.id
-                    recommended_item = recommended_item.id
-                else:
-                    # get recommended item id from response data 
-                    recommended_item = request.data['recommended_item']
-                    rand_policy = choose_random_comparison_policy(all_policies, recommended_item,set(previous_validation_shown))
-                    item_A = recommended_item
-                    item_B = rand_policy.id
-                predicted_response = 1 # setting as item_A since we are in validation and comparing our recommended item to a randomly chosen policy
+        # TODO: first query shown depends on which stream assigned to, remove first step if else
+        if f_random == 1:
+            # we are in the random stream
+            item_A, item_B, predicted_response, objval = get_next_query(
+                all_policies, answered_queries, f_random=f_random, verbose=True)
+        elif f_random == 2:
+            # we are in the validation stage
+            # now we need to choose a random policy to compare to:
+            previous_validation_shown = get_shown_validation_policies(request)
+            print(f"previous_validation_shown: {previous_validation_shown}")
+            if len(previous_validation_shown) == 0:
+                # we are in the validation phase and we want to call the robust_recommend_subproblem function
+                recommended_item, _, _ = robust_recommend_subproblem(answered_queries, all_policies, problem_type="maximin",
+                                                                     verbose=False,
+                                                                     gamma=0.0)
+                print(f"recommended_item: {recommended_item.id}")
+                rand_policy = choose_random_comparison_policy(
+                    all_policies, recommended_item.id, set(previous_validation_shown))
+                item_A = recommended_item.id
+                item_B = rand_policy.id
+                recommended_item = recommended_item.id
             else:
-                # else we are in the adaptive stream
-                answered_queries_tuple = choice_path_data_prep(request.data)
-                item_A, item_B, predicted_response, recommended_item = look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid_data)
-        print(f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}")
+                # get recommended item id from response data
+                recommended_item = request.data['recommended_item']
+                rand_policy = choose_random_comparison_policy(
+                    all_policies, recommended_item, set(previous_validation_shown))
+                item_A = recommended_item
+                item_B = rand_policy.id
+            # setting as item_A since we are in validation and comparing our recommended item to a randomly chosen policy
+            predicted_response = 1
+        else:
+            # else we are in the adaptive stream
+            # TODO: how to handle case where the user makes a clearly bad choice? Especially in the first round of adaptive?
+            answered_queries_tuple = choice_path_data_prep(request.data)
+            item_A, item_B, predicted_response, recommended_item = look_up_choice(
+                answered_queries, answered_queries_tuple, choices_data, covid_data)
+        print(
+            f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}")
         # we need to store the recommended item information on the front end
-        response_dict = {"policy_ids": [item_A, item_B], "prediction" : predicted_response, "recommended_item": recommended_item}
+        response_dict = {"policy_ids": [
+            item_A, item_B], "prediction": predicted_response, "recommended_item": recommended_item}
         return Response(response_dict)
+
 
 class PolicyDataView(APIView):
     def get(self, request, format=None):
-        dataset_name = request.GET.get('dataset',None)
+        dataset_name = request.GET.get('dataset', None)
         print(dataset_name)
         if dataset_name is not None:
             covid_data = covid_data_dict.get(dataset_name, None)
