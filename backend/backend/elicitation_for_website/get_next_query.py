@@ -4,14 +4,15 @@ from gurobipy import *
 
 from .gurobi_functions import create_mip_model, optimize
 from .preference_classes import robust_utility, Query, is_feasible, Item, User
-from .static_elicitation import  static_mip_optimal
+from .static_elicitation import static_mip_optimal
 from .utils import U0_positive_normed
 from random import randint, uniform
 from time import sleep
 
+
 def get_next_query(items, answered_queries, gamma=0.0, problem_type="maximin",
                    eps=0.0,
-                   verbose=False, f_random = 0,answers = set()):
+                   verbose=False, f_random=0, answers=set()):
     """
     return the next query (policy_A and policy_B) to ask a user, given their username. use optimal robust elicitation
 
@@ -35,21 +36,23 @@ def get_next_query(items, answered_queries, gamma=0.0, problem_type="maximin",
         assert isinstance(query, Query)
 
     # if the user does not have any answered queries, return a random query:
-    #if len(answered_queries) == 0 or f_random == 1 or len(answered_queries ) > 10:
+    # if len(answered_queries) == 0 or f_random == 1 or len(answered_queries ) > 10:
+    # TO-DO: remove extra condition
     if f_random == 1 or len(answered_queries) > 10:
         done = True
         while done:
             item_b, item_a = np.random.choice(items, 2, replace=False)
             if item_a.id < item_b.id:
-                if (item_a.id,item_b.id) not in answers:
+                if (item_a.id, item_b.id) not in answers:
                     done = False
-        
-        if len(answered_queries) > 10: #in validation we do not care about the prediction (it should always be fixed policy)
+
+        # in validation we do not care about the prediction (it should always be fixed policy)
+        if len(answered_queries) > 10:
             predicted_response = 'garbage_validation'
 
-        else: #must be random exploration stage, so find the predicted choice
+        else:  # must be random exploration stage, so find the predicted choice
             _, _, predicted_response = find_random_query_prediction(answered_queries, items, item_a, item_b, gamma=gamma,
-                                                                problem_type=problem_type, eps=0.0)
+                                                                    problem_type=problem_type, eps=0.0)
         objval = None
 
     else:
@@ -61,7 +64,8 @@ def get_next_query(items, answered_queries, gamma=0.0, problem_type="maximin",
         print("predicted is", predicted_response)
     return item_a.id, item_b.id, predicted_response, objval
 
-def find_optimal_query_mip(answered_queries,items,gamma=0.0, problem_type="maximin", eps=0.0):
+
+def find_optimal_query_mip(answered_queries, items, gamma=0.0, problem_type="maximin", eps=0.0):
     """
         use the static elicitation MIP to find the next optimal query to ask. the next query can be constructed using any
         of the items.
@@ -97,8 +101,10 @@ def find_optimal_query_mip(answered_queries,items,gamma=0.0, problem_type="maxim
     item_a_opt = queries[-1].item_A
     item_b_opt = queries[-1].item_B
 
-    robust_utility_a, _ = robust_utility(item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
-    robust_utility_b, _ = robust_utility(item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
+    robust_utility_a, _ = robust_utility(
+        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
+    robust_utility_b, _ = robust_utility(
+        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
 
     # predict the agent's response
     if robust_utility_a > robust_utility_b:
@@ -111,8 +117,7 @@ def find_optimal_query_mip(answered_queries,items,gamma=0.0, problem_type="maxim
     return item_a_opt, item_b_opt, predicted_response, objval
 
 
-
-def find_random_query_prediction(answered_queries,items,item_a,item_b,gamma=0.0, problem_type="maximin", eps=0.0):
+def find_random_query_prediction(answered_queries, items, item_a, item_b, gamma=0.0, problem_type="maximin", eps=0.0):
     """
         use the static elicitation MIP to find the next optimal query to ask. the next query can be constructed using any
         of the items.
@@ -131,14 +136,15 @@ def find_random_query_prediction(answered_queries,items,item_a,item_b,gamma=0.0,
 
     K = len(answered_queries) + 1
 
-
     item_a_opt = items[item_a.id]
     item_b_opt = items[item_b.id]
 
-    robust_utility_a, _ = robust_utility(item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
-    robust_utility_b, _ = robust_utility(item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
+    robust_utility_a, _ = robust_utility(
+        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
+    robust_utility_b, _ = robust_utility(
+        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma)
     # sleep(randint(2, 5)) # this is a long time to sleep...
-    sleep(round(uniform(0.5, 1),2))
+    sleep(round(uniform(0.5, 1), 2))
     if robust_utility_a is None or robust_utility_b is None:
         return item_a_opt.id, item_b_opt.id, "infeasible"
     # predict the agent's response
@@ -149,9 +155,7 @@ def find_random_query_prediction(answered_queries,items,item_a,item_b,gamma=0.0,
     else:
         predicted_response = 0
 
-
     return item_a_opt.id, item_b_opt.id, predicted_response
-
 
 
 def find_optimal_query(answered_queries, items,
@@ -179,7 +183,8 @@ def find_optimal_query(answered_queries, items,
     response_obj_values = [None] * len(Query.valid_responses)
 
     # get all item pairs
-    query_list = [Query(item_A, item_B) for item_A, item_B in itertools.combinations(items, 2)]
+    query_list = [Query(item_A, item_B)
+                  for item_A, item_B in itertools.combinations(items, 2)]
 
     # make sure that not all queries have been answered
     assert len(answered_queries) < len(query_list)
@@ -203,18 +208,21 @@ def find_optimal_query(answered_queries, items,
             # find the worst-case recommendation utility for each response
             q.response = r
             queries = answered_queries + [q]
-            response_obj_values[j], _, _ = robust_recommend_subproblem(queries, items, verbose=verbose, eps=eps)
+            response_obj_values[j], _, _ = robust_recommend_subproblem(
+                queries, items, verbose=verbose, eps=eps)
 
         # if all responses are infeasible, raise an Exception
         if all(v is None for v in response_obj_values):
             raise Exception("all responses are infeasible")
 
         # take the minimum objective value that is not None
-        query_objective_values[i] = min([v for v in response_obj_values if v is not None])
+        query_objective_values[i] = min(
+            [v for v in response_obj_values if v is not None])
 
     # if there are >1 optimal queries, select one at random
     max_obj = max(query_objective_values)
-    optimal_query_indices = np.argwhere(query_objective_values == max_obj).flatten()
+    optimal_query_indices = np.argwhere(
+        query_objective_values == max_obj).flatten()
     optimal_ind = rs.choice(optimal_query_indices, 1)[0]
 
     # get the items from the optimal pair
@@ -223,8 +231,10 @@ def find_optimal_query(answered_queries, items,
     item_b_opt = q.item_B
 
     # calculate the robust utilities for each item
-    robust_utility_a, _ = robust_utility(item_a_opt, answered_queries=answered_queries)
-    robust_utility_b, _ = robust_utility(item_b_opt, answered_queries=answered_queries)
+    robust_utility_a, _ = robust_utility(
+        item_a_opt, answered_queries=answered_queries)
+    robust_utility_b, _ = robust_utility(
+        item_b_opt, answered_queries=answered_queries)
 
     # predict the agent's response
     if robust_utility_a > robust_utility_b:
@@ -336,12 +346,12 @@ def robust_recommend_subproblem(answered_queries, items, problem_type="maximin",
 
     if problem_type == "maximin":
         obj = (
-            quicksum([b_vec[j] * beta_vars[j] for j in range(m_const)]) + gamma * mu_var
+            quicksum([b_vec[j] * beta_vars[j]
+                     for j in range(m_const)]) + gamma * mu_var
         )
         m.setObjective(obj, sense=GRB.MAXIMIZE)
     elif problem_type == "mmr":
         m.setObjective(theta_var, sense=GRB.MINIMIZE)
-
 
     m.Params.DualReductions = 0
     # m.write("recommendation.lp")
@@ -364,7 +374,6 @@ def robust_recommend_subproblem(answered_queries, items, problem_type="maximin",
     elif m.status != GRB.OPTIMAL:
         raise Exception("gurobi model is not optimal")
 
-
     # find the recommended item
     y_vals = np.array([var.x for var in y_vars.values()])
     selected_items = np.argwhere(y_vals > 0.5)
@@ -374,9 +383,11 @@ def robust_recommend_subproblem(answered_queries, items, problem_type="maximin",
     recommended_item = items[selected_items[0][0]]
 
     # finally, find the minimum u-vector
-    min_u_objval, u_vector = robust_utility(recommended_item, answered_queries=answered_queries,gamma_inconsistencies=gamma)
+    min_u_objval, u_vector = robust_utility(
+        recommended_item, answered_queries=answered_queries, gamma_inconsistencies=gamma)
 
     return recommended_item, m.objVal, u_vector
+
 
 def add_rec_dual_variables(
     m,
@@ -396,7 +407,8 @@ def add_rec_dual_variables(
     if gamma > 0:
         # dual variable for inconsistencies constraint
         if problem_type == "maximin":
-            mu_var = m.addVar(vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=0.0, name="mu")
+            mu_var = m.addVar(vtype=GRB.CONTINUOUS, lb=-
+                              GRB.INFINITY, ub=0.0, name="mu")
         if problem_type == "mmr":
             mu_var = m.addVar(
                 vtype=GRB.CONTINUOUS, lb=0.0, ub=GRB.INFINITY, name=f"mu_{mmr_item.id}"
@@ -426,7 +438,8 @@ def add_rec_dual_variables(
     if gamma > 0:
         if problem_type == "maximin":
             for k in range(K):
-                m.addConstr(alpha_vars[k] + mu_var <= 0, name=f"alpha_constr_k{k}")
+                m.addConstr(alpha_vars[k] + mu_var <= 0,
+                            name=f"alpha_constr_k{k}")
         if problem_type == "mmr":
             for k in range(K):
                 m.addConstr(
