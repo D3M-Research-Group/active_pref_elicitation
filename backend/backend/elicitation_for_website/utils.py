@@ -1,6 +1,7 @@
 import time
 import os
 import numpy as np
+from scipy.special import erfinv
 
 def generate_filepath(output_dir, name, extension):
     # generate filepath, of the format <name>_YYYYMMDD_HHMMDD<extension>
@@ -48,3 +49,15 @@ def U0_positive_normed(num_features):
         (np.repeat(0.0, num_features), np.repeat(-1.0, num_features), [1.0], [-1.0])
     )
     return B_mat, b_vec
+
+def get_gamma(k, sigma, confidence_level):
+    sigma_hat = np.sqrt(2.0 * k * (sigma ** 2))
+
+    gamma = (
+        sigma_hat * np.sqrt(2) * erfinv(2.0 * confidence_level - 1.0)
+    )
+
+    if np.isnan(gamma):
+        gamma = 0.0
+
+    return gamma

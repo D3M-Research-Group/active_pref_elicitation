@@ -10,6 +10,7 @@ from .models import SessionInfo, Choices, FormInfo
 from .policy_data import covid_data_dict, all_policies_dict
 from .choice_paths import choices_data
 from elicitation_for_website.preference_classes import Item, Query
+from elicitation_for_website.utils import get_gamma
 import random
 import numpy as np
 
@@ -116,7 +117,10 @@ def elicitation_data_prep(json_data, response_data):
         answered_queries.append(Query(item_A, item_B, current_choice))
 
     # looks like the current gamma just chooses a random integer?
-    current_gamma = get_smallest_gamma_stub()
+    #current_gamma = get_smallest_gamma_stub()
+
+    current_gamma = get_gamma(len(answered_queries) + 1, sigma=0.1, confidence_level=0.9)
+
     return answered_queries, current_gamma
 
 
@@ -164,7 +168,7 @@ def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0):
     return predicted_response
 
 
-def look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid_data):
+def look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid_data, gamma):
     print(f"answered_queries: {answered_queries_tuple}")
     print(
         f"next_query_tuple: {choices_data.get(answered_queries_tuple, None)}")
@@ -173,7 +177,7 @@ def look_up_choice(answered_queries, answered_queries_tuple, choices_data, covid
     item_A = make_item(covid_data, item_A_id)
     item_B = make_item(covid_data, item_B_id)
     predicted_response = get_predicted_response(
-        item_A, item_B, answered_queries, gamma=0.0)
+        item_A, item_B, answered_queries, gamma=gamma)
     recommended_item = None
     return item_A_id, item_B_id, predicted_response, recommended_item
 
@@ -229,7 +233,7 @@ class NextChoiceView(APIView):
         if f_random == 1:
             # we are in the random stream
             item_A, item_B, predicted_response, objval = get_next_query(
-                all_policies, answered_queries, f_random=f_random, verbose=True)
+                all_policies, answered_queries, gamma=current_gamma, f_random=f_random, verbose=True)
         elif f_random == 2:
             # we are in the validation stage
             # now we need to choose a random policy to compare to:
@@ -239,7 +243,7 @@ class NextChoiceView(APIView):
                 # we are in the validation phase and we want to call the robust_recommend_subproblem function
                 recommended_item, _, _ = robust_recommend_subproblem(answered_queries, all_policies, problem_type="maximin",
                                                                      verbose=False,
-                                                                     gamma=0.0)
+                                                                     gamma=current_gamma)
                 print(f"recommended_item: {recommended_item.id}")
                 rand_policy = choose_random_comparison_policy(
                     all_policies, recommended_item.id, set(previous_validation_shown))
@@ -260,7 +264,7 @@ class NextChoiceView(APIView):
             # TODO: how to handle case where the user makes a clearly bad choice? Especially in the first round of adaptive?
             answered_queries_tuple = choice_path_data_prep(request.data)
             item_A, item_B, predicted_response, recommended_item = look_up_choice(
-                answered_queries, answered_queries_tuple, choices_data, covid_data)
+                answered_queries, answered_queries_tuple, choices_data, covid_data, gamma=current_gamma)
         print(
             f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}")
         # we need to store the recommended item information on the front end
