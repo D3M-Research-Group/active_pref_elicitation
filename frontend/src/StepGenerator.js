@@ -39,7 +39,6 @@ class Step extends React.Component{
 
     render() { 
         if(this.currentStep !== this.stepNum ){
-            // console.log("I am step "+ this.stepNum+ " and I am hidden." + " the current step is " + this.currentStep);
             return null
         }
         return(
