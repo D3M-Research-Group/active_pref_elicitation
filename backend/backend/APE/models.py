@@ -1,3 +1,4 @@
+from sre_parse import Verbose
 from django.db import models
 
 # Session info
@@ -23,6 +24,7 @@ class Choices(models.Model):
     recommended_item = models.PositiveIntegerField(null=True)
     algorithm_stage = models.CharField(max_length=50, verbose_name="algorithm stage")
     time_on_page = models.FloatField(verbose_name="Time Spent on Question (seconds)")
+    # gamma = models.FloatField(verbose_name="Gamma value")
 
 class FormInfo(models.Model):
     # Need some fields to be nullable so that we can use this model for
