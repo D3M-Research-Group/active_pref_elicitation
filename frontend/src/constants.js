@@ -1,4 +1,4 @@
-export const DEBUG = true;
+export const DEBUG = false;
 
 export const SERVER_URL = DEBUG ? "http://localhost:8000" : "https://api.cais-preference-elicitation.com";
 export const DATASET_NAME = "UK_6781beds-25policies";

@@ -144,6 +144,10 @@ class UserInfoForm extends React.Component{
                                     name: "80+",
                                     label: "80+",
                                     value: "80+",
+                                },{
+                                    name: "Prefer not to Answer",
+                                    label: "Prefer not to Answer",
+                                    value: "Prefer not to Answer",
                                 }
                             ]}
                             value={formData.age}
@@ -353,6 +357,10 @@ class UserInfoForm extends React.Component{
                                     name: "Doctorate degree",
                                     label: "Doctorate degree",
                                     value: "Doctorate degree",
+                                },{
+                                    name: "Prefer not to Answer",
+                                    label: "Prefer not to Answer",
+                                    value: "Prefer not to Answer",
                                 }
                             ]}
                             value={formData.education}
@@ -442,6 +450,10 @@ class UserInfoForm extends React.Component{
                                     name: "Unsure",
                                     label: "Unsure",
                                     value: "Unsure",
+                                },{
+                                    name: "Prefer not to Answer",
+                                    label: "Prefer not to Answer",
+                                    value: "Prefer not to Answer",
                                 }
                             ]}
                             value={formData.positive_family}
@@ -476,6 +488,10 @@ class UserInfoForm extends React.Component{
                                     name: "Unsure",
                                     label: "Unsure",
                                     value: "Unsure",
+                                },{
+                                    name: "Prefer not to Answer",
+                                    label: "Prefer not to Answer",
+                                    value: "Prefer not to Answer",
                                 }
                             ]}
                             value={formData.positive_anyone}
@@ -507,6 +523,10 @@ class UserInfoForm extends React.Component{
                                     name: "No",
                                     label: "No",
                                     value: "No",
+                                },{
+                                    name: "Prefer not to Answer",
+                                    label: "Prefer not to Answer",
+                                    value: "Prefer not to Answer",
                                 }
                             ]}
                             value={formData.healthcare_yn}

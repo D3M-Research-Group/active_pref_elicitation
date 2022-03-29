@@ -12,7 +12,7 @@ const schema = {
       "age": {
         "title": "What is your age group?",
         "type": "string",
-        "enum": ["18-39","40-49", "50-59","60-69", "70-79","80+"]
+        "enum": ["18-39","40-49", "50-59","60-69", "70-79","80+","Prefer not to Answer"]
       },
       "race_ethnicity": {
         "title": "What is your race/ethnicity?",
@@ -55,7 +55,7 @@ const schema = {
                     "Bachelor’s degree",
                     "Master’s degree",
                     "Professional degree",
-                    "Doctorate degree"]
+                    "Doctorate degree","Prefer not to Answer"]
       },
       "political": {
         "title": "What is your political party affiliation?",
@@ -75,7 +75,7 @@ const schema = {
         "enum": [
             "Yes",
             "No",
-            "Unsure"
+            "Unsure","Prefer not to Answer"
         ]
       },
       "positive_anyone": {
@@ -84,7 +84,7 @@ const schema = {
         "enum": [
             "Yes",
             "No",
-            "Unsure"
+            "Unsure","Prefer not to Answer"
         ]
       },
       "healthcare_yn": {
@@ -92,7 +92,7 @@ const schema = {
         "type": "string",
         "enum": [
             "Yes",
-            "No"
+            "No","Prefer not to Answer"
         ]
       },
 
