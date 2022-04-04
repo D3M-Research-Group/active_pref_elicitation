@@ -7,10 +7,12 @@ import {Container} from 'reactstrap';
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
+import MemoryWipeForm from './MemoryWipeForm';
 import StepList from './StepGenerator';
 import TopNavBar from './TopNavBar';
 import EndPage from './EndPage';
 import './Card.scss';
+import './Form.css';
 import * as Constants from "./constants";
 
 const SERVER_URL = Constants.SERVER_URL;
@@ -33,6 +35,9 @@ class App extends React.Component {
 
       // toggle show Userinfo form
       showUserInfoForm: false,
+
+      // toggle show MemoryWipeForm form
+      showMemoryWipeForm: false,
 
       // toggle show Start page
       showStartPage: true,
@@ -64,6 +69,17 @@ class App extends React.Component {
       policyData: [],
       policyDataSet: '',
 
+      // do we expect problem type to change between choices or is it constant for a user?
+      problem_type: '',
+      u0_type: '',
+
+      // Memory wipe info
+      MemoryWipeInfo: {
+        question_1: '',
+        question_2: '',
+        question_3: ''
+      },
+
       // form info
       userInfo: {
         turker_id: '',
@@ -90,10 +106,12 @@ class App extends React.Component {
 
     // binding functions
     this.toggleUserInfoForm = this.toggleUserInfoForm.bind(this);
+    this.toggleMemoryWipeForm = this.toggleMemoryWipeForm.bind(this);
     this.toggleStartPage = this.toggleStartPage.bind(this);
     this.toggleShowModal = this.toggleShowModal.bind(this);
     this.toggleEndPage = this.toggleEndPage.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
+    this.updateMemoryWipeInfo = this.updateMemoryWipeInfo.bind(this);
     this.incrementStep = this.incrementStep.bind(this);
     this.toggleLoading = this.toggleLoading.bind(this);
     this.toggleWrapUp = this.toggleWrapUp.bind(this);
@@ -289,6 +307,32 @@ class App extends React.Component {
     this.setState({ showUserInfoForm: !this.state.showUserInfoForm})
   }
 
+  toggleMemoryWipeForm(){
+    this.setState({ showMemoryWipeForm: !this.state.showMemoryWipeForm})
+  }
+
+  updateMemoryWipeInfo(data){
+    // remove form errors messages from the object
+    var toUpdate = _.omit(data, ["defaultMessage"])
+
+    toUpdate = Object.keys(toUpdate).reduce((obj,key) => {
+          if(_.isObject(toUpdate[key])){
+            obj[key] = toUpdate[key]['value']
+          } else{
+                obj[key] = toUpdate[key];
+          }
+        return obj;
+      }, {})
+    this.setState({
+      MemoryWipeInfo: toUpdate
+    }, 
+    function(){
+      console.log(this.state.MemoryWipeInfo);
+      this.writeStatetoLS();
+    }
+    )
+  }
+
   updateUserInfo(data){
     // remove form errors messages from the object
     var toUpdate = _.omit(data, ["defaultMessage", "selectFieldMessage",
@@ -373,14 +417,6 @@ class App extends React.Component {
           'Content-Type': 'application/json'
         }
       })
-      // const response = await axios({
-      //   method: "POST",
-      //   url: `${SERVER_URL}/next_query/`,
-      //   data: prevChoices,
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      // })
       
 
       this.updatePolicyIDs(response.data.policy_ids);
@@ -416,10 +452,17 @@ class App extends React.Component {
           toggleStartPage={this.toggleStartPage}
           toggleShowModal={this.toggleShowModal}
           toggleUserInfoForm={this.toggleUserInfoForm}
+          toggleMemoryWipeForm={this.toggleMemoryWipeForm} 
           readStatefromLS={this.readStatefromLS}
           showResumeButton={this.state.showResumeButton}
           showModal={this.state.showModal}
           removeStateAndRestart={this.removeStateAndRestart}
+          />
+          <MemoryWipeForm showForm={this.state.showMemoryWipeForm}
+          toggleMemoryWipeForm={this.toggleMemoryWipeForm} 
+          updateMemoryWipeInfo={this.updateMemoryWipeInfo}
+          incrementStep={this.incrementStep} 
+          writeStatetoLS={this.writeStatetoLS}
           />
           <UserInfoForm showForm={this.state.showUserInfoForm}
           toggleUserInfoForm={this.toggleUserInfoForm} 

@@ -1,4 +1,4 @@
-const schema = {
+const UserInfoSchema = {
     type: "object",
     properties: {
         turker_id: {
@@ -85,4 +85,4 @@ const schema = {
     required: ["age", "race_ethnicity", "gender", "marital_status", "education", "political",
     "positive_family", "positive_anyone","healthcare_yn", "healthcare_role"]
 }
-export default schema;
+export default UserInfoSchema;

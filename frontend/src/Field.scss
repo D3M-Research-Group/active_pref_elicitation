@@ -1,8 +1,16 @@
 .Jfv_Field {
-	&.isInvalid {
-		&.isSubmitted,
-		&.isTouched {
-			border-color: #db0029;
-		}
-	}
+  &.isInvalid {
+    &.isSubmitted,
+    &.isTouched {
+      border-color: #db0029;
+    }
+  }
+  display: block;
+  color: black;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 4px;
+  //   padding: 10px 15px;
+  margin-bottom: 10px;
+  font-size: 18px;
 }
