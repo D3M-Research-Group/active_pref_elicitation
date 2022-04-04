@@ -51,7 +51,7 @@ class MemoryWipeForm extends React.Component{
 			this.setState({ loading: false, success: true });
             
 		}, 1000);
-        this.props.toggleUserInfoForm();
+        this.props.toggleMemoryWipeForm();
         this.props.incrementStep();
         // save state here so state is at the beginning of the questionnaire
         console.log(this.state.formData);
@@ -79,6 +79,7 @@ class MemoryWipeForm extends React.Component{
 				onChange={this.handleChange}
 				onSubmit={this.handleSubmit}
 				schema={MemoryWipeSchema}
+                liveValidate={true}
 			>
                 <Row className="mb-4">
                     <h3>
@@ -95,6 +96,7 @@ class MemoryWipeForm extends React.Component{
                                 name="question_1"
                                 value={formData.question_1}
                                 type="input"
+                                maxLength={80}
                             />
                             <FieldError 
                             errorMessages={{
@@ -115,6 +117,8 @@ class MemoryWipeForm extends React.Component{
                                 name="question_2"
                                 value={formData.question_2}
                                 type="input"
+                                maxLength={80}
+                                
                             />
                             <FieldError 
                             errorMessages={{
@@ -135,6 +139,7 @@ class MemoryWipeForm extends React.Component{
                                 name="question_3"
                                 value={formData.question_3}
                                 type="input"
+                                maxLength={80}
                             />
                             <FieldError 
                             errorMessages={{
