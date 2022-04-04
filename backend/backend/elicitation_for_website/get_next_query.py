@@ -76,6 +76,7 @@ def get_next_query(
         )
 
     if verbose:
+        print(f"problem type: {problem_type}, u0 type: {u0_type}")
         print(f"next query: item_A={item_a.id}, item_B={item_b.id}")
         print("predicted is", predicted_response)
     return (
@@ -84,6 +85,7 @@ def get_next_query(
         predicted_response,
         objval,
         problem_type,
+        u0_type,
     )
 
 
