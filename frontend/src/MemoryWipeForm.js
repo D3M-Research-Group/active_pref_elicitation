@@ -15,6 +15,7 @@ import './FieldError.scss';
 import MemoryWipeSchema from './MemoryWipeFormSchema';
 import Submit from './Submit';
 import './MemoryWipeForm';
+import './Form.css';
 
 
 class MemoryWipeForm extends React.Component{

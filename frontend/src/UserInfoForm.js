@@ -19,6 +19,7 @@ import UserInfoSchema from './UserInfoFormSchema';
 import Submit from './Submit';
 import Select from './Select';
 import './UserInfoForm';
+import './Form.css';
 
 
 class UserInfoForm extends React.Component{
