@@ -12,7 +12,6 @@ import StepList from './StepGenerator';
 import TopNavBar from './TopNavBar';
 import EndPage from './EndPage';
 import './Card.scss';
-import './Form.css';
 import * as Constants from "./constants";
 
 const SERVER_URL = Constants.SERVER_URL;
@@ -69,9 +68,10 @@ class App extends React.Component {
       policyData: [],
       policyDataSet: '',
 
-      // do we expect problem type to change between choices or is it constant for a user?
-      problem_type: '',
-      u0_type: '',
+      // metadata
+      problem_type: [],
+      u0_type: [],
+      gamma: [],
 
       // Memory wipe info
       MemoryWipeInfo: {
@@ -121,6 +121,9 @@ class App extends React.Component {
     this.pushBackPrediction = this.pushBackPrediction.bind(this);
     this.pushBackPolicyShown = this.pushBackPolicyShown.bind(this);
     this.pushBackTimeElapsed = this.pushBackTimeElapsed.bind(this);
+    this.pushBackProblemType = this.pushBackProblemType.bind(this);
+    this.pushBackU0Type = this.pushBackU0Type.bind(this);
+    this.pushBackGamma = this.pushBackGamma.bind(this);
     this.updateRecommendedItem = this.updateRecommendedItem.bind(this);
     this.pushBackStage = this.pushBackStage.bind(this);
     this.postFinalData = this.postFinalData.bind(this);
@@ -250,6 +253,18 @@ class App extends React.Component {
       algorithmStage : stage,
       nextStage: nextStage
     })
+  }
+
+  pushBackProblemType(problem){
+    this.state.problem_type.push(problem);
+  }
+
+  pushBackU0Type(u_zero){
+    this.state.u0_type.push(u_zero);
+  }
+
+  pushBackGamma(gamma){
+    this.state.gamma.push(gamma);
   }
 
   pushBackTimeElapsed(time){
@@ -421,6 +436,9 @@ class App extends React.Component {
 
       this.updatePolicyIDs(response.data.policy_ids);
       this.pushBackPrediction(response.data.prediction);
+      this.pushBackProblemType(response.data.problem_type);
+      this.pushBackU0Type(response.data.u0_type);
+      this.pushBackGamma(response.data.gamma);
       this.updateRecommendedItem(response.data.recommended_item);
       console.log(response);
       console.log("policy ids shown after async request", this.state.policiesShown);
@@ -476,6 +494,9 @@ class App extends React.Component {
               userChoices={this.state.userChoices}
               policiesShown={this.state.policiesShown}
               timeOnPage={this.state.timeOnPage}
+              problem_type={this.state.problem_type}
+              u0_type={this.state.u0_type}
+              gamma={this.state.gamma}
               maxSteps={this.maxSteps}
               policyData={this.state.policyData}
               policyDataSet={this.state.policyDataSet}
@@ -494,6 +515,9 @@ class App extends React.Component {
               nextStage={this.state.nextStage}
               pushBackPolicyShown={this.pushBackPolicyShown}
               pushBackTimeElapsed={this.pushBackTimeElapsed}
+              pushBackProblemType={this.pushBackProblemType}
+              pushBackU0Type={this.pushBackU0Type}
+              pushBackGamma={this.pushBackGamma}
               pushBackStage={this.pushBackStage}
               pushBackPrediction={this.pushBackPrediction}
               recommended_policy={this.state.recommended_policy}

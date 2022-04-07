@@ -18,6 +18,9 @@ class Step extends React.Component{
         this.userChoices = this.props.userChoices;
         this.policiesShown = this.props.policiesShown;
         this.timeOnPage = this.props.timeOnPage;
+        this.problem_type = this.props.problem_type;
+        this.u0_type = this.props.u0_type;
+        this.gamma = this.props.gamma;
         this.policyDataSet = this.props.policyDataSet;
         this.incrementStep = this.props.incrementStep;
         this.policyData = this.props.policyData;
@@ -28,6 +31,9 @@ class Step extends React.Component{
         this.algorithmStage=this.props.algorithmStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown;
         this.pushBackTimeElapsed=this.props.pushBackTimeElapsed;
+        this.pushBackProblemType=this.props.pushBackProblemType;
+        this.pushBackU0Type=this.props.pushBackU0Type;
+        this.pushBackGamma=this.props.pushBackGamma;
         this.updateRecommendedItem=this.props.updateRecommendedItem;
         this.pushBackStage=this.props.pushBackStage;
         this.postFinalData=this.props.postFinalData;
@@ -55,6 +61,12 @@ class Step extends React.Component{
                     userChoices = {this.userChoices}
                     policiesShown = {this.policiesShown}
                     timeOnPage={this.timeOnPage}
+                    problem_type = {this.problem_type}
+                    u0_type = {this.u0_type}
+                    gamma = {this.gamma}
+                    pushBackProblemType={this.pushBackProblemType}
+                    pushBackU0Type={this.pushBackU0Type}
+                    pushBackGamma={this.pushBackGamma}
                     policyDataSet = {this.policyDataSet}
                     incrementStep={this.incrementStep}
                     graphData={this.policyData}
@@ -97,6 +109,9 @@ class StepList extends React.Component{
         this.userChoices = this.props.userChoices;
         this.policiesShown = this.props.policiesShown;
         this.timeOnPage = this.props.timeOnPage;
+        this.problem_type = this.props.problem_type;
+        this.u0_type = this.props.u0_type;
+        this.gamma = this.props.gamma;
         this.policyDataSet = this.props.policyDataSet;
         this.maxSteps = this.props.maxSteps;
         this.choiceData = this.props.choiceData;
@@ -117,6 +132,9 @@ class StepList extends React.Component{
         this.nextStage=this.props.nextStage;
         this.pushBackPolicyShown=this.props.pushBackPolicyShown;
         this.pushBackTimeElapsed=this.props.pushBackTimeElapsed;
+        this.pushBackProblemType=this.props.pushBackProblemType;
+        this.pushBackU0Type=this.props.pushBackU0Type;
+        this.pushBackGamma=this.props.pushBackGamma;
         this.pushBackStage=this.props.pushBackStage;
         this.postFinalData=this.props.postFinalData;
 
@@ -154,6 +172,12 @@ class StepList extends React.Component{
                                 userChoices={this.userChoices}
                                 policiesShown = {this.policiesShown}
                                 timeOnPage = {this.timeOnPage}
+                                problem_type = {this.problem_type}
+                                u0_type = {this.u0_type}
+                                gamma = {this.gamma}
+                                pushBackProblemType={this.pushBackProblemType}
+                                pushBackU0Type={this.pushBackU0Type}
+                                pushBackGamma={this.pushBackGamma}
                                 policyDataSet = {this.policyDataSet}
                                 incrementStep={this.incrementStep}
                                 policyData={this.policyData}
