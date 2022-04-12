@@ -1,13 +1,11 @@
 import React from 'react';
 import Loader from "./Loader";
 import ErrorPage from './ErrorPage';
-import BottomNavBar from './NavBar';
-import { Container} from 'reactstrap';
-import PolicyComparisonSection from './PolicyComparisonSection';
 import './PolicyComparisonSection'
 import axios from 'axios';
 import Intro from './Intro';
 import * as Constants from "./constants";
+import QuestionContainer from './QuestionContainer';
 
 const SERVER_URL = Constants.SERVER_URL;
 
@@ -21,9 +19,10 @@ class PairwiseComparison extends React.Component {
             selected: -1,
             loading: false,
             wrapup: false,
+            showQuestion: true
         }
         // a constant for minimum loading time
-        this.waitSecs = 1;
+        this.waitSecs = Constants.WAIT_SECS;
         // this.loading = this.props.loading
         this.toggleLoading = this.props.toggleLoading;
         this.graphData = this.props.graphData;
@@ -59,6 +58,7 @@ class PairwiseComparison extends React.Component {
         this.updateShowError = this.updateShowError.bind(this);
         this.prepareCardData = this.prepareCardData.bind(this);
         this.createPoliciesShownData = this.createPoliciesShownData.bind(this);
+        this.updateQueryInfo = this.updateQueryInfo.bind(this);
         this.postFinalData=this.props.postFinalData;
         this.toggleEndPage = this.props.toggleEndPage;
 
@@ -136,6 +136,32 @@ class PairwiseComparison extends React.Component {
       // this.toggleEndPage();
     }
 
+    updateQueryInfo(response, timeStart){
+      if(this.props.randomize){
+        // console.log("original policy_id" , response.data.policy_ids);
+        // console.log("original prediction" , response.data.prediction);
+        this.props.randomizePolicyids(response.data.policy_ids, response.data.prediction);
+        
+      } else{
+        this.updatePolicyIDs(response.data.policy_ids);
+        this.props.pushBackPrediction(response.data.prediction);
+      }
+      this.pushBackProblemType(response.data.problem_type);
+      this.pushBackU0Type(response.data.u0_type);
+      this.pushBackGamma(response.data.gamma);
+      // this.updateRecommendedItem(response.data.recommended_item);
+      // move to next step and update stage for the next step
+      this.incrementStep();
+      this.updateStage();
+      // this.pushBackChoice(this.state.selected);
+      this.props.writeStatetoLS();
+      while(true){
+        if ((Date.now() - timeStart)/1000 > this.waitSecs){
+          break;
+        }
+      }
+    }
+
     createPoliciesShownData(prevChoices=false){
       // map userChoices so we create array with objects
       // that each contain the necessary info so we don't
@@ -150,8 +176,8 @@ class PairwiseComparison extends React.Component {
         for(var i=0; i < this.policiesShown.length; i++){
           var policy = [...this.policiesShown[i]]
           const sortedPolicies = [...policy].sort((a,b) => a-b);
-          console.log(policy);
-          console.log(sortedPolicies);
+          // console.log(policy);
+          // console.log(sortedPolicies);
           // use the flipPrediction function now going from 
           // permuted policies -> sorted policies (original policies)
           // and flip our userChoice to match
@@ -170,7 +196,8 @@ class PairwiseComparison extends React.Component {
                   prevStages: this.props.prevStages,
                   datasetName: this.policyDataSet,
                   nextStage: this.props.nextStage,
-                  recommended_item: this.props.recommended_policy
+                  recommended_item: this.props.recommended_policy,
+                  numFirstStage: this.props.numFirstStage
           })
         } else{
           console.log("policiesShown", policiesShown);
@@ -191,7 +218,7 @@ class PairwiseComparison extends React.Component {
               policy_dataset: this.policyDataSet,
               user_choice: Constants.USER_CHOICES_MAP[choice],
               prediction: Constants.PREDICTIONS_MAP[predictions[idx]],
-              recommended_item: idx < this.props.numExploration ? null : this.props.recommended_policy,
+              recommended_item: idx === this.props.numFirstStage | idx === this.props.numExploration ? this.props.recommended_policy[this.props.prevStages[idx]] : null,
               algorithm_stage: this.props.prevStages[idx],
               time_on_page: this.timeOnPage[idx],
               problem_type: this.problem_type[idx],
@@ -211,7 +238,8 @@ class PairwiseComparison extends React.Component {
             prevStages: this.props.prevStages,
             datasetName: this.policyDataSet,
             nextStage: this.props.nextStage,
-            recommended_item: this.props.recommended_policy
+            recommended_item: this.props.recommended_policy,
+            numFirstStage: this.props.numFirstStage
           })
         } else {
           choicesInfo = this.userChoices.map((choice, idx) =>{
@@ -225,7 +253,7 @@ class PairwiseComparison extends React.Component {
               policy_dataset: this.policyDataSet,
               user_choice: Constants.USER_CHOICES_MAP[choice],
               prediction: Constants.PREDICTIONS_MAP[this.props.prevPredictions[idx]],
-              recommended_item: idx < this.props.numExploration ? null : this.props.recommended_policy,
+              recommended_item: idx === this.props.numFirstStage | idx === this.props.numExploration ? this.props.recommended_policy[this.props.prevStages[idx]] : null,
               algorithm_stage: this.props.prevStages[idx],
               time_on_page: this.timeOnPage[idx],
               problem_type: this.problem_type[idx],
@@ -372,6 +400,41 @@ class PairwiseComparison extends React.Component {
                       break;
                     }
                   }
+                })
+              }
+              if(!this.state.showError){
+                // Post the form info and then show end page
+                var memoryWipeFormInfo = this.props.memoryWipeInfo
+                memoryWipeFormInfo['session_id'] = this.uuid;
+                console.log("memory wipe form info to be posted", memoryWipeFormInfo)
+                axios.post(`${SERVER_URL}/memorywipeinfo/`, memoryWipeFormInfo,
+                  {
+                    headers: {
+                      'Content-Type': 'application/json'
+                    }
+                  }
+                ).catch(function(error){
+                  if(error.response){
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                  } else if (error.request) {
+                    // The request was made but no response was received
+                    console.log(error.request);
+                  } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log('Error', error.message);
+                  }
+                  self.setState({loading: false, wrapup: false, showError: true})
+                })
+                .then((response) =>{
+                  console.log("Memory wipe form info", response)
+                  // if we've gotten through everything ok, then let's move on to the End Page
+                  while(true){
+                    if ((Date.now() - timeStart)/1000 > this.waitSecs){
+                      break;
+                    }
+                  }
                   this.setState({loading: false, wrapup: false});
                   this.incrementStep();
                   this.toggleEndPage();
@@ -382,7 +445,7 @@ class PairwiseComparison extends React.Component {
             } else {
               // This is the case where we are still have queries remaining
               // Switch to loading screen
-              await this.setStateAsync({loading: true});
+              await this.setStateAsync({loading: true, showQuestion: false});
 
               // start timing the process
               timeStart = Date.now();
@@ -396,67 +459,96 @@ class PairwiseComparison extends React.Component {
               // this.props.writeStatetoLS();
               console.log(this.props.prevStages);
               console.log("nextStage", this.props.nextStage);
-              // var nextStage = this.props.prevStages.length < this.props.numExploration ? this.props.algorithmStage : "validation";
-              // console.log("algorithm", this.props.algorithmStage);
-              // console.log("nextStage", nextStage);
+              
+              
+
               // this request needs to pass data to the endpoint
               // if we are randomizing the display of policies, we need to reorder them before 
               // sending them back to the backend to avoid Gurobi crashing
               var prevChoices = this.createPoliciesShownData(true);
-
               console.log("prevChoices", prevChoices);
               
-              axios.post(`${SERVER_URL}/next_query/`,prevChoices,
+
+              // we need to check if we are at the end of a stage and make a request for the recommended policy
+              // 
+              if(this.stepNum === this.props.numFirstStage | this.stepNum === this.props.numExploration){
+                axios.post(`${SERVER_URL}/rec_policy/`, prevChoices,
+                {
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                }
+                )
+                .then((response) => {
+                  console.log("rec_policy_response", response.data)
+                  var recommended_policy = response.data.recommended_item;
+                  var current_stage = response.data.current_stage;
+                  this.updateRecommendedItem(recommended_policy, current_stage);
+                  // need to update previous choices with the new recommended item
+                  prevChoices = this.createPoliciesShownData(true);
+                  console.log("prevChoices", prevChoices);
+                })
+                .then(() => {
+                    axios.post(`${SERVER_URL}/next_query/`,prevChoices,
+                    {
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      
+                    })
+                  .then((response) => {
+                    console.log(this.props.randomize);
+                    this.updateQueryInfo(response, timeStart);
+                  })
+                  .catch(function(error){
+                    if(error.response){
+                      console.log(error.response.data);
+                      console.log(error.response.status);
+                      console.log(error.response.headers);
+                    } else if (error.request) {
+                      // The request was made but no response was received
+                      console.log(error.request);
+                    } else {
+                      // Something happened in setting up the request that triggered an Error
+                      console.log('Error', error.message);
+                    }
+                    // No matter the reason for the error, we want to show error message here
+                    self.setState({loading: false, showError: true})
+                  })
+                })
+              } else {
+                
+                axios.post(`${SERVER_URL}/next_query/`,prevChoices,
                 {
                   headers: {
                     'Content-Type': 'application/json'
                   },
                   
                 })
-              .then((response) => {
-                console.log(this.props.randomize);
-                if(this.props.randomize){
-                  // console.log("original policy_id" , response.data.policy_ids);
-                  // console.log("original prediction" , response.data.prediction);
-                  this.props.randomizePolicyids(response.data.policy_ids, response.data.prediction);
-                  
-                } else{
-                  this.updatePolicyIDs(response.data.policy_ids);
-                  this.props.pushBackPrediction(response.data.prediction);
-                }
-                this.pushBackProblemType(response.data.problem_type);
-                this.pushBackU0Type(response.data.u0_type);
-                this.pushBackGamma(response.data.gamma);
-                this.updateRecommendedItem(response.data.recommended_item);
-                // move to next step and update stage for the next step
-                this.incrementStep();
-                this.updateStage();
-                // this.pushBackChoice(this.state.selected);
-                this.props.writeStatetoLS();
-                while(true){
-                  if ((Date.now() - timeStart)/1000 > this.waitSecs){
-                    break;
+                .then((response) => {
+                  console.log(this.props.randomize);
+                  this.updateQueryInfo(response, timeStart);
+                })
+                .catch(function(error){
+                  if(error.response){
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                  } else if (error.request) {
+                    // The request was made but no response was received
+                    console.log(error.request);
+                  } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log('Error', error.message);
                   }
-                }
-                this.setState({loading: false});
-              })
-              .catch(function(error){
-                if(error.response){
-                  console.log(error.response.data);
-                  console.log(error.response.status);
-                  console.log(error.response.headers);
-                } else if (error.request) {
-                  // The request was made but no response was received
-                  console.log(error.request);
-                } else {
-                  // Something happened in setting up the request that triggered an Error
-                  console.log('Error', error.message);
-                }
-                // No matter the reason for the error, we want to show error message here
-                self.setState({loading: false, showError: true})
-              })
+                  // No matter the reason for the error, we want to show error message here
+                  self.setState({loading: false, showError: true})
+                })
+              }
               
               
+              
+              // await this.setStateAsync({loading: false, showQuestion: false})
             }   
         }
     }
@@ -485,45 +577,86 @@ class PairwiseComparison extends React.Component {
       return (
         // <div className="column">
         <React.Fragment>
+          {console.log(this.state)}
+          {console.log(this.stepNum === this.props.numFirstStage+1)}
+          {console.log("this.stepNum",this.stepNum)}
+          {console.log(this.props.numFirstStage+1)}
           {this.stepNum === 1 ? <Intro/> : null}
-          {this.state.loading ? <Loader wrapup={this.state.wrapup} /> : null}
+          {/* {this.state.loading ? <Loader loading={this.state.loading} wrapup={this.state.wrapup} /> : null} */}
+
           {this.state.showError ? <ErrorPage/> : null}
-
-            {this.state.loading | this.state.showError ? null : 
-            <div>
-
-            <Container id="policy_comparison_container" fluid={false}>
-
-              <h1 className="title">Question {this.stepNum} / {this.maxSteps}</h1>
-              {
-                this.sectionInfo.map((section, index) => {
-                  const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);
-                  return(
-                    <PolicyComparisonSection
-                      key={index.toString()}
-                      idx_key={index.toString()}
-                      plotType={section.plotType}
-                      sectionType={section.sectionType}
-                      policyData={prepped_dat['dat']}
-                      maxYVal={prepped_dat['maxYVal']}
-                      sectionNum={index+1}
-                      columnNums={section.columnNums}
-                      title={section.sectionName}  
-                      description={section.sectionDescription}
-                    />
-                  )
-                })
-              }
-                
-            </Container>
-            <BottomNavBar 
-              sectionNames={this.sectionInfo.map((x)=> x.sectionName)} 
-              onSelectChange={this.onListChanged}
+          <Loader loading={this.state.loading} wrapup={this.state.wrapup} />
+          {this.state.loading | this.state.showError ? null :
+              <QuestionContainer
+              stepNum={this.stepNum}
+              maxSteps={this.maxSteps}
+              sectionInfo={this.sectionInfo}
+              // for MemoryWipeForm
+              showMemoryWipeForm={this.props.showMemoryWipeForm}
+              toggleMemoryWipeForm={this.props.toggleMemoryWipeForm}
+              updateMemoryWipeInfo={this.props.updateMemoryWipeInfo}
+              writeStatetoLS={this.props.writeStatetoLS}
+    
+              // For policy comparison section
+              graphData={this.graphData}
+              policy_ids={this.policy_ids}
+              prepareCardData={this.prepareCardData}
+              // For navbar
               submitChoice={this.submitChoice}
-              toggleLoading={this.toggleLoading}
-            />
-            </div>
+              onListChanged={this.onListChanged}
+              
+              />
+          }
+          
+          
+          {/* <MemoryWipeForm
+          key={this.stepNum.toString()}
+          showMemoryWipe={this.props}  
+          toggleMemoryWipeForm={this.props.toggleMemoryWipeForm} 
+          updateMemoryWipeInfo={this.props.updateMemoryWipeInfo}
+          writeStatetoLS={this.props.writeStatetoLS}
+          /> */}
+     
+
+          {/* {this.state.loading | this.state.showMemoryWipe ? null :  */}
+          
+          {/* <div style={{display : this.state.loading | (this.stepNum === (this.numFirstStage+1)) ? "none" : ""}}>
+
+          <Container id="policy_comparison_container" fluid={false}>
+
+            <h1 className="title">Question {this.stepNum} / {this.maxSteps}</h1>
+            {
+              this.sectionInfo.map((section, index) => {
+                const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);
+                return(
+                  <PolicyComparisonSection
+                    key={index.toString()}
+                    idx_key={index.toString()}
+                    plotType={section.plotType}
+                    sectionType={section.sectionType}
+                    policyData={prepped_dat['dat']}
+                    maxYVal={prepped_dat['maxYVal']}
+                    sectionNum={index+1}
+                    columnNums={section.columnNums}
+                    title={section.sectionName}  
+                    description={section.sectionDescription}
+                  />
+                )
+              })
             }
+              
+          </Container>
+          <BottomNavBar 
+            sectionNames={this.sectionInfo.map((x)=> x.sectionName)} 
+            onSelectChange={this.onListChanged}
+            submitChoice={this.submitChoice}
+            toggleLoading={this.toggleLoading}
+          />
+          </div> */}
+
+          {/* } */}
+
+        
             
         </React.Fragment>
         );

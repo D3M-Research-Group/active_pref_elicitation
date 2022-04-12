@@ -38,6 +38,7 @@ class Step extends React.Component{
         this.pushBackStage=this.props.pushBackStage;
         this.postFinalData=this.props.postFinalData;
         this.toggleEndPage = this.props.toggleEndPage;
+        this.toggleMemoryWipeForm = this.props.toggleMemoryWipeForm;
 
         this.userInfo = this.props.userInfo;
         this.uuid = this.props.uuid;
@@ -52,12 +53,16 @@ class Step extends React.Component{
                 <PairwiseComparison
                     // title={this.data['query_title']}
                     key={this.stepNum}
-                    maxSteps={this.maxSteps} 
+                    maxSteps={this.maxSteps}
+                    numFirstStage={this.props.numFirstStage}
                     loading={this.loading}
                     toggleLoading={this.toggleLoading}
                     wrapup={this.wrapup}
                     toggleWrapUp={this.toggleWrapUp}
                     toggleEndPage={this.toggleEndPage}
+                    toggleMemoryWipeForm={this.props.toggleMemoryWipeForm}
+                    updateMemoryWipeInfo={this.props.updateMemoryWipeInfo} 
+                    showMemoryWipeForm={this.props.showMemoryWipeForm}
                     userChoices = {this.userChoices}
                     policiesShown = {this.policiesShown}
                     timeOnPage={this.timeOnPage}
@@ -93,6 +98,7 @@ class Step extends React.Component{
                     randomize={this.props.randomize}
                     
                     userInfo={this.userInfo}
+                    memoryWipeInfo={this.props.memoryWipeInfo}
                     uuid={this.uuid}
                     // pass userChoices all the way to PairwiseComparisons and from their lift up state by pushing
                     // choices back to userChoices in App's state
@@ -121,6 +127,7 @@ class StepList extends React.Component{
         this.wrapup = this.props.wrapup;
         this.toggleWrapUp = this.props.toggleWrapUp;
         this.toggleEndPage = this.props.toggleEndPage;
+        this.toggleMemoryWipeForm = this.props.toggleMemoryWipeForm;
         this.incrementStep = this.props.incrementStep;
         this.policyData=this.props.policyData;
         this.policy_ids=this.props.policy_ids;
@@ -162,11 +169,15 @@ class StepList extends React.Component{
                             <Step 
                                 key={elem.toString()} 
                                 maxSteps={this.maxSteps} 
+                                numFirstStage={this.props.numFirstStage}
                                 stepNum={elem} 
                                 currentStep={this.currentStep}
                                 loading={this.loading} 
                                 toggleLoading={this.toggleLoading} 
                                 toggleEndPage={this.toggleEndPage}
+                                updateMemoryWipeInfo={this.props.updateMemoryWipeInfo}
+                                toggleMemoryWipeForm={this.props.toggleMemoryWipeForm}
+                                showMemoryWipeForm={this.props.showMemoryWipeForm}
                                 wrapup={this.wrapup}
                                 toggleWrapUp={this.toggleWrapUp}
                                 userChoices={this.userChoices}
@@ -204,6 +215,7 @@ class StepList extends React.Component{
                                 flipPrediction={this.props.flipPrediction}
 
                                 userInfo={this.userInfo}
+                                memoryWipeInfo={this.props.memoryWipeInfo}
                                 uuid={this.uuid}
                             /> 
                              );

@@ -7,12 +7,13 @@ import {Container} from 'reactstrap';
 
 import StartPage from './StartPage';
 import UserInfoForm from './UserInfoForm';
-import MemoryWipeForm from './MemoryWipeForm';
 import StepList from './StepGenerator';
 import TopNavBar from './TopNavBar';
 import EndPage from './EndPage';
 import './Card.scss';
 import * as Constants from "./constants";
+import MemoryWipeForm from './MemoryWipeForm';
+import Loader from './Loader';
 
 const SERVER_URL = Constants.SERVER_URL;
 const DATASET_NAME = Constants.DATASET_NAME;
@@ -26,7 +27,10 @@ class App extends React.Component {
       userChoices : [],
       predictions : [],
       timeOnPage: [],
-      recommended_policy: null,
+      recommended_policy: {
+        'adaptive' : null,
+        'random': null
+      },
       policiesShown: [], // store the policy ids we've seen so far as an array of arrays e.g., [[2,3], [3,4],...]
 
       // handle loading screen toggle
@@ -74,7 +78,7 @@ class App extends React.Component {
       gamma: [],
 
       // Memory wipe info
-      MemoryWipeInfo: {
+      memoryWipeInfo: {
         question_1: '',
         question_2: '',
         question_3: ''
@@ -96,9 +100,13 @@ class App extends React.Component {
       }
     }
     this.randomize = true;
-    this.numExploration = 10;
-    this.numValidation = 5;
+    
+    this.numFirstStage = 10;
+    this.numSecondStage = 10;
+    this.numExploration = this.numFirstStage + this.numSecondStage;
+    this.numValidation = 1;
     this.maxSteps = this.numExploration+this.numValidation;
+    // this.maxSteps = this.numFirstStage + this.numSecondStage + this.numValidation;
     this.state.nextStage=this.state.algorithmStage;
     this.uuid = uuidv4();
 
@@ -109,11 +117,12 @@ class App extends React.Component {
     this.toggleMemoryWipeForm = this.toggleMemoryWipeForm.bind(this);
     this.toggleStartPage = this.toggleStartPage.bind(this);
     this.toggleShowModal = this.toggleShowModal.bind(this);
+    this.toggleShowSteps = this.toggleShowSteps.bind(this);
     this.toggleEndPage = this.toggleEndPage.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.updateMemoryWipeInfo = this.updateMemoryWipeInfo.bind(this);
     this.incrementStep = this.incrementStep.bind(this);
-    this.toggleLoading = this.toggleLoading.bind(this);
+    this.toggleMemoryWipeLoading = this.toggleMemoryWipeLoading.bind(this);
     this.toggleWrapUp = this.toggleWrapUp.bind(this);
     this.updatePolicyIDs = this.updatePolicyIDs.bind(this);
     this.updateStage = this.updateStage.bind(this);
@@ -237,6 +246,9 @@ class App extends React.Component {
     }, function(){ console.log("Current step:", this.state.currentStep)})
     if(this.state.currentStep === 0){
       this.toggleShowSteps();
+    } else if(this.state.currentStep === this.numFirstStage+1){
+      this.toggleShowSteps();
+      this.toggleMemoryWipeForm();
     }
   }
   
@@ -247,8 +259,33 @@ class App extends React.Component {
   }
 
   updateStage(){
-    var stage = this.state.currentStep <= this.numExploration ? this.state.algorithmStage : "validation";
-    var nextStage = this.state.currentStep + 1 < this.numExploration ? this.state.algorithmStage : "validation"
+    var stage;
+    var nextStage;
+    if(this.state.currentStep <= this.numFirstStage){
+      // if we're in the first stage, don't change the algorithm type
+      stage = this.state.nextStage;
+      if(this.state.currentStep + 1 > this.numFirstStage){
+        nextStage = this.state.algorithmStage === "adaptive" ? "random" : "adaptive";
+        
+      } else {
+        nextStage = this.state.algorithmStage;
+      }
+    } else if( this.state.currentStep > this.numFirstStage & this.state.currentStep <= this.numExploration){
+      stage = this.state.nextStage;
+      if(this.state.currentStep + 1 > this.numExploration){
+        nextStage = "validation";
+      } else {
+        nextStage = this.state.nextStage;
+      }
+    } else {
+      stage = "validation";
+      nextStage = "validation"
+    }
+    console.log("currentStep: ", this.state.currentStep);
+    console.log("currentStep+1: ", this.state.currentStep + 1);
+    console.log("algorithmStage: ", this.state.algorithmStage);
+    console.log("stage: ", stage);
+    console.log("nextStage: ", nextStage);
     this.setState({
       algorithmStage : stage,
       nextStage: nextStage
@@ -284,10 +321,11 @@ class App extends React.Component {
     console.log(this.state.predictions);
   }
 
-  updateRecommendedItem(item){
+  updateRecommendedItem(item, stream){
+    const newPolicy_dict = {...this.state.recommended_policy, [stream] : item}
     this.setState({
-      recommended_policy: item
-    })
+      recommended_policy: newPolicy_dict
+    }, function(){console.log("recommended policy dict", this.state.recommended_policy)})
   }
   pushBackChoices(selected){
     this.state.userChoices.push(selected);
@@ -298,8 +336,9 @@ class App extends React.Component {
     this.setState({ showSteps: !this.state.showSteps})
   }
 
-  toggleLoading(state){
-    this.setState({ loading: state})
+  toggleMemoryWipeLoading(){
+    this.setState({ loading: !this.state.loading}, function(){ console.log("toggled loading")})
+    
   }
 
   toggleStartPage(){
@@ -307,7 +346,7 @@ class App extends React.Component {
   }
 
   toggleShowModal(){
-    this.setState({ showModal: !this.state.showModal}, function(){console.log("fired!")})
+    this.setState({ showModal: !this.state.showModal})
   }
 
   toggleEndPage(){
@@ -322,9 +361,14 @@ class App extends React.Component {
     this.setState({ showUserInfoForm: !this.state.showUserInfoForm})
   }
 
+  toggleAlgorithm(){
+    this.setState({ algorithmStage: this.state.algorithmStage === "adaptive" ? "random" : "adaptive"})
+  }
+
   toggleMemoryWipeForm(){
     this.setState({ showMemoryWipeForm: !this.state.showMemoryWipeForm})
   }
+
 
   updateMemoryWipeInfo(data){
     // remove form errors messages from the object
@@ -339,10 +383,10 @@ class App extends React.Component {
         return obj;
       }, {})
     this.setState({
-      MemoryWipeInfo: toUpdate
+      memoryWipeInfo: toUpdate
     }, 
     function(){
-      console.log(this.state.MemoryWipeInfo);
+      console.log(this.state.memoryWipeInfo);
       this.writeStatetoLS();
     }
     )
@@ -425,7 +469,8 @@ class App extends React.Component {
         userChoices : [],
         prevStages: [this.state.algorithmStage],
         datasetName: DATASET_NAME,
-        nextStage: this.state.nextStage
+        nextStage: this.state.nextStage,
+        numFirstStage: this.numFirstStage
       })
       const response = await axios.post(`${SERVER_URL}/next_query/`, prevChoices,{
         headers: {
@@ -439,7 +484,7 @@ class App extends React.Component {
       this.pushBackProblemType(response.data.problem_type);
       this.pushBackU0Type(response.data.u0_type);
       this.pushBackGamma(response.data.gamma);
-      this.updateRecommendedItem(response.data.recommended_item);
+      // this.updateRecommendedItem(response.data.recommended_item);
       console.log(response);
       console.log("policy ids shown after async request", this.state.policiesShown);
 
@@ -470,17 +515,10 @@ class App extends React.Component {
           toggleStartPage={this.toggleStartPage}
           toggleShowModal={this.toggleShowModal}
           toggleUserInfoForm={this.toggleUserInfoForm}
-          toggleMemoryWipeForm={this.toggleMemoryWipeForm} 
           readStatefromLS={this.readStatefromLS}
           showResumeButton={this.state.showResumeButton}
           showModal={this.state.showModal}
           removeStateAndRestart={this.removeStateAndRestart}
-          />
-          <MemoryWipeForm showForm={this.state.showMemoryWipeForm}
-          toggleMemoryWipeForm={this.toggleMemoryWipeForm} 
-          updateMemoryWipeInfo={this.updateMemoryWipeInfo}
-          incrementStep={this.incrementStep} 
-          writeStatetoLS={this.writeStatetoLS}
           />
           <UserInfoForm showForm={this.state.showUserInfoForm}
           toggleUserInfoForm={this.toggleUserInfoForm} 
@@ -488,7 +526,18 @@ class App extends React.Component {
           incrementStep={this.incrementStep} 
           writeStatetoLS={this.writeStatetoLS}
           />
-          {this.state.showSteps ? 
+          {this.state.loading ? <Loader loading={this.state.loading} wrapup={false}/> : null}
+          
+          <MemoryWipeForm
+          showMemoryWipe={this.state.showMemoryWipeForm}
+          toggleMemoryWipeForm={this.toggleMemoryWipeForm}
+          toggleShowSteps={this.toggleShowSteps}
+          toggleMemoryWipeLoading={this.toggleMemoryWipeLoading}
+          updateMemoryWipeInfo={this.updateMemoryWipeInfo}
+          writeStatetoLS={this.writeStatetoLS}
+          />
+
+          {this.state.showSteps && this.state.currentStep !== this.state.numFirstStage+1 ? 
             <StepList 
               key={this.state.currentStep.toString()} // key necessary for ensuring re-render on state change
               userChoices={this.state.userChoices}
@@ -497,6 +546,7 @@ class App extends React.Component {
               problem_type={this.state.problem_type}
               u0_type={this.state.u0_type}
               gamma={this.state.gamma}
+              numFirstStage={this.numFirstStage}
               maxSteps={this.maxSteps}
               policyData={this.state.policyData}
               policyDataSet={this.state.policyDataSet}
@@ -505,8 +555,10 @@ class App extends React.Component {
               loading={this.state.loading}
               wrapup={this.state.wrapup}
               incrementStep={this.incrementStep}
-              toggleLoading={this.toggleLoading}
               toggleWrapUp={this.toggleWrapUp}
+              toggleMemoryWipeForm={this.toggleMemoryWipeForm}
+              updateMemoryWipeInfo={this.updateMemoryWipeInfo}
+              showMemoryWipeForm={this.state.showMemoryWipeForm}
               toggleEndPage={this.toggleEndPage}
               updatePolicyIDs={this.updatePolicyIDs}
               updateStage={this.updateStage}
@@ -532,6 +584,7 @@ class App extends React.Component {
               randomize={this.randomize}
 
               userInfo={this.state.userInfo}
+              memoryWipeInfo={this.state.memoryWipeInfo}
               ip={this.state.ip}
               uuid={this.uuid}
 
