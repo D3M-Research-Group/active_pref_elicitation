@@ -22,10 +22,14 @@ from APE import views
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('choices/', views.ChoicesView.as_view(), name="choice"),
-    path('sessioninfo/', views.SessionInfoView.as_view(), name="session info"),
-    path('forminfo/', views.FormInfoView.as_view(), name="form info"),
-    path('next_query/', views.NextChoiceView.as_view(), name="next_query"),
-    path('dataset/', views.PolicyDataView.as_view(), name="datasets")
+    path("admin/", admin.site.urls),
+    path("choices/", views.ChoicesView.as_view(), name="choice"),
+    path("sessioninfo/", views.SessionInfoView.as_view(), name="session info"),
+    path("forminfo/", views.FormInfoView.as_view(), name="form info"),
+    path(
+        "memorywipeinfo/", views.MemoryWipeView.as_view(), name="memory wipe form info"
+    ),
+    path("next_query/", views.NextChoiceView.as_view(), name="next_query"),
+    path("rec_policy/", views.RecommendPolicyView.as_view(), name="recommended policy"),
+    path("dataset/", views.PolicyDataView.as_view(), name="datasets"),
 ]
