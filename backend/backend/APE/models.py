@@ -41,10 +41,10 @@ class FormInfo(models.Model):
     marital_status = models.CharField(max_length=100)
     education = models.CharField(max_length=100)
     political = models.CharField(max_length=100)
-    positive_family = models.CharField(max_length=10, null=True)
-    positive_anyone = models.CharField(max_length=10, null=True)
-    healthcare_yn = models.CharField(max_length=10, null=True)
-    healthcare_role = models.CharField(max_length=10, null=True)
+    positive_family = models.CharField(max_length=20, null=True)
+    positive_anyone = models.CharField(max_length=20, null=True)
+    healthcare_yn = models.CharField(max_length=20, null=True)
+    healthcare_role = models.CharField(max_length=100, null=True)
 
 class MemoryWipeInfo(models.Model):
     session_id = models.CharField(max_length=50,

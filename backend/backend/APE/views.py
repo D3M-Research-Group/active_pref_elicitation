@@ -8,8 +8,13 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.generics import GenericAPIView, CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import SessionInfoSerializer, ChoicesSerializer, FormInfoSerializer
-from .models import SessionInfo, Choices, FormInfo
+from .serializers import (
+    MemoryWipeInfoSerializer,
+    SessionInfoSerializer,
+    ChoicesSerializer,
+    FormInfoSerializer,
+)
+from .models import SessionInfo, Choices, FormInfo, MemoryWipeInfo
 from .policy_data import covid_data_dict, all_policies_dict
 from .choice_paths import choices_data
 from elicitation_for_website.preference_classes import Item, Query
@@ -22,6 +27,10 @@ ALGO_STAGE_MAP = {"adaptive": 0, "random": 1, "validation": 2}
 
 def get_last_stage(algo_stage_list):
     return algo_stage_list[-1]
+
+
+def get_first_stage(algo_stage_list):
+    return algo_stage_list[0]
 
 
 # TO-DO: perhaps move this function to a util file?
@@ -77,6 +86,14 @@ class FormInfoView(mixins.CreateModelMixin, GenericAPIView):
         return self.create(request, *args, **kwargs)
 
 
+class MemoryWipeView(mixins.CreateModelMixin, GenericAPIView):
+    queryset = MemoryWipeInfo.objects.all()
+    serializer_class = MemoryWipeInfoSerializer
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
 def get_smallest_gamma_stub():
     print("[WARN]: Using get_smallest_gamma_stub() function")
     return random.randint(1, 100) / 100.0
@@ -99,11 +116,22 @@ def elicitation_data_prep(json_data, response_data):
         response_data: a dictionary with policiesShown as list of list of policies
         and userChoices as as list of the choices of the user
     """
+    # need to handle the case where we transition from random -> adaptive
+    # since we will have existing user_choices
+    prev_stages = response_data.get("prevStages")
+    num_first_stage = response_data.get("numFirstStage")
     answered_queries = []
     user_choices = [int(val) for val in response_data.get("userChoices")]
     policies_shown = response_data.get("policiesShown")
+
+    if (len(prev_stages) > num_first_stage) and (prev_stages[0] == "random"):
+        # then the first stage was random, we need to limit the range of
+        # policies shown that we loop over
+        policy_range = range(num_first_stage, len(policies_shown))
+    else:
+        policy_range = range(len(policies_shown))
     # TO-DO: safer way to loop through or maybe assert equal length of the lists
-    for i in range(len(policies_shown)):
+    for i in policy_range:
         # generate the items for each policy
         current_policy = policies_shown[i]
         current_choice = user_choices[i]
@@ -135,11 +163,25 @@ def choice_path_data_prep(response_data):
         response_data: a dictionary with policiesShown as list of list of policies
         and userChoices as as list of the choices of the user
     """
+    # need to handle the case where we transition from random -> adaptive
+    # since we will have existing user_choices
+    prev_stages = response_data.get("prevStages")
+    num_first_stage = response_data.get("numFirstStage")
     answered_queries = []
     user_choices = [int(val) for val in response_data.get("userChoices")]
     policies_shown = response_data.get("policiesShown")
+
+    if (len(prev_stages) >= num_first_stage) and (prev_stages[0] == "random"):
+        # then the first stage was random, we need to limit the range of
+        # policies shown that we loop over
+        policy_range = range(num_first_stage, len(policies_shown))
+
+    else:
+        policy_range = range(len(policies_shown))
+    print(len(policies_shown))
+    print(list(policy_range))
     # TO-DO: safer way to loop through or maybe assert equal length of the lists
-    for i in range(len(policies_shown)):
+    for i in policy_range:
         # generate the items for each policy
         current_policy = policies_shown[i]
         current_choice = user_choices[i]
@@ -215,9 +257,36 @@ def get_shown_validation_policies(request_data):
     return tuple(tuple(sub) for sub in validation_shown)
 
 
+class RecommendPolicyView(APIView):
+    def post(self, request, format=None):
+        recommended_item = None
+        current_stage = get_last_stage(request.data["prevStages"])
+        print(f"current stage: {current_stage}")
+        covid_data = covid_data_dict.get(request.data["datasetName"], None)
+        all_policies = all_policies_dict.get(request.data["datasetName"], None)
+        if covid_data is None or all_policies is None:
+            print(f"got {request.data['datasetName']} as the datasetName")
+        answered_queries, current_gamma = elicitation_data_prep(
+            covid_data, request.data
+        )
+        problem_type = "maximin"
+        recommended_item, _, _ = robust_recommend_subproblem(
+            answered_queries,
+            all_policies,
+            problem_type=problem_type,
+            verbose=False,
+            gamma=current_gamma,
+        )
+        print(f"recommended_item: {recommended_item.id}")
+        recommended_item = recommended_item.id
+        response_dict = {
+            "recommended_item": recommended_item,
+            "current_stage": current_stage,
+        }
+        return Response(response_dict)
+
+
 # NextChoice is a generic view
-
-
 class NextChoiceView(APIView):
     # TO-DO: do checks on request data
     # dynamic way to choose which data set?
@@ -226,8 +295,6 @@ class NextChoiceView(APIView):
     # TO-DO: add logic for once we are in the validation stage
     def post(self, request, format=None):
         print(request.data)
-        # current_stage = get_last_stage(request.data['prevStages'])
-        # f_random = ALGO_STAGE_MAP[current_stage]
         next_stage = request.data["nextStage"]
         f_random = ALGO_STAGE_MAP[next_stage]
         recommended_item = None
@@ -261,39 +328,17 @@ class NextChoiceView(APIView):
                 verbose=True,
             )
         elif f_random == 2:
-            # we are in the validation stage
-            # now we need to choose a random policy to compare to:
-            previous_validation_shown = get_shown_validation_policies(request)
-            print(f"previous_validation_shown: {previous_validation_shown}")
-            if len(previous_validation_shown) == 0:
-                # we are in the validation phase and we want to call the robust_recommend_subproblem function
-                recommended_item, _, _ = robust_recommend_subproblem(
-                    answered_queries,
-                    all_policies,
-                    problem_type=problem_type,
-                    verbose=False,
-                    gamma=current_gamma,
-                )
-                print(f"recommended_item: {recommended_item.id}")
-                rand_policy = choose_random_comparison_policy(
-                    all_policies, recommended_item.id, set(previous_validation_shown)
-                )
-                item_A = recommended_item.id
-                item_B = rand_policy.id
-                recommended_item = recommended_item.id
-            else:
-                # get recommended item id from response data
-                recommended_item = request.data["recommended_item"]
-                rand_policy = choose_random_comparison_policy(
-                    all_policies, recommended_item, set(previous_validation_shown)
-                )
-                item_A = recommended_item
-                item_B = rand_policy.id
+            # we are in the validation stage so we just return the two recommended policies as the validation items
+            # what was the first stage and what is the most recent stage?
+            recommended_policy_dict = request.data["recommended_item"]
+            item_A = recommended_policy_dict["adaptive"]
+            item_B = recommended_policy_dict["random"]
             # setting as item_A since we are in validation and comparing our recommended item to a randomly chosen policy
             predicted_response = 1
         else:
             # else we are in the adaptive stream
             # TODO: how to handle case where the user makes a clearly bad choice? Especially in the first round of adaptive?
+            # need to handle the case where we are going from random -> adaptive
             answered_queries_tuple = choice_path_data_prep(request.data)
             item_A, item_B, predicted_response, recommended_item = look_up_choice(
                 answered_queries,
