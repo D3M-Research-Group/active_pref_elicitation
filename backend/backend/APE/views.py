@@ -15,7 +15,7 @@ from .serializers import (
     FormInfoSerializer,
 )
 from .models import SessionInfo, Choices, FormInfo, MemoryWipeInfo
-from .policy_data import covid_data_dict, all_policies_dict
+from .policy_data import covid_data_dict, all_policies_dict, covid_data_normalized_dict
 from .choice_paths import choices_data
 from elicitation_for_website.preference_classes import Item, Query
 from elicitation_for_website.utils import get_gamma
@@ -108,6 +108,49 @@ def make_item(json_data, policy_id):
         json_data[policy_id]["values"], policy_id, json_data[policy_id]["labels"]
     )
 
+def rec_policy_data_prep(json_data, response_data, last_N=10):
+    """transform the response data and json data to return a list of Query objects for the rec policy endpoint
+    Args:
+        json_data: the policy data set
+        response_data: a dictionary with policiesShown as list of list of policies
+        and userChoices as as list of the choices of the user
+    """
+    # get the last-N stages to use for getting the recommended policy
+    print("DOING REC POLICY VIEW DATA PREP")
+    answered_queries = []
+    user_choices = [int(val) for val in response_data.get("userChoices")]
+    policies_shown = response_data.get("policiesShown")
+    num_policies_shown = len(policies_shown)
+    policy_range = range(num_policies_shown - last_N, num_policies_shown)
+    print(f"policy_range: {list(policy_range)}")
+    # TO-DO: safer way to loop through or maybe assert equal length of the lists
+    for i in policy_range:
+        print(f"i: {i}")
+        # generate the items for each policy
+        current_policy = policies_shown[i]
+        current_choice = user_choices[i]
+        policy_A = current_policy[0]
+        policy_B = current_policy[1]
+        print(f"current_policy: {current_policy}")
+        print(f"current_choice: {current_choice}")
+        # print(f'item_A: {json_data[policy_A]["values"], policy_A, json_data[policy_A]["labels"]}')
+        # print(f'item_B: {json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]}')
+        # Item(features, id, feature_names)
+        item_A = Item(
+            json_data[policy_A]["values"], policy_A, json_data[policy_A]["labels"]
+        )
+        item_B = Item(
+            json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]
+        )
+        print(Query(item_A, item_B, current_choice))
+        answered_queries.append(Query(item_A, item_B, current_choice))
+
+    current_gamma = get_gamma(
+        len(answered_queries) + 1, sigma=0.1, confidence_level=0.9
+    )
+
+    return answered_queries, current_gamma
+
 
 def elicitation_data_prep(json_data, response_data):
     """transform the response data and json data to return a list of Query objects
@@ -118,25 +161,35 @@ def elicitation_data_prep(json_data, response_data):
     """
     # need to handle the case where we transition from random -> adaptive
     # since we will have existing user_choices
+    print("DOING ELICITATION DATA PREP")
     prev_stages = response_data.get("prevStages")
     num_first_stage = response_data.get("numFirstStage")
     answered_queries = []
     user_choices = [int(val) for val in response_data.get("userChoices")]
     policies_shown = response_data.get("policiesShown")
-
-    if (len(prev_stages) > num_first_stage) and (prev_stages[0] == "random"):
-        # then the first stage was random, we need to limit the range of
+    print(f"len(prev_stages): {len(prev_stages)}")
+    print(f"len(policies_shown): {len(policies_shown)}")
+    if (len(policies_shown) > num_first_stage):
+        # then we are in the second stage and we need to limit the range of
         # policies shown that we loop over
         policy_range = range(num_first_stage, len(policies_shown))
+    elif (len(policies_shown) == num_first_stage):
+        policy_range = []
     else:
         policy_range = range(len(policies_shown))
+    print(f"policy_range: {list(policy_range)}")
     # TO-DO: safer way to loop through or maybe assert equal length of the lists
     for i in policy_range:
+        print(f"i: {i}")
         # generate the items for each policy
         current_policy = policies_shown[i]
         current_choice = user_choices[i]
         policy_A = current_policy[0]
         policy_B = current_policy[1]
+        print(f"current_policy: {current_policy}")
+        print(f"current_choice: {current_choice}")
+        # print(f'item_A: {json_data[policy_A]["values"], policy_A, json_data[policy_A]["labels"]}')
+        # print(f'item_B: {json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]}')
         # Item(features, id, feature_names)
         item_A = Item(
             json_data[policy_A]["values"], policy_A, json_data[policy_A]["labels"]
@@ -144,10 +197,8 @@ def elicitation_data_prep(json_data, response_data):
         item_B = Item(
             json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]
         )
+        print(Query(item_A, item_B, current_choice))
         answered_queries.append(Query(item_A, item_B, current_choice))
-
-    # looks like the current gamma just chooses a random integer?
-    # current_gamma = get_smallest_gamma_stub()
 
     current_gamma = get_gamma(
         len(answered_queries) + 1, sigma=0.1, confidence_level=0.9
@@ -262,13 +313,15 @@ class RecommendPolicyView(APIView):
         recommended_item = None
         current_stage = get_last_stage(request.data["prevStages"])
         print(f"current stage: {current_stage}")
-        covid_data = covid_data_dict.get(request.data["datasetName"], None)
+        covid_data = covid_data_normalized_dict.get(request.data["datasetName"], None)
         all_policies = all_policies_dict.get(request.data["datasetName"], None)
         if covid_data is None or all_policies is None:
             print(f"got {request.data['datasetName']} as the datasetName")
-        answered_queries, current_gamma = elicitation_data_prep(
-            covid_data, request.data
+        num_first_stage = request.data.get("numFirstStage")
+        answered_queries, current_gamma = rec_policy_data_prep(
+            covid_data, request.data, num_first_stage
         )
+        print(f"current_gamma: {current_gamma}")
         problem_type = "maximin"
         recommended_item, _, _ = robust_recommend_subproblem(
             answered_queries,
@@ -291,14 +344,13 @@ class NextChoiceView(APIView):
     # TO-DO: do checks on request data
     # dynamic way to choose which data set?
     # maybe add dataset name to request?
-    # TO-DO: Do we need to track gamma?
     # TO-DO: add logic for once we are in the validation stage
     def post(self, request, format=None):
         print(request.data)
         next_stage = request.data["nextStage"]
         f_random = ALGO_STAGE_MAP[next_stage]
         recommended_item = None
-        covid_data = covid_data_dict.get(request.data["datasetName"], None)
+        covid_data = covid_data_normalized_dict.get(request.data["datasetName"], None)
         all_policies = all_policies_dict.get(request.data["datasetName"], None)
         if covid_data is None or all_policies is None:
             print(f"got {request.data['datasetName']} as the datasetName")
@@ -348,7 +400,7 @@ class NextChoiceView(APIView):
                 gamma=current_gamma,
             )
         print(
-            f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}, problem_type: {problem_type}, u0_type : {u0_type}, gamma: {current_gamma} "
+            f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}, f_random: {f_random}, problem_type: {problem_type}, u0_type : {u0_type}, gamma: {current_gamma} "
         )
         # we need to store the recommended item information on the front end
         response_dict = {
