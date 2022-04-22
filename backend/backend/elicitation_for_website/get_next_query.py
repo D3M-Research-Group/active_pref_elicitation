@@ -46,7 +46,8 @@ def get_next_query(
     # if the user does not have any answered queries, return a random query:
     # if len(answered_queries) == 0 or f_random == 1 or len(answered_queries ) > 10:
     # TO-DO: remove extra condition
-    if f_random == 1 or len(answered_queries) > 10:
+    # if f_random == 1 or len(answered_queries) > 10:
+    if f_random == 1:
         done = True
         while done:
             item_b, item_a = np.random.choice(items, 2, replace=False)
@@ -55,19 +56,18 @@ def get_next_query(
                     done = False
 
         # in validation we do not care about the prediction (it should always be fixed policy)
-        if len(answered_queries) > 10:
-            predicted_response = "garbage_validation"
-
-        else:  # must be random exploration stage, so find the predicted choice
-            _, _, predicted_response = find_random_query_prediction(
-                answered_queries,
-                items,
-                item_a,
-                item_b,
-                gamma=gamma,
-                problem_type=problem_type,
-                eps=0.0,
-            )
+        # if len(answered_queries) > 10:
+        #     predicted_response = "garbage_validation"
+        # else:  # must be random exploration stage, so find the predicted choice
+        _, _, predicted_response = find_random_query_prediction(
+            answered_queries,
+            items,
+            item_a,
+            item_b,
+            gamma=gamma,
+            problem_type=problem_type,
+            eps=0.0,
+        )
         objval = None
 
     else:
