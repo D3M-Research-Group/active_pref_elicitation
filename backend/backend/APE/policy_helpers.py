@@ -42,8 +42,8 @@ def rec_policy_data_prep(json_data, response_data, last_N=10):
     user_choices = [int(val) for val in response_data.get("userChoices")]
     policies_shown = response_data.get("policiesShown")
     num_policies_shown = len(policies_shown)
-    policy_range = range(num_policies_shown - last_N, num_policies_shown)
-
+    policy_range = range(num_policies_shown - int(last_N), num_policies_shown)
+    print(policy_range)
     for i in policy_range:
         # generate the items for each policy
         current_policy = policies_shown[i]

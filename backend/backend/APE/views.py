@@ -68,7 +68,6 @@ class MemoryWipeView(mixins.CreateModelMixin, GenericAPIView):
 class RecommendPolicyView(APIView):
     def post(self, request, format=None):
         recommended_item = None
-        
         current_stage = get_last_stage(request.data["prevStages"])
         print(f"current stage: {current_stage}")
 
