@@ -105,7 +105,7 @@ def make_item(json_data, policy_id):
     policy_id: an integer id
     """
     return Item(
-        json_data[policy_id]["values"], policy_id, json_data[policy_id]["labels"]
+        json_data[str(policy_id)]["values"], policy_id, json_data[str(policy_id)]["labels"]
     )
 
 def rec_policy_data_prep(json_data, response_data, last_N=10):
@@ -137,10 +137,10 @@ def rec_policy_data_prep(json_data, response_data, last_N=10):
         # print(f'item_B: {json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]}')
         # Item(features, id, feature_names)
         item_A = Item(
-            json_data[policy_A]["values"], policy_A, json_data[policy_A]["labels"]
+            json_data[str(policy_A)]["values"], policy_A, json_data[str(policy_A)]["labels"]
         )
         item_B = Item(
-            json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]
+            json_data[str(policy_B)]["values"], policy_B, json_data[str(policy_B)]["labels"]
         )
         print(Query(item_A, item_B, current_choice))
         answered_queries.append(Query(item_A, item_B, current_choice))
@@ -192,10 +192,10 @@ def elicitation_data_prep(json_data, response_data):
         # print(f'item_B: {json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]}')
         # Item(features, id, feature_names)
         item_A = Item(
-            json_data[policy_A]["values"], policy_A, json_data[policy_A]["labels"]
+            json_data[str(policy_A)]["values"], policy_A, json_data[str(policy_A)]["labels"]
         )
         item_B = Item(
-            json_data[policy_B]["values"], policy_B, json_data[policy_B]["labels"]
+            json_data[str(policy_B)]["values"], policy_B, json_data[str(policy_B)]["labels"]
         )
         print(Query(item_A, item_B, current_choice))
         answered_queries.append(Query(item_A, item_B, current_choice))

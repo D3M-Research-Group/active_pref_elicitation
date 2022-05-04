@@ -22,6 +22,7 @@ for covid_normalized_filename in covid_normalized_filenames:
         json_data = json.load(fp)
         covid_data_normalized_dict[covid_normalized_filename[:-16]] = json_data
         all_policies = []
-        for i in range(len(json_data)):
-            all_policies.append(Item(json_data[i]['values'], i, json_data[i]['labels']))
+        # for i in range(len(json_data)):
+        for i in json_data.keys():
+            all_policies.append(Item(json_data[str(i)]['values'], int(i), json_data[str(i)]['labels']))
         all_policies_dict[covid_normalized_filename[:-16]] = all_policies
