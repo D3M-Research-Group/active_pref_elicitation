@@ -218,7 +218,8 @@ class PairwiseComparison extends React.Component {
               policy_dataset: this.policyDataSet,
               user_choice: Constants.USER_CHOICES_MAP[choice],
               prediction: Constants.PREDICTIONS_MAP[predictions[idx]],
-              recommended_item: idx === this.props.numFirstStage | idx === this.props.numExploration ? this.props.recommended_policy[this.props.prevStages[idx]] : null,
+              // recommended_item: idx === this.props.numFirstStage-1 | idx === this.props.numExploration-1 ? this.props.recommended_policy[this.props.prevStages[idx]] : null,
+              recommended_item: this.props.recommended_policy[this.props.prevStages[idx]],
               algorithm_stage: this.props.prevStages[idx],
               time_on_page: this.timeOnPage[idx],
               problem_type: this.problem_type[idx],
@@ -253,7 +254,8 @@ class PairwiseComparison extends React.Component {
               policy_dataset: this.policyDataSet,
               user_choice: Constants.USER_CHOICES_MAP[choice],
               prediction: Constants.PREDICTIONS_MAP[this.props.prevPredictions[idx]],
-              recommended_item: idx === this.props.numFirstStage | idx === this.props.numExploration ? this.props.recommended_policy[this.props.prevStages[idx]] : null,
+              // recommended_item: idx === this.props.numFirstStage-1 | idx === this.props.numExploration-1 ? this.props.recommended_policy[this.props.prevStages[idx]] : null,
+              recommended_item: this.props.recommended_policy[this.props.prevStages[idx]],
               algorithm_stage: this.props.prevStages[idx],
               time_on_page: this.timeOnPage[idx],
               problem_type: this.problem_type[idx],
@@ -472,6 +474,7 @@ class PairwiseComparison extends React.Component {
               // we need to check if we are at the end of a stage and make a request for the recommended policy
               // 
               if(this.stepNum === this.props.numFirstStage | this.stepNum === this.props.numExploration){
+                console.log("prevChoices for rec_policy", prevChoices)
                 axios.post(`${SERVER_URL}/rec_policy/`, prevChoices,
                 {
                   headers: {
@@ -577,10 +580,6 @@ class PairwiseComparison extends React.Component {
       return (
         // <div className="column">
         <React.Fragment>
-          {console.log(this.state)}
-          {console.log(this.stepNum === this.props.numFirstStage+1)}
-          {console.log("this.stepNum",this.stepNum)}
-          {console.log(this.props.numFirstStage+1)}
           {this.stepNum === 1 ? <Intro/> : null}
           {/* {this.state.loading ? <Loader loading={this.state.loading} wrapup={this.state.wrapup} /> : null} */}
 
@@ -606,58 +605,7 @@ class PairwiseComparison extends React.Component {
               onListChanged={this.onListChanged}
               
               />
-          }
-          
-          
-          {/* <MemoryWipeForm
-          key={this.stepNum.toString()}
-          showMemoryWipe={this.props}  
-          toggleMemoryWipeForm={this.props.toggleMemoryWipeForm} 
-          updateMemoryWipeInfo={this.props.updateMemoryWipeInfo}
-          writeStatetoLS={this.props.writeStatetoLS}
-          /> */}
-     
-
-          {/* {this.state.loading | this.state.showMemoryWipe ? null :  */}
-          
-          {/* <div style={{display : this.state.loading | (this.stepNum === (this.numFirstStage+1)) ? "none" : ""}}>
-
-          <Container id="policy_comparison_container" fluid={false}>
-
-            <h1 className="title">Question {this.stepNum} / {this.maxSteps}</h1>
-            {
-              this.sectionInfo.map((section, index) => {
-                const prepped_dat = this.prepareCardData(this.graphData, this.policy_ids, section.columnNums);
-                return(
-                  <PolicyComparisonSection
-                    key={index.toString()}
-                    idx_key={index.toString()}
-                    plotType={section.plotType}
-                    sectionType={section.sectionType}
-                    policyData={prepped_dat['dat']}
-                    maxYVal={prepped_dat['maxYVal']}
-                    sectionNum={index+1}
-                    columnNums={section.columnNums}
-                    title={section.sectionName}  
-                    description={section.sectionDescription}
-                  />
-                )
-              })
-            }
-              
-          </Container>
-          <BottomNavBar 
-            sectionNames={this.sectionInfo.map((x)=> x.sectionName)} 
-            onSelectChange={this.onListChanged}
-            submitChoice={this.submitChoice}
-            toggleLoading={this.toggleLoading}
-          />
-          </div> */}
-
-          {/* } */}
-
-        
-            
+          }            
         </React.Fragment>
         );
     }

@@ -69,7 +69,7 @@ class App extends React.Component {
       prevStages: [],
 
       policy_ids: [],
-      policyData: [],
+      policyData: {},
       policyDataSet: '',
 
       // metadata
