@@ -141,3 +141,4 @@ GitHub.sublime-settings
 .history
 backend/backend/db.sqlite3
 .vscode/settings.json
+.vscode/launch.json
