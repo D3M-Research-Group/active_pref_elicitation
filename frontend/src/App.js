@@ -281,11 +281,6 @@ class App extends React.Component {
       stage = "validation";
       nextStage = "validation"
     }
-    console.log("currentStep: ", this.state.currentStep);
-    console.log("currentStep+1: ", this.state.currentStep + 1);
-    console.log("algorithmStage: ", this.state.algorithmStage);
-    console.log("stage: ", stage);
-    console.log("nextStage: ", nextStage);
     this.setState({
       algorithmStage : stage,
       nextStage: nextStage

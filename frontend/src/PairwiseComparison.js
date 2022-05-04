@@ -208,8 +208,6 @@ class PairwiseComparison extends React.Component {
           console.log("u0_type", this.u0_type);
           console.log("gamma", this.gamma);
           choicesInfo = userChoices.map((choice, idx) =>{
-            // console.log(this.policiesShown[idx][0])
-            console.log(this.props.prevStages[idx]);
             const choiceInfo = {
               session_id: this.uuid,
               question_num: idx+1,
@@ -342,7 +340,7 @@ class PairwiseComparison extends React.Component {
                 self.setState({loading: false, wrapup: false, showError: true})
               })
               .then((response) =>{
-                console.log("Choices response", response)
+                // console.log("Choices response", response)
               })
               // If we're able to post the choice info without catching an error and flipping the showError flag
               // then continue with the session info. The same logic follows for user info
@@ -369,7 +367,7 @@ class PairwiseComparison extends React.Component {
                   self.setState({loading: false, wrapup: false, showError: true})
                 })
                 .then((response) =>{
-                  console.log("Session info response", response)
+                  // console.log("Session info response", response)
                 })
               }
               if(!this.state.showError){
@@ -395,7 +393,7 @@ class PairwiseComparison extends React.Component {
                   self.setState({loading: false, wrapup: false, showError: true})
                 })
                 .then((response) =>{
-                  console.log("User form info", response)
+                  // console.log("User form info", response)
                   // if we've gotten through everything ok, then let's move on to the End Page
                   while(true){
                     if ((Date.now() - timeStart)/1000 > this.waitSecs){
@@ -430,7 +428,7 @@ class PairwiseComparison extends React.Component {
                   self.setState({loading: false, wrapup: false, showError: true})
                 })
                 .then((response) =>{
-                  console.log("Memory wipe form info", response)
+                  // console.log("Memory wipe form info", response)
                   // if we've gotten through everything ok, then let's move on to the End Page
                   while(true){
                     if ((Date.now() - timeStart)/1000 > this.waitSecs){
@@ -459,22 +457,15 @@ class PairwiseComparison extends React.Component {
               this.pushBackTimeElapsed(elapsed_time);
               // Don't write state until we've successfully heard back from the server to avoid overcounting responses
               // this.props.writeStatetoLS();
-              console.log(this.props.prevStages);
-              console.log("nextStage", this.props.nextStage);
-              
-              
-
               // this request needs to pass data to the endpoint
               // if we are randomizing the display of policies, we need to reorder them before 
               // sending them back to the backend to avoid Gurobi crashing
               var prevChoices = this.createPoliciesShownData(true);
-              console.log("prevChoices", prevChoices);
               
 
               // we need to check if we are at the end of a stage and make a request for the recommended policy
               // 
               if(this.stepNum === this.props.numFirstStage | this.stepNum === this.props.numExploration){
-                console.log("prevChoices for rec_policy", prevChoices)
                 axios.post(`${SERVER_URL}/rec_policy/`, prevChoices,
                 {
                   headers: {
@@ -489,7 +480,6 @@ class PairwiseComparison extends React.Component {
                   this.updateRecommendedItem(recommended_policy, current_stage);
                   // need to update previous choices with the new recommended item
                   prevChoices = this.createPoliciesShownData(true);
-                  console.log("prevChoices", prevChoices);
                 })
                 .then(() => {
                     axios.post(`${SERVER_URL}/next_query/`,prevChoices,
@@ -539,7 +529,7 @@ class PairwiseComparison extends React.Component {
                     console.log(error.response.headers);
                   } else if (error.request) {
                     // The request was made but no response was received
-                    console.log(error.request);
+                    // console.log(error.request);
                   } else {
                     // Something happened in setting up the request that triggered an Error
                     console.log('Error', error.message);
