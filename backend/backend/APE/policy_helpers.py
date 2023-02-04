@@ -1,6 +1,6 @@
+import numpy as np
 from elicitation_for_website.preference_classes import Item, Query, robust_utility
 from elicitation_for_website.utils import get_gamma
-import numpy as np
 
 
 def get_last_stage(algo_stage_list):
@@ -62,9 +62,7 @@ def rec_policy_data_prep(json_data, response_data, last_N=10):
         )
         answered_queries.append(Query(item_A, item_B, current_choice))
 
-    current_gamma = get_gamma(
-        len(answered_queries) + 1, sigma=0.1, confidence_level=0.9
-    )
+    current_gamma = get_gamma(len(answered_queries), sigma=0.1, confidence_level=0.9)
 
     return answered_queries, current_gamma
 
@@ -84,7 +82,7 @@ def elicitation_data_prep(json_data, response_data):
     answered_queries_adaptive = []
     user_choices = [int(val) for val in response_data.get("userChoices")]
     policies_shown = response_data.get("policiesShown")
-    
+
     if len(policies_shown) > num_first_stage:
         # then we are in the second stage and we need to limit the range of
         # policies shown that we loop over
@@ -100,7 +98,7 @@ def elicitation_data_prep(json_data, response_data):
         current_choice = user_choices[i]
         policy_A = current_policy[0]
         policy_B = current_policy[1]
-        
+
         # Item(features, id, feature_names)
         item_A = Item(
             json_data[str(policy_A)]["values"],

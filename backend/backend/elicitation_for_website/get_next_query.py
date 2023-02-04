@@ -1,13 +1,15 @@
 # function to get the next pairwise comparison, drawn from a set of items
+import itertools
+from random import randint, uniform
+from time import sleep
+
 import numpy as np
 from gurobipy import *
 
 from .gurobi_functions import create_mip_model, optimize
-from .preference_classes import robust_utility, Query, is_feasible, Item, User
+from .preference_classes import Item, Query, User, is_feasible, robust_utility
 from .static_elicitation import static_mip_optimal
 from .utils import U0_positive_normed
-from random import randint, uniform
-from time import sleep
 
 
 def get_next_query(
@@ -45,7 +47,7 @@ def get_next_query(
 
     # if the user does not have any answered queries, return a random query:
     # if len(answered_queries) == 0 or f_random == 1 or len(answered_queries ) > 10:
-    # TO-DO: remove extra condition
+    # TODO: remove extra condition
     # if f_random == 1 or len(answered_queries) > 10:
     if f_random == 1:
         done = True
