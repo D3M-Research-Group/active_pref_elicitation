@@ -1,19 +1,19 @@
-import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import _ from 'lodash';
 import axios from 'axios';
 import ls from 'local-storage';
-import {Container} from 'reactstrap';
+import _ from 'lodash';
+import React from 'react';
+import { Container } from 'reactstrap';
+import { v4 as uuidv4 } from 'uuid';
 
-import StartPage from './StartPage';
-import UserInfoForm from './UserInfoForm';
-import StepList from './StepGenerator';
-import TopNavBar from './TopNavBar';
-import EndPage from './EndPage';
 import './Card.scss';
 import * as Constants from "./constants";
-import MemoryWipeForm from './MemoryWipeForm';
+import EndPage from './EndPage';
 import Loader from './Loader';
+import MemoryWipeForm from './MemoryWipeForm';
+import StartPage from './StartPage';
+import StepList from './StepGenerator';
+import TopNavBar from './TopNavBar';
+import UserInfoForm from './UserInfoForm';
 
 const SERVER_URL = Constants.SERVER_URL;
 const DATASET_NAME = Constants.DATASET_NAME;
@@ -440,6 +440,7 @@ class App extends React.Component {
       // check that there is actually any info in the state object
       var state_info = JSON.parse(loadableState);
       console.log("loaded state_info", state_info)
+      // TODO: check that UserInfo object is non-empty instead of just looking at age
       if(state_info['currentStep'] > 0 && state_info['userInfo']['age'].length > 0){
         this.setState({
           showResumeButton: true
