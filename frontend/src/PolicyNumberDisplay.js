@@ -10,6 +10,7 @@ class PolicyNumberDisplay extends React.Component{
 
     render(){
         return(
+            
             <Jumbotron>
                 <h1>{this.data.values.slice(this.columnNums[0],this.columnNums[1]+1).toLocaleString(undefined,
                     {   

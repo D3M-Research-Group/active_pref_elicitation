@@ -15,3 +15,5 @@ export const PREDICTIONS_MAP = {
     "0" : "indifferent",
     "garbage_validation": "garbage_validation"
   }
+
+export const WAIT_SECS = 0.5

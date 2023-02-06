@@ -1,13 +1,15 @@
 # function to get the next pairwise comparison, drawn from a set of items
+import itertools
+from random import randint, uniform
+from time import sleep
+
 import numpy as np
 from gurobipy import *
 
 from .gurobi_functions import create_mip_model, optimize
-from .preference_classes import robust_utility, Query, is_feasible, Item, User
+from .preference_classes import Item, Query, User, is_feasible, robust_utility
 from .static_elicitation import static_mip_optimal
 from .utils import U0_positive_normed
-from random import randint, uniform
-from time import sleep
 
 
 def get_next_query(
@@ -45,8 +47,9 @@ def get_next_query(
 
     # if the user does not have any answered queries, return a random query:
     # if len(answered_queries) == 0 or f_random == 1 or len(answered_queries ) > 10:
-    # TO-DO: remove extra condition
-    if f_random == 1 or len(answered_queries) > 10:
+    # TODO: remove extra condition
+    # if f_random == 1 or len(answered_queries) > 10:
+    if f_random == 1:
         done = True
         while done:
             item_b, item_a = np.random.choice(items, 2, replace=False)
@@ -55,19 +58,18 @@ def get_next_query(
                     done = False
 
         # in validation we do not care about the prediction (it should always be fixed policy)
-        if len(answered_queries) > 10:
-            predicted_response = "garbage_validation"
-
-        else:  # must be random exploration stage, so find the predicted choice
-            _, _, predicted_response = find_random_query_prediction(
-                answered_queries,
-                items,
-                item_a,
-                item_b,
-                gamma=gamma,
-                problem_type=problem_type,
-                eps=0.0,
-            )
+        # if len(answered_queries) > 10:
+        #     predicted_response = "garbage_validation"
+        # else:  # must be random exploration stage, so find the predicted choice
+        _, _, predicted_response = find_random_query_prediction(
+            answered_queries,
+            items,
+            item_a,
+            item_b,
+            gamma=gamma,
+            problem_type=problem_type,
+            eps=0.0,
+        )
         objval = None
 
     else:
@@ -76,6 +78,7 @@ def get_next_query(
         )
 
     if verbose:
+        print(f"problem type: {problem_type}, u0 type: {u0_type}")
         print(f"next query: item_A={item_a.id}, item_B={item_b.id}")
         print("predicted is", predicted_response)
     return (
@@ -84,6 +87,7 @@ def get_next_query(
         predicted_response,
         objval,
         problem_type,
+        u0_type,
     )
 
 

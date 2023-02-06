@@ -24,7 +24,9 @@ class Choices(models.Model):
     recommended_item = models.PositiveIntegerField(null=True)
     algorithm_stage = models.CharField(max_length=50, verbose_name="algorithm stage")
     time_on_page = models.FloatField(verbose_name="Time Spent on Question (seconds)")
-    # gamma = models.FloatField(verbose_name="Gamma value")
+    gamma = models.FloatField(verbose_name="Gamma value")
+    problem_type = models.CharField(max_length=20)
+    u0_type = models.CharField(max_length=20)
 
 class FormInfo(models.Model):
     # Need some fields to be nullable so that we can use this model for
@@ -39,10 +41,18 @@ class FormInfo(models.Model):
     marital_status = models.CharField(max_length=100)
     education = models.CharField(max_length=100)
     political = models.CharField(max_length=100)
-    positive_family = models.CharField(max_length=10, null=True)
-    positive_anyone = models.CharField(max_length=10, null=True)
-    healthcare_yn = models.CharField(max_length=10, null=True)
-    healthcare_role = models.CharField(max_length=10, null=True)
+    positive_family = models.CharField(max_length=20, null=True)
+    positive_anyone = models.CharField(max_length=20, null=True)
+    healthcare_yn = models.CharField(max_length=20, null=True)
+    healthcare_role = models.CharField(max_length=100, null=True)
+
+class MemoryWipeInfo(models.Model):
+    session_id = models.CharField(max_length=50,
+                            primary_key=True,
+                            verbose_name='session_id') # session id which relates this to SessionInfo
+    question_1 = models.CharField(max_length=80)
+    question_2 = models.CharField(max_length=80)
+    question_3 = models.CharField(max_length=80)
 
 # Which question to display next
 # class NextChoice(models.Model):

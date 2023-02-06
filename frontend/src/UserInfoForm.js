@@ -15,10 +15,11 @@ import { defaultMessage,
 
 import './Field.scss';
 import './FieldError.scss';
-import schema from './simplifiedFormSchema';
+import UserInfoSchema from './UserInfoFormSchema';
 import Submit from './Submit';
 import Select from './Select';
 import './UserInfoForm';
+import './Form.css';
 
 
 class UserInfoForm extends React.Component{
@@ -90,7 +91,7 @@ class UserInfoForm extends React.Component{
 				data={formData}
 				onChange={this.handleChange}
 				onSubmit={this.handleSubmit}
-				schema={schema}
+				schema={UserInfoSchema}
 			>
                 <Row className="mb-4">
                 <FormGroup>

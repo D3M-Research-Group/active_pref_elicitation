@@ -26,6 +26,7 @@ class StartPage extends React.Component {
         this.props.toggleStartPage();
         // show UserInfoForm
         this.props.toggleUserInfoForm();
+        // this.props.toggleMemoryWipeForm();
     }
 
     render(){
