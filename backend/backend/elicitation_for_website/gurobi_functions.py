@@ -1,6 +1,6 @@
 from gurobipy import *
 
-TIME_LIM = 18000 #18,000s = 5 hours
+TIME_LIM = 18000  # 18,000s = 5 hours
 
 # MIP constants
 EPS_MIP = 1e-3
@@ -20,11 +20,14 @@ def create_mip_model(time_lim=TIME_LIM, verbose=False, mipgap=None):
     if mipgap is not None:
         assert mipgap >= 0
         m.params.MIPGap = mipgap
+
+    m.params.NumericFocus = 3
+
     return m
 
 
 def optimize(model, raise_warnings=True):
-    '''optimize a Gurobi model'''
+    """optimize a Gurobi model"""
 
     # if cfg.lp_file:
     #     model.update()
@@ -44,9 +47,9 @@ def optimize(model, raise_warnings=True):
         if raise_warnings:
             raise Warning("model is infeasible")
             m.computeIIS()
-            m.write('/Users/duncan/research/model.mps')
-            m.write('/Users/duncan/research/model.rlp')
-            m.write('/Users/duncan/research/model.ilp')
+            m.write("/Users/duncan/research/model.mps")
+            m.write("/Users/duncan/research/model.rlp")
+            m.write("/Users/duncan/research/model.ilp")
     elif model.status == GRB.UNBOUNDED:
         if raise_warnings:
             raise Warning("model is unbounded")
