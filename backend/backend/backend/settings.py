@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = os.environ.get("DJANGO_DEBUG", "") != "False"
+DEBUG = os.environ.get("DJANGO_DEBUG", "") == "True"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(", ")
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "APE",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [

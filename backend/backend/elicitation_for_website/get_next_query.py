@@ -155,16 +155,16 @@ def find_random_query_prediction(
     of the items.
     """
 
-    valid_responses = [-1, 0, 1]
+    # valid_responses = [-1, 0, 1]
 
-    # for q in answered_queries:
-    #     assert q.item_A.id < q.item_B.id
+    # # for q in answered_queries:
+    # #     assert q.item_A.id < q.item_B.id
 
-    response_list = [q.response for q in answered_queries]
+    # response_list = [q.response for q in answered_queries]
 
-    assert set(response_list).issubset(set(valid_responses))
+    # assert set(response_list).issubset(set(valid_responses))
 
-    scenario_list = [tuple(response_list + [r]) for r in valid_responses]
+    # scenario_list = [tuple(response_list + [r]) for r in valid_responses]
 
     K = len(answered_queries) + 1
 
@@ -192,7 +192,7 @@ def find_random_query_prediction(
     return item_a_opt.id, item_b_opt.id, predicted_response
 
 
-def find_optimal_query(answered_queries, items, verbose=False, eps=0.0):
+def find_optimal_query(answered_queries, items, verbose=False, gamma=0.0):
     """
     exhaustively search all queries for the next one that maximizes the robust rec. utility.
 
@@ -200,7 +200,7 @@ def find_optimal_query(answered_queries, items, verbose=False, eps=0.0):
     - answered_queries: list(Query). answered query objects. each Query should have a defined response
     - items: list(Item). list of item objects.
     - verbose: (bool). set to True to print output.
-    - eps: (float). decision margin for agents
+    - gamma: (float). decision margin for agents
 
     outputs:
     - item_A: (item). first item in the query
@@ -241,8 +241,8 @@ def find_optimal_query(answered_queries, items, verbose=False, eps=0.0):
             # find the worst-case recommendation utility for each response
             q.response = r
             queries = answered_queries + [q]
-            response_obj_values[j], _, _ = robust_recommend_subproblem(
-                queries, items, verbose=verbose, eps=eps
+            _, response_obj_values[j], _ = robust_recommend_subproblem(
+                queries, items, verbose=verbose, gamma=gamma
             )
 
         # if all responses are infeasible, raise an Exception
@@ -329,7 +329,7 @@ def robust_recommend_subproblem(
 
     # add dual variables
     if problem_type == "maximin":
-        mu_var, alpha_vars, beta_vars = add_rec_dual_variables(
+        mu_var, alpha_vars, rho_vars, nu_vars, beta_vars = add_rec_dual_variables(
             m,
             K,
             gamma,
@@ -463,11 +463,25 @@ def add_rec_dual_variables(
     alpha_vars = m.addVars(
         K, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=alpha_name
     )
+    rho_vars = m.addVars(K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=0, name=f"rho")
+
+    nu_vars = m.addVars(K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=0, name=f"nu")
 
     if gamma > 0:
         if problem_type == "maximin":
             for k in range(K):
-                m.addConstr(alpha_vars[k] + mu_var <= 0, name=f"alpha_constr_k{k}")
+                if responses[k] == -1 or responses[k] == 1:
+                    m.addConstr(
+                        alpha_vars[k] + mu_var <= 0,
+                        name=f"alpha_constr_k{k}_resp{responses[k]}",
+                    )
+                elif responses[k] == 0:  # indifferent
+                    m.addConstr(
+                        -rho_vars[k] - nu_vars[k] + mu_var <= 0,
+                        name=f"rho_nu_constr_k{k}",
+                    )
+                else:
+                    raise Exception("response scenario value unexpected:", responses[k])
         if problem_type == "mmr":
             for k in range(K):
                 m.addConstr(
@@ -483,8 +497,17 @@ def add_rec_dual_variables(
     # the big constraint ...
     for f in range(num_features):
         lhs_1 = quicksum(
-            [responses[k] * z_vectors[k][f] * alpha_vars[k] for k in range(K)]
+            [
+                responses[k] * z_vectors[k][f] * alpha_vars[k]
+                for k in range(K)
+                if (responses[k] == 1 or responses[k] == -1)
+            ]
+        ) + quicksum(
+            (rho_vars[k] - nu_vars[k]) * z_vectors[k][f]
+            for k in range(K)
+            if (responses[k] == 0)
         )
+
         lhs_2 = quicksum([b_mat[j, f] * beta_vars[j] for j in range(m_const)])
 
         if problem_type == "maximin":
@@ -497,4 +520,4 @@ def add_rec_dual_variables(
 
         m.addConstr(lhs_1 + lhs_2 == rhs, name=feature_name)
 
-    return mu_var, alpha_vars, beta_vars
+    return mu_var, alpha_vars, rho_vars, nu_vars, beta_vars

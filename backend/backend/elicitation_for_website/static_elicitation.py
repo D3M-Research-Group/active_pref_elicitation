@@ -1,19 +1,22 @@
-from gurobipy import *
-import numpy as np
+import itertools
 import time
+
+import numpy as np
+from gurobipy import *
 from scipy.special import comb
 
-import itertools
-
-from .gurobi_functions import create_mip_model, optimize, M, TIME_LIM
-from .preference_classes import Query, Item
+from .gurobi_functions import TIME_LIM, M, create_mip_model, optimize
+from .preference_classes import Item, Query
 from .utils import U0_polyhedron, get_u0
+
 
 class StaticMIPFailed(Exception):
     pass
 
+
 class FeasibilitySubproblemFailed(Exception):
     pass
+
 
 class WarmDecompHeuristicFailed(Exception):
     pass
@@ -21,7 +24,7 @@ class WarmDecompHeuristicFailed(Exception):
 
 # primary function to build questionnaire
 def build_questionnaire(items, K, time_lim):
-    '''
+    """
 
     args:
     - items:   (list(Item)). list of preference_classes.Item objects for building queries
@@ -32,29 +35,40 @@ def build_questionnaire(items, K, time_lim):
     output:
     - queries
 
-    '''
+    """
 
     eps = 0.0
-    valid_responses = [1, -1]
+    valid_responses = [1, 0, -1]
 
     if K >= comb(len(items), 2):
         raise Exception("K must be smaller than the number of possible queries")
 
-    queries, objval, _ = solve_warm_start_decomp_heuristic(items, K, eps, valid_responses,
-                                                           time_lim=time_lim,
-                                                           verbose=False,
-                                                           time_lim_overall=False,
-                                                           logfile=None,
-                                                           displayinterval=None)
+    queries, objval, _ = solve_warm_start_decomp_heuristic(
+        items,
+        K,
+        eps,
+        valid_responses,
+        time_lim=time_lim,
+        verbose=False,
+        time_lim_overall=False,
+        logfile=None,
+        displayinterval=None,
+    )
 
     # make sure that no queries have identical items
     for i, q in enumerate(queries):
         if q.item_A.id == q.item_B.id:
-            raise Exception("query {} returned by the heuristic uses only item {}".format(i + 1, q))
+            raise Exception(
+                "query {} returned by the heuristic uses only item {}".format(i + 1, q)
+            )
 
     # if there are repeated queries, replace the repeated queries with other random queries
     if len(queries) > len(set(queries)):
-        print("the heuristic returned {} repeated queries. replacing these with new random queries.".format(len(queries) - len(set(queries))))
+        print(
+            "the heuristic returned {} repeated queries. replacing these with new random queries.".format(
+                len(queries) - len(set(queries))
+            )
+        )
         print("the queries returned by the heuristic are:")
         for q in queries:
             print(q)
@@ -69,10 +83,12 @@ def build_questionnaire(items, K, time_lim):
 
     return queries, objval
 
+
 # additional functions
 
+
 def new_random_queries(items, num_new_queries, old_queries):
-    '''find new random queries to add to the list, which are not in old_queries'''
+    """find new random queries to add to the list, which are not in old_queries"""
 
     query_list = [Query(a, b) for a, b in itertools.combinations(items, 2)]
 
@@ -84,6 +100,7 @@ def new_random_queries(items, num_new_queries, old_queries):
     new_queries = np.random.choice(query_list, num_new_queries, replace=False)
 
     return new_queries
+
 
 def static_mip_optimal(
     items,
@@ -133,27 +150,25 @@ def static_mip_optimal(
     if fixed_queries is None:
         fixed_queries = []
 
-
     for query in fixed_queries:
-       it_a = query.item_A
-       it_b = query.item_B
-       res = query.response
-       if it_a.id > it_b.id:
-           if res == 1:
-              temp = it_a
-              query.item_A = it_b
-              query.item_B = temp
-              query.response = -1
-           elif res == -1:
-               temp = it_a
-               query.item_A = it_b
-               query.item_B = temp
-               query.response = 1
-           else:
-               temp = it_a
-               query.item_A = it_b
-               query.item_B = temp
-
+        it_a = query.item_A
+        it_b = query.item_B
+        res = query.response
+        if it_a.id > it_b.id:
+            if res == 1:
+                temp = it_a
+                query.item_A = it_b
+                query.item_B = temp
+                query.response = -1
+            elif res == -1:
+                temp = it_a
+                query.item_A = it_b
+                query.item_B = temp
+                query.response = 1
+            else:
+                temp = it_a
+                query.item_A = it_b
+                query.item_B = temp
 
     assert problem_type in ["maximin", "mmr"]
 
@@ -237,15 +252,27 @@ def static_mip_optimal(
     if problem_type == "maximin":
         y_vars = {}
         alpha_vars = {}
+        rho_vars = {}
+        nu_vars = {}
         beta_vars = {}
         v_bar_vars = {}
         w_bar_vars = {}
+        v_bar_prime_vars = {}
+        w_bar_prime_vars = {}
+        v_bar_prime_prime_vars = {}
+        w_bar_prime_prime_vars = {}
         for i, r in enumerate(scenario_list):
             (
                 alpha_vars[r],
+                rho_vars[r],
+                nu_vars[r],
                 beta_vars[r],
                 v_bar_vars[r],
                 w_bar_vars[r],
+                v_bar_prime_vars[r],
+                w_bar_prime_vars[r],
+                v_bar_prime_prime_vars[r],
+                w_bar_prime_prime_vars[r],
             ) = add_r_constraints(
                 m,
                 tau,
@@ -316,7 +343,6 @@ def static_mip_optimal(
     #     if raise_gurobi_time_limit:
     #         raise GurobiTimeLimit
 
-
     # for i in m.getVars():
     #     print(i,i.x)
 
@@ -371,7 +397,13 @@ def static_mip_optimal(
 
 
 def add_integer_variables(
-    model, num_items, K, start_queries=None, cut_1=True, cut_2=True, fixed_queries=[],
+    model,
+    num_items,
+    K,
+    start_queries=None,
+    cut_1=True,
+    cut_2=True,
+    fixed_queries=[],
 ):
     """
     :param model:
@@ -393,8 +425,8 @@ def add_integer_variables(
     # q_vars[i,k] = q^k_i
     # get the indices of non-fixed variables
 
-    p_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="p")
-    q_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="q")
+    p_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="v")
+    q_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="w")
 
     # # auxiliary variable
     # new_start_rec = None
@@ -435,11 +467,11 @@ def add_integer_variables(
 
         model.addConstr(
             quicksum(p_vars[i, k] for i in range(num_items)) == 1,
-            name=("p_constr_k%d" % k),
+            # name=("p_constr_k%d" % k),
         )
         model.addConstr(
             quicksum(q_vars[i, k] for i in range(num_items)) == 1,
-            name=("q_constr_k%d" % k),
+            # name=("q_constr_k%d" % k),
         )
 
     # add warm start queries if they're provided
@@ -495,12 +527,12 @@ def add_integer_variables(
     # note: these are "y" in the paper
     # w^k = p^k + q^k
     # w_vars = model.addVars(num_items, K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='w')
-    w_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="w")
+    w_vars = model.addVars(num_items, K, vtype=GRB.BINARY, name="t")
     for i in range(num_items):
         for k in range(K):
             model.addConstr(
                 w_vars[i, k] == p_vars[i, k] + q_vars[i, k],
-                name=("w_constr_i%d_k%d" % (i, k)),
+                name=("t_constr_i%d_k%d" % (i, k)),
             )
             # add warm start values for w, if provided
             if start_queries is not None:
@@ -621,7 +653,7 @@ def add_r_constraints(
     assert problem_type in ["mmr", "maximin"]
 
     for ri in response_scenario:
-        assert ri in [-1, 0,1]
+        assert ri in [-1, 0, 1]
 
     if problem_type == "mmr":
         assert isinstance(mmr_item, Item)
@@ -671,7 +703,21 @@ def add_r_constraints(
         m_const, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=f"beta_r_{id_str}"
     )
     alpha_vars = m.addVars(
-        K, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=f"alpha_{id_str}"
+        K, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=f"zeta_{id_str}"
+    )
+
+    if 0 in response_scenario:
+        # print("0 in", response_scenario)
+        indiff_lb = -GRB.INFINITY
+    else:
+        indiff_lb = 0
+
+    rho_vars = m.addVars(
+        K, vtype=GRB.CONTINUOUS, lb=indiff_lb, ub=0, name=f"rho_{id_str}"
+    )
+
+    nu_vars = m.addVars(
+        K, vtype=GRB.CONTINUOUS, lb=indiff_lb, ub=0, name=f"nu_{id_str}"
     )
 
     # only define these variables for queries which are not fixed
@@ -686,7 +732,7 @@ def add_r_constraints(
         vtype=GRB.CONTINUOUS,
         lb=dual_lb,
         ub=dual_ub,
-        name=f"gamma_{id_str}",
+        name=f"vbar_{id_str}",
     )
     w_bar_vars = m.addVars(
         num_items,
@@ -694,50 +740,236 @@ def add_r_constraints(
         vtype=GRB.CONTINUOUS,
         lb=dual_lb,
         ub=dual_ub,
-        name=f"lambda_{id_str}",
+        name=f"wbar_{id_str}",
+    )
+
+    v_bar_prime_vars = m.addVars(
+        num_items,
+        K_free,
+        vtype=GRB.CONTINUOUS,
+        lb=indiff_lb,
+        ub=0,
+        name=f"vbar'_{id_str}",
+    )
+    w_bar_prime_vars = m.addVars(
+        num_items,
+        K_free,
+        vtype=GRB.CONTINUOUS,
+        lb=indiff_lb,
+        ub=0,
+        name=f"wbar'_{id_str}",
+    )
+
+    v_bar_prime_prime_vars = m.addVars(
+        num_items,
+        K_free,
+        vtype=GRB.CONTINUOUS,
+        lb=indiff_lb,
+        ub=0,
+        name=f"vbar''_{id_str}",
+    )
+    w_bar_prime_prime_vars = m.addVars(
+        num_items,
+        K_free,
+        vtype=GRB.CONTINUOUS,
+        lb=indiff_lb,
+        ub=0,
+        name=f"wbar''_{id_str}",
     )
     # print("vbar",v_bar_vars)
     if gamma_inconsistencies > 0:
         if problem_type == "maximin":
             for k in range(K):
-                m.addConstr(
-                    alpha_vars[k] + mu_var <= 0, name=f"alpha_constr_k{k}_{id_str}",
-                )
+                # for resp in response_scenario:
+                #     print("resp scenario is", response_scenario)
+                if response_scenario[k] == -1 or response_scenario[k] == 1:
+                    m.addConstr(
+                        alpha_vars[k] + mu_var <= 0,
+                        name=f"alpha_constr_k{k}_{id_str}",
+                    )
+                elif response_scenario[k] == 0:  # indifferent
+                    m.addConstr(
+                        -rho_vars[k] - nu_vars[k] + mu_var <= 0,
+                        name=f"rho_nu_constr_k{k}_{id_str}",
+                    )
+
+                else:
+                    raise Exception(
+                        "response scenario value unexpected:", response_scenario[k]
+                    )
         if problem_type == "mmr":
             for k in range(K):
                 m.addConstr(
-                    alpha_vars[k] + mu_var >= 0, name=f"alpha_constr_k{k}_{id_str}",
+                    alpha_vars[k] + mu_var >= 0,
+                    name=f"alpha_constr_k{k}_{id_str}",
                 )
 
     # constraints defining gamma and lambda - identical for mmr and maximin
     if problem_type == "maximin":
         for k in K_free:
             for i in range(num_items):
-                m.addConstr(
-                    v_bar_vars[i, k] <= M * p_vars[i, k],
-                    name=f"p_constrA_k{k}_i{i}_{id_str}",
-                )
-                m.addConstr(
-                    v_bar_vars[i, k] <= alpha_vars[k],
-                    name=f"p_constrB_k{k}_i{i}_{id_str}",
-                )
-                m.addConstr(
-                    v_bar_vars[i, k] >= alpha_vars[k] - M * (1 - p_vars[i, k]),
-                    name=f"p_constrC_k{k}_i{i}_{id_str}",
+                m.addGenConstrIndicator(
+                    p_vars[i, k],
+                    False,
+                    v_bar_vars[i, k] == 0.0,
+                    name=f"v_constrA_k{k}_i{i}_{id_str}",
                 )
 
-                m.addConstr(
-                    w_bar_vars[i, k] <= M * q_vars[i, k],
-                    name=f"q_constrA_k{k}_i{i}_{id_str}",
+                m.addGenConstrIndicator(
+                    p_vars[i, k],
+                    True,
+                    v_bar_vars[i, k] == alpha_vars[k],
+                    name=f"v_constrB_k{k}_i{i}_{id_str}",
                 )
-                m.addConstr(
-                    w_bar_vars[i, k] <= alpha_vars[k],
-                    name=f"q_constrB_k{k}_i{i}_{id_str}",
+
+                m.addGenConstrIndicator(
+                    q_vars[i, k],
+                    False,
+                    w_bar_vars[i, k] == 0.0,
+                    name=f"v_constrA_k{k}_i{i}_{id_str}",
                 )
-                m.addConstr(
-                    w_bar_vars[i, k] >= alpha_vars[k] - M * (1 - q_vars[i, k]),
-                    name=f"q_constrC_k{k}_i{i}_{id_str}",
+
+                m.addGenConstrIndicator(
+                    q_vars[i, k],
+                    True,
+                    w_bar_vars[i, k] == alpha_vars[k],
+                    name=f"v_constrB_k{k}_i{i}_{id_str}",
                 )
+
+                # ----------------------------------------------------------------------------------
+                m.addGenConstrIndicator(
+                    p_vars[i, k],
+                    False,
+                    v_bar_prime_vars[i, k] == 0.0,
+                    name=f"v_constrA_k{k}_i{i}_{id_str}",
+                )
+
+                m.addGenConstrIndicator(
+                    p_vars[i, k],
+                    True,
+                    v_bar_prime_vars[i, k] == rho_vars[k],
+                    name=f"v_constrB_k{k}_i{i}_{id_str}",
+                )
+
+                m.addGenConstrIndicator(
+                    q_vars[i, k],
+                    False,
+                    w_bar_prime_vars[i, k] == 0.0,
+                    name=f"v_constrA_k{k}_i{i}_{id_str}",
+                )
+
+                m.addGenConstrIndicator(
+                    q_vars[i, k],
+                    True,
+                    w_bar_prime_vars[i, k] == rho_vars[k],
+                    name=f"v_constrB_k{k}_i{i}_{id_str}",
+                )
+                # ----------------------------------------------------------------------------------
+                m.addGenConstrIndicator(
+                    p_vars[i, k],
+                    False,
+                    v_bar_prime_prime_vars[i, k] == 0.0,
+                    name=f"v_constrA_k{k}_i{i}_{id_str}",
+                )
+
+                m.addGenConstrIndicator(
+                    p_vars[i, k],
+                    True,
+                    v_bar_prime_prime_vars[i, k] == nu_vars[k],
+                    name=f"v_constrB_k{k}_i{i}_{id_str}",
+                )
+
+                m.addGenConstrIndicator(
+                    q_vars[i, k],
+                    False,
+                    w_bar_prime_prime_vars[i, k] == 0.0,
+                    name=f"v_constrA_k{k}_i{i}_{id_str}",
+                )
+
+                m.addGenConstrIndicator(
+                    q_vars[i, k],
+                    True,
+                    w_bar_prime_prime_vars[i, k] == nu_vars[k],
+                    name=f"v_constrB_k{k}_i{i}_{id_str}",
+                )
+
+                # m.addConstr(
+                #     v_bar_vars[i, k] <= M * p_vars[i, k],
+                #     name=f"p_constrA_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     v_bar_vars[i, k] <= alpha_vars[k],
+                #     name=f"p_constrB_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     v_bar_vars[i, k] >= alpha_vars[k] - M * (1 - p_vars[i, k]),
+                #     name=f"p_constrC_k{k}_i{i}_{id_str}",
+                # )
+                #
+                # m.addConstr(
+                #     w_bar_vars[i, k] <= M * q_vars[i, k],
+                #     name=f"q_constrA_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     w_bar_vars[i, k] <= alpha_vars[k],
+                #     name=f"q_constrB_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     w_bar_vars[i, k] >= alpha_vars[k] - M * (1 - q_vars[i, k]),
+                #     name=f"q_constrC_k{k}_i{i}_{id_str}",
+                # )
+                # #   -----------------------------------------------------------------
+                # m.addConstr(
+                #     v_bar_prime_vars[i, k] >= - M * p_vars[i, k],
+                #     name=f"p'_constrA_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     v_bar_prime_vars[i, k] >= rho_vars[k],
+                #     name=f"p'_constrB_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     v_bar_prime_vars[i, k] <= rho_vars[k] + M * (1 - p_vars[i, k]),
+                #     name=f"p'_constrC_k{k}_i{i}_{id_str}",
+                # )
+                #
+                # m.addConstr(
+                #     w_bar_prime_vars[i, k] >= -M * q_vars[i, k],
+                #     name=f"q'_constrA_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     w_bar_prime_vars[i, k] >= rho_vars[k],
+                #     name=f"q'_constrB_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     w_bar_prime_vars[i, k] <= rho_vars[k] + M * (1 - q_vars[i, k]),
+                #     name=f"q'_constrC_k{k}_i{i}_{id_str}",
+                # )
+                # #   -----------------------------------------------------------------
+                # m.addConstr(
+                #     v_bar_prime_prime_vars[i, k] >= -M * p_vars[i, k],
+                #     name=f"p''_constrA_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     v_bar_prime_prime_vars[i, k] >= nu_vars[k],
+                #     name=f"p''_constrB_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     v_bar_prime_prime_vars[i, k] <= nu_vars[k] + M * (1 - p_vars[i, k]),
+                #     name=f"p''_constrC_k{k}_i{i}_{id_str}",
+                # )
+                #
+                # m.addConstr(
+                #     w_bar_prime_prime_vars[i, k] >= -M * q_vars[i, k],
+                #     name=f"q''_constrA_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     w_bar_prime_prime_vars[i, k] >= nu_vars[k],
+                #     name=f"q''_constrB_k{k}_i{i}_{id_str}",
+                # )
+                # m.addConstr(
+                #     w_bar_prime_prime_vars[i, k] <= nu_vars[k] + M * (1 - q_vars[i, k]),
+                #     name=f"q''_constrC_k{k}_i{i}_{id_str}",
+                # )
     if problem_type == "mmr":
         for k in K_free:
             for i in range(num_items):
@@ -779,14 +1011,45 @@ def add_r_constraints(
                     - fixed_queries[i_q].item_B.features[f]
                 )
                 for i_q, k in enumerate(K_fixed)
+                if (response_scenario[k] == 1 or response_scenario[k] == -1)
+            ) + quicksum(
+                (rho_vars[k] - nu_vars[k])
+                * (
+                    fixed_queries[i_q].item_A.features[f]
+                    - fixed_queries[i_q].item_B.features[f]
+                )
+                for i_q, k in enumerate(K_fixed)
+                if (response_scenario[k] == 0)
             )
-        lhs_1_free = quicksum(
-            items[i].features[f]
-            * quicksum(
-                response_scenario[k] * (v_bar_vars[i, k] - w_bar_vars[i, k])
-                for k in K_free
+
+        lhs_1_free = (
+            quicksum(
+                items[i].features[f]
+                * quicksum(
+                    response_scenario[k] * (v_bar_vars[i, k] - w_bar_vars[i, k])
+                    for k in K_free
+                    if (response_scenario[k] == 1 or response_scenario[k] == -1)
+                )
+                for i in range(num_items)
             )
-            for i in range(num_items)
+            + quicksum(
+                items[i].features[f]
+                * quicksum(
+                    (v_bar_prime_vars[i, k] - w_bar_prime_vars[i, k])
+                    for k in K_free
+                    if (response_scenario[k] == 0)
+                )
+                for i in range(num_items)
+            )
+            - quicksum(
+                items[i].features[f]
+                * quicksum(
+                    (v_bar_prime_prime_vars[i, k] - w_bar_prime_prime_vars[i, k])
+                    for k in K_free
+                    if (response_scenario[k] == 0)
+                )
+                for i in range(num_items)
+            )
         )
         lhs_2 = quicksum(B_mat[j, f] * beta_vars[j] for j in range(m_const))
 
@@ -820,7 +1083,18 @@ def add_r_constraints(
             name=f"tau_{id_str}",
         )
 
-    return alpha_vars, beta_vars, v_bar_vars, w_bar_vars
+    return (
+        alpha_vars,
+        rho_vars,
+        nu_vars,
+        beta_vars,
+        v_bar_vars,
+        w_bar_vars,
+        v_bar_prime_vars,
+        w_bar_prime_vars,
+        v_bar_prime_prime_vars,
+        w_bar_prime_prime_vars,
+    )
 
 
 # def find_cluster_queries(queries, k):
@@ -868,14 +1142,19 @@ def add_r_constraints(
 #     return np.matmul(np.matmul(A, np.linalg.pinv(np.matmul(A.T,A))),A.T)
 
 
-def solve_warm_start(items, K, eps, valid_responses,
-                     cut_1=True,
-                     time_lim=TIME_LIM,
-                     time_lim_overall=True,
-                     verbose=False,
-                     logfile=None,
-                     displayinterval=None):
-    '''
+def solve_warm_start(
+    items,
+    K,
+    eps,
+    valid_responses,
+    cut_1=True,
+    time_lim=TIME_LIM,
+    time_lim_overall=True,
+    verbose=False,
+    logfile=None,
+    displayinterval=None,
+):
+    """
     incrementally build a solution using small K, up to the desired K
     smaller-K solutions are used as warm starts for larger-K solutions
 
@@ -890,21 +1169,26 @@ def solve_warm_start(items, K, eps, valid_responses,
     verbose: (bool)
     logfile: (str).
     displayinterval: (float)
-    '''
+    """
 
     assert isinstance(time_lim, int) or isinstance(time_lim, float)
 
     start_time = time.time()
 
-    solve_opt = lambda k, queries_apx, time_lim, start_rec: static_mip_optimal(items, k, eps, valid_responses,
-                                                                               cut_1=cut_1,
-                                                                               cut_2=True,
-                                                                               start_queries=queries_apx,
-                                                                               time_lim=time_lim,
-                                                                               start_rec=start_rec,
-                                                                               verbose=verbose,
-                                                                               logfile=logfile,
-                                                                               displayinterval=displayinterval)
+    solve_opt = lambda k, queries_apx, time_lim, start_rec: static_mip_optimal(
+        items,
+        k,
+        eps,
+        valid_responses,
+        cut_1=cut_1,
+        cut_2=True,
+        start_queries=queries_apx,
+        time_lim=time_lim,
+        start_rec=start_rec,
+        verbose=verbose,
+        logfile=logfile,
+        displayinterval=displayinterval,
+    )
 
     # this is the time budget; subtract from it each time we run anything...
     t_remaining = time_lim
@@ -913,20 +1197,25 @@ def solve_warm_start(items, K, eps, valid_responses,
     k = 1
 
     if logfile is not None:
-        with open(logfile, 'a') as f:
+        with open(logfile, "a") as f:
             f.write("WARM START: k=%d; time=%f\n" % (k, (time.time() - start_time)))
 
-    queries_opt, objval, time_lim_reached, rec_inds = static_mip_optimal(items, k, eps, valid_responses,
-                                                                         cut_1=cut_1,
-                                                                         cut_2=False,
-                                                                         time_lim=time_lim,
-                                                                         verbose=verbose,
-                                                                         logfile=logfile,
-                                                                         displayinterval=displayinterval)
+    queries_opt, objval, time_lim_reached, rec_inds = static_mip_optimal(
+        items,
+        k,
+        eps,
+        valid_responses,
+        cut_1=cut_1,
+        cut_2=False,
+        time_lim=time_lim,
+        verbose=verbose,
+        logfile=logfile,
+        displayinterval=displayinterval,
+    )
 
     # if we apply the time limit to the overall run, then subtract after each iteration. otherwise, never subtract.
     if time_lim_overall:
-        t_remaining -= (time.time() - t0)
+        t_remaining -= time.time() - t0
 
     for k in range(2, K + 1):
 
@@ -956,14 +1245,16 @@ def solve_warm_start(items, K, eps, valid_responses,
         # use approx. queries as a warm start for the OPTIMAL run
 
         if logfile is not None:
-            with open(logfile, 'a') as f:
+            with open(logfile, "a") as f:
                 f.write("WARM START: k=%d; time=%f\n" % (k, (time.time() - start_time)))
 
         t0 = time.time()
-        queries_opt, objval, time_lim_reached, rec_inds = solve_opt(k, queries_apx, t_remaining, start_rec_list)
+        queries_opt, objval, time_lim_reached, rec_inds = solve_opt(
+            k, queries_apx, t_remaining, start_rec_list
+        )
 
         if time_lim_overall:
-            t_remaining -= (time.time() - t0)
+            t_remaining -= time.time() - t0
 
         if t_remaining <= 0:
             # if fewer than K queries were found return only the queries already identified (possisbly fewer than K)
@@ -974,27 +1265,38 @@ def solve_warm_start(items, K, eps, valid_responses,
 
 # heuristics for solving the static questionnaire problem
 
-def solve_warm_start_decomp_heuristic(items, K, eps, valid_responses,
-                                      time_lim=TIME_LIM,
-                                      verbose=False,
-                                      time_lim_overall=True,
-                                      logfile=None,
-                                      displayinterval=None):
-    '''
+
+def solve_warm_start_decomp_heuristic(
+    items,
+    K,
+    eps,
+    valid_responses,
+    time_lim=TIME_LIM,
+    verbose=False,
+    time_lim_overall=True,
+    logfile=None,
+    displayinterval=None,
+):
+    """
     incrementally build a solution - solving first the K=1 problem to opimality, then incrementally adding more queries
     by solving the K=1 problem (using the scenario decomp.)
-    '''
+    """
 
     rs = np.random.RandomState()
 
     # note: cut_2 must be false because fixed_queries are used
-    solve_opt = lambda k, fixed_queries, time_lim: solve_scenario_decomposition(items, k, rs, eps,
-                                                                                valid_responses,
-                                                                                max_iter=10000,
-                                                                                cut_2=False,
-                                                                                verbose=verbose,
-                                                                                time_limit=time_lim,
-                                                                                fixed_queries=fixed_queries)
+    solve_opt = lambda k, fixed_queries, time_lim: solve_scenario_decomposition(
+        items,
+        k,
+        rs,
+        eps,
+        valid_responses,
+        max_iter=10000,
+        cut_2=False,
+        verbose=verbose,
+        time_limit=time_lim,
+        fixed_queries=fixed_queries,
+    )
 
     # this is the time budget; subtract from it each time we run anything...
     t_remaining = time_lim
@@ -1004,15 +1306,22 @@ def solve_warm_start_decomp_heuristic(items, K, eps, valid_responses,
     if verbose:
         print("WARM+DECOMP HEURISTIC: solving K=1 problem")
     try:
-        queries_opt, objval, time_time_lim_reached, rec_inds = static_mip_optimal(items, k, eps, valid_responses,
-                                                                                  cut_2=False,
-                                                                                  verbose=verbose,
-                                                                                  time_lim=time_lim)
+        queries_opt, objval, time_time_lim_reached, rec_inds = static_mip_optimal(
+            items,
+            k,
+            eps,
+            valid_responses,
+            cut_2=False,
+            verbose=verbose,
+            time_lim=time_lim,
+        )
     except StaticMIPFailed:
-        raise WarmDecompHeuristicFailed("static MIP failed. time limit probably needs to be increased.")
+        raise WarmDecompHeuristicFailed(
+            "static MIP failed. time limit probably needs to be increased."
+        )
 
     if time_lim_overall:
-        t_remaining -= (time.time() - t0)
+        t_remaining -= time.time() - t0
 
     if verbose:
         print("WARM+DECOMP HEURISTIC: identified optimal query:")
@@ -1026,10 +1335,12 @@ def solve_warm_start_decomp_heuristic(items, K, eps, valid_responses,
             print("WARM+DECOMP HEURISTIC: solving K=%d problem" % k)
 
         t0 = time.time()
-        queries_opt, objval, time_lim_reached, rec_inds = solve_opt(k, queries_fixed, t_remaining)
+        queries_opt, objval, time_lim_reached, rec_inds = solve_opt(
+            k, queries_fixed, t_remaining
+        )
 
         if time_lim_overall:
-            t_remaining -= (time.time() - t0)
+            t_remaining -= time.time() - t0
 
         if verbose:
             print("WARM+DECOMP HEURISTIC: identified optimal queries:")
@@ -1044,23 +1355,29 @@ def solve_warm_start_decomp_heuristic(items, K, eps, valid_responses,
     return queries_opt, objval, time_lim_reached
 
 
-def solve_scenario_decomposition(items, K, rs, eps, valid_responses,
-                                 max_iter=10000,
-                                 cut_2=True,
-                                 verbose=False,
-                                 verbose_gurobi=False,
-                                 start_queries=None,
-                                 fixed_queries=None,
-                                 eps_optimal=1e-4,
-                                 time_limit=1e10,
-                                 logfile=None,
-                                 displayinterval=None):
+def solve_scenario_decomposition(
+    items,
+    K,
+    rs,
+    eps,
+    valid_responses,
+    max_iter=10000,
+    cut_2=True,
+    verbose=False,
+    verbose_gurobi=False,
+    start_queries=None,
+    fixed_queries=None,
+    eps_optimal=1e-4,
+    time_limit=1e10,
+    logfile=None,
+    displayinterval=None,
+):
     assert sorted(valid_responses) == [-1, 0, 1] or sorted(valid_responses) == [-1, 1]
 
     start_time = time.time()
 
     if logfile is not None:
-        with open(logfile, 'a') as f:
+        with open(logfile, "a") as f:
             f.write("SCENARIO DECOMP: start_time=%f\n" % start_time)
 
     # initialize with a single random response scenario
@@ -1074,7 +1391,7 @@ def solve_scenario_decomposition(items, K, rs, eps, valid_responses,
     S = [list(s_init)]
 
     if verbose:
-        print('S0 = %s' % str(S[0]))
+        print("S0 = %s" % str(S[0]))
 
     # keep track of time. only penalize time for solving the RMP
     time_remaining = time_limit
@@ -1089,8 +1406,8 @@ def solve_scenario_decomposition(items, K, rs, eps, valid_responses,
             break
 
         if verbose:
-            print('iter %d:' % i)
-            print('solving RMP with S:')
+            print("iter %d:" % i)
+            print("solving RMP with S:")
             print(str(S))
 
         t0 = time.time()
@@ -1104,17 +1421,25 @@ def solve_scenario_decomposition(items, K, rs, eps, valid_responses,
             start_queries = rmp_queries
 
         if logfile is not None:
-            with open(logfile, 'a') as f:
-                f.write("SCENARIO DECOMP: begin iter=%d; time=%f\n" % (i, (time.time() - start_time)))
+            with open(logfile, "a") as f:
+                f.write(
+                    "SCENARIO DECOMP: begin iter=%d; time=%f\n"
+                    % (i, (time.time() - start_time))
+                )
 
-        rmp_queries_new, RMP_objval, time_lim_reached, rec_inds = static_mip_optimal(items, K, eps, valid_responses,
-                                                                                     time_lim=time_remaining,
-                                                                                     cut_1=True,
-                                                                                     cut_2=cut_2,
-                                                                                     start_queries=start_queries,
-                                                                                     fixed_queries=fixed_queries,
-                                                                                     response_subset=S,
-                                                                                     verbose=verbose_gurobi)
+        rmp_queries_new, RMP_objval, time_lim_reached, rec_inds = static_mip_optimal(
+            items,
+            K,
+            eps,
+            valid_responses,
+            time_lim=time_remaining,
+            cut_1=True,
+            cut_2=cut_2,
+            start_queries=start_queries,
+            fixed_queries=fixed_queries,
+            response_subset=S,
+            verbose=verbose_gurobi,
+        )
 
         time_remaining -= time.time() - t0
 
@@ -1129,58 +1454,74 @@ def solve_scenario_decomposition(items, K, rs, eps, valid_responses,
         UB = RMP_objval
 
         if logfile is not None:
-            with open(logfile, 'a') as f:
-                f.write("SCENARIO DECOMP: end iter %d; new UB=%f; time=%f\n" % (i, UB, (start_time - time.time())))
+            with open(logfile, "a") as f:
+                f.write(
+                    "SCENARIO DECOMP: end iter %d; new UB=%f; time=%f\n"
+                    % (i, UB, (start_time - time.time()))
+                )
 
         rmp_queries = rmp_queries_new
         if verbose:
-            print('RMP objval = %e' % RMP_objval)
-            print('RMP queries: %s' % str([(q.item_A.id, q.item_B.id) for q in rmp_queries]))
+            print("RMP objval = %e" % RMP_objval)
+            print(
+                "RMP queries: %s"
+                % str([(q.item_A.id, q.item_B.id) for q in rmp_queries])
+            )
 
-        s_opt, SP_objval = feasibility_subproblem([q.z for q in rmp_queries],
-                                                  valid_responses,
-                                                  K,
-                                                  items,
-                                                  eps,
-                                                  B_mat,
-                                                  b_vec,
-                                                  time_lim=TIME_LIM,
-                                                  verbose=verbose_gurobi)
+        s_opt, SP_objval = feasibility_subproblem(
+            [q.z for q in rmp_queries],
+            valid_responses,
+            K,
+            items,
+            eps,
+            B_mat,
+            b_vec,
+            time_lim=TIME_LIM,
+            verbose=verbose_gurobi,
+        )
 
         LB = SP_objval
 
         if logfile is not None:
-            with open(logfile, 'a') as f:
-                f.write("SCENARIO DECOMP: end iter %d; new LB=%f; time=%f\n" % (i, LB, (start_time - time.time())))
+            with open(logfile, "a") as f:
+                f.write(
+                    "SCENARIO DECOMP: end iter %d; new LB=%f; time=%f\n"
+                    % (i, LB, (start_time - time.time()))
+                )
 
         if verbose:
-            print('SP objval = %e' % SP_objval)
-            print('new scenario: %s' % str(s_opt))
+            print("SP objval = %e" % SP_objval)
+            print("new scenario: %s" % str(s_opt))
 
         if s_opt in S:
             if verbose:
-                print('warning: SP identified a scenario that is already in S')
+                print("warning: SP identified a scenario that is already in S")
 
         S.append(s_opt)
 
     return rmp_queries, RMP_objval, False, rec_inds
 
 
-def feasibility_subproblem(z_vec_list,
-                           valid_responses,
-                           K,
-                           items,
-                           eps,
-                           B_mat,
-                           b_vec,
-                           time_lim=TIME_LIM,
-                           verbose=False):
+def feasibility_subproblem(
+    z_vec_list,
+    valid_responses,
+    K,
+    items,
+    eps,
+    B_mat,
+    b_vec,
+    gamma_inconsistencies,
+    time_lim=TIME_LIM,
+    fixed_responses=None,
+    verbose=False,
+):
     # solve the scenario decomposition subproblem.
 
     if set(valid_responses) == set([-1, 1]):
         use_indifference = False
     elif set(valid_responses) == set([-1, 1, 0]):
         use_indifference = True
+        # print("indiff")
     else:
         raise Exception("valid_responses is not valid")
 
@@ -1195,59 +1536,140 @@ def feasibility_subproblem(z_vec_list,
     m.params.OptimalityTol = 1e-8
 
     # objective value
-    theta_var = m.addVar(vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='theta')
+    theta_var = m.addVar(
+        vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="theta"
+    )
 
     # decision variables for response scenario
-    s_plus_vars = m.addVars(K, vtype=GRB.BINARY, name='s_plus')
-    s_minus_vars = m.addVars(K, vtype=GRB.BINARY, name='s_minus')
+    s_plus_vars = m.addVars(K, vtype=GRB.BINARY, name="s_plus")
+    s_minus_vars = m.addVars(K, vtype=GRB.BINARY, name="s_minus")
 
     if use_indifference:
-        s_0_vars = m.addVars(K, vtype=GRB.BINARY, name='s_0')
+        s_0_vars = m.addVars(K, vtype=GRB.BINARY, name="s_0")
 
     # only one response is possible
     for k in range(K):
         if use_indifference:
-            m.addConstr(s_plus_vars[k] + s_minus_vars[k] + s_0_vars[k] == 1, name='s_const')
+            m.addConstr(
+                s_plus_vars[k] + s_minus_vars[k] + s_0_vars[k] == 1, name="s_const"
+            )
             m.addSOS(GRB.SOS_TYPE1, [s_plus_vars[k], s_minus_vars[k], s_0_vars[k]])
         else:
-            m.addConstr(s_plus_vars[k] + s_minus_vars[k] == 1, name='s_const')
+            m.addConstr(s_plus_vars[k] + s_minus_vars[k] == 1, name="s_const")
             m.addSOS(GRB.SOS_TYPE1, [s_plus_vars[k], s_minus_vars[k]])
+
+    if fixed_responses is not None:
+        for ix, resp in enumerate(fixed_responses):
+            if resp == 1:
+                s_plus_vars[ix].setAttr("lb", 1.0)
+                s_plus_vars[ix].setAttr("ub", 1.0)
+            elif resp == -1:
+                s_minus_vars[ix].setAttr("lb", 1.0)
+                s_minus_vars[ix].setAttr("ub", 1.0)
+            else:  # resp == 0
+                s_0_vars[ix].setAttr("lb", 1.0)
+                s_0_vars[ix].setAttr("ub", 1.0)
+
+    if gamma_inconsistencies > 0:
+        # print("xi")
+        xi_vars = m.addVars(num_items, K, lb=0.0, ub=GRB.INFINITY, name="xi")
+
+        for i in range(num_items):
+            m.addConstr(
+                quicksum(xi_vars[i, k] for k in range(K)) <= gamma_inconsistencies,
+                name="gamma_sum",
+            )
+
+    else:
+        xi_vars = np.zeros((num_items, K))
 
     # add constraints for the utility of each item x
     # u_vars for each item
-    u_vars = m.addVars(num_items, num_features,
-                       vtype=GRB.CONTINUOUS,
-                       lb=-GRB.INFINITY,
-                       ub=GRB.INFINITY,
-                       name='u')
+    u_vars = m.addVars(
+        num_items,
+        num_features,
+        vtype=GRB.CONTINUOUS,
+        lb=-GRB.INFINITY,
+        ub=GRB.INFINITY,
+        name="u",
+    )
     for i_item, item in enumerate(items):
 
         # U^0 constraints
         for i_row in range(m_const):
-            m.addConstr(quicksum(B_mat[i_row, i_feat] * u_vars[i_item, i_feat]
-                                 for i_feat in range(num_features)) >= b_vec[i_row], name=('U0_const_row_%d' % i_row))
+            m.addConstr(
+                quicksum(
+                    B_mat[i_row, i_feat] * u_vars[i_item, i_feat]
+                    for i_feat in range(num_features)
+                )
+                >= b_vec[i_row],
+                name=("U0_const_row_%d" % i_row),
+            )
+
+        # partworth
+        m.addConstr(
+            quicksum(u_vars[i_item, i_feat] for i_feat in range(num_features)) == 1,
+            name="sum_1",
+        )
+        for i_feat in range(num_features):
+            m.addConstr(u_vars[i_item, i_feat] >= 0, name="pos_1")
 
         # m.addConstr(theta_var >= item_util[i_item], name=('theta_constr_%d' % i_item))
         m.addConstr(
-            theta_var >= quicksum([u_vars[i_item, i_feat] * item.features[i_feat] for i_feat in range(num_features)]),
-            name=('theta_constr_%d' % i_item))
+            theta_var
+            >= quicksum(
+                [
+                    u_vars[i_item, i_feat] * item.features[i_feat]
+                    for i_feat in range(num_features)
+                ]
+            ),
+            name=("theta_constr_%d" % i_item),
+        )
 
         # add constraints on U(z, s)
         for i_k, z_vec in enumerate(z_vec_list):
-            m.addConstr(quicksum([u_vars[i_item, i_feat] * z_vec[i_feat] for i_feat in range(num_features)]) \
-                        >= eps - M * (1 - s_plus_vars[i_k]),
-                        name=('U_s_plus_k%d' % i_k))
-            m.addConstr(quicksum([u_vars[i_item, i_feat] * z_vec[i_feat] for i_feat in range(num_features)]) \
-                        <= - eps + M * (1 - s_minus_vars[i_k]),
-                        name=('U_s_minus_k%d' % i_k))
+            m.addConstr(
+                quicksum(
+                    [
+                        u_vars[i_item, i_feat] * z_vec[i_feat]
+                        for i_feat in range(num_features)
+                    ]
+                )
+                >= -xi_vars[i_item, i_k] + eps - M * (1 - s_plus_vars[i_k]),
+                name=("U_s_plus_k%d" % i_k),
+            )
+            m.addConstr(
+                quicksum(
+                    [
+                        u_vars[i_item, i_feat] * z_vec[i_feat]
+                        for i_feat in range(num_features)
+                    ]
+                )
+                <= xi_vars[i_item, i_k] - eps + M * (1 - s_minus_vars[i_k]),
+                name=("U_s_minus_k%d" % i_k),
+            )
 
             if use_indifference:
-                m.addConstr(quicksum([u_vars[i_item, i_feat] * z_vec[i_feat] for i_feat in range(num_features)]) \
-                            <= M * (1 - s_0_vars[i_k]),
-                            name=('U_s_0+_k%d' % i_k))
-                m.addConstr(quicksum([u_vars[i_item, i_feat] * z_vec[i_feat] for i_feat in range(num_features)]) \
-                            >= - M * (1 - s_0_vars[i_k]),
-                            name=('U_s_0-_k%d' % i_k))
+                m.addConstr(
+                    quicksum(
+                        [
+                            u_vars[i_item, i_feat] * z_vec[i_feat]
+                            for i_feat in range(num_features)
+                        ]
+                    )
+                    <= xi_vars[i_item, i_k] + M * (1 - s_0_vars[i_k]),
+                    name=("U_s_0+_k%d" % i_k),
+                )
+                m.addConstr(
+                    quicksum(
+                        [
+                            u_vars[i_item, i_feat] * z_vec[i_feat]
+                            for i_feat in range(num_features)
+                        ]
+                    )
+                    >= -xi_vars[i_item, i_k] - M * (1 - s_0_vars[i_k]),
+                    name=("U_s_0-_k%d" % i_k),
+                )
 
     m.setObjective(theta_var, sense=GRB.MINIMIZE)
 
@@ -1260,7 +1682,9 @@ def feasibility_subproblem(z_vec_list,
     try:
         # get the optimal response scenario
         # s_opt = [- s_plus_vars[k].x + s_minus_vars[k].x for k in range(K)]
-        s_opt = [int(round(s_plus_vars[i_k].x - s_minus_vars[i_k].x)) for i_k in range(K)]
+        s_opt = [
+            int(round(s_plus_vars[i_k].x - s_minus_vars[i_k].x)) for i_k in range(K)
+        ]
         objval = m.objval
     except:
         # if failed for some reason...
