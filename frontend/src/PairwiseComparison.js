@@ -1,10 +1,10 @@
-import React from 'react';
-import Loader from "./Loader";
-import ErrorPage from './ErrorPage';
-import './PolicyComparisonSection'
 import axios from 'axios';
-import Intro from './Intro';
+import React from 'react';
 import * as Constants from "./constants";
+import ErrorPage from './ErrorPage';
+import Intro from './Intro';
+import Loader from "./Loader";
+import './PolicyComparisonSection';
 import QuestionContainer from './QuestionContainer';
 
 const SERVER_URL = Constants.SERVER_URL;
@@ -73,13 +73,15 @@ class PairwiseComparison extends React.Component {
           sectionType : "number",
           columnNums: [0,0],
           sectionName: "Life Years Saved",
-          sectionDescription: ""
+          sectionDescription: "",
+          toolTipText: 'The metric "life years saved" is based on the life expectancies of those that will recover from COVID-19 under a given policy. Policies with higher life years saved values will, in general, save lives that are younger than those with lower life years saved.'
         },{
           sectionType : "plot",
           plotType : "pie",
           columnNums: [1,1],
           sectionName: "Overall Survival Probability",
-          sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care"
+          sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
+          toolTipText: ''
         },
         {
             sectionType : "plot",
@@ -87,13 +89,15 @@ class PairwiseComparison extends React.Component {
             columnNums: [9,14],
             sectionName: "Chance of Receiving Critical Care by Age Group",
             sectionDescription: "Among People Who Need It",
+            toolTipText: ''
           },
           {
             sectionType : "plot",
             plotType : "bar",
             columnNums: [2,7],
             sectionName: "Survival Probability",
-            sectionDescription: "Chance of Surviving by Age Group"
+            sectionDescription: "Chance of Surviving by Age Group",
+            toolTipText: ''
           } 
         ]
        

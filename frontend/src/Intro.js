@@ -1,5 +1,5 @@
+import { Steps } from "intro.js-react";
 import React from "react";
-import { Steps} from "intro.js-react";
 
 import "intro.js/introjs.css";
 
@@ -77,6 +77,8 @@ export default class Intro extends React.Component{
               // onAfterChange={this.keepSpot}
               options={{ hideNext: false,
                 disableInteraction: true,
+                exitOnOverlayClick: false,
+                exitOnEsc: false,
                 // scrollToElement: true,
                 // scrollPadding: "1px"
               }}
