@@ -1,8 +1,9 @@
 import React from 'react';
 import { Col, Container, Row } from 'reactstrap';
-import PolicyNumberDisplay from './PolicyNumberDisplay';
-import './PolicyComparisonSection.css'
+import './PolicyComparisonSection.css';
 import PolicyDataPlot from './PolicyDataPlots';
+import PolicyNumberDisplay from './PolicyNumberDisplay';
+import TooltipItem from './ToolTip';
 
 class PolicyComparisonSection extends React.Component{
     constructor(props){
@@ -16,6 +17,7 @@ class PolicyComparisonSection extends React.Component{
         this.sectionNum = this.props.sectionNum;
         this.title=this.props.title;
         this.description=this.props.description;
+        this.toolTipText=this.props.toolTipText;
         this.maxYVal = this.props.maxYVal;
         this.generatePlotColumn = this.generatePlotColumn.bind(this);
         
@@ -55,9 +57,17 @@ class PolicyComparisonSection extends React.Component{
     render() {
         return(
                 <div className="section_container text-center" id={"section_"+this.sectionNum}>
-                    <h2>
-                        {this.title}
-                    </h2>
+                    <div>
+                        <h2 style={{ display: "inline"}}>
+                            {this.title}
+                        </h2>
+                        {
+                        this.toolTipText.length > 0 ?
+                        <TooltipItem key={this.sectionNum} placement={'right'} text={this.toolTipText} id={this.sectionNum} /> :
+                        null
+                        }
+                        
+                    </div>
                     <p>{this.description}</p>
                     <Container fluid={true} style={{marginBottom: "5rem"}} key={this.key}>
                         {this.plotType === "pie"? 

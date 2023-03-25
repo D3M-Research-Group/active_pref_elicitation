@@ -1,7 +1,7 @@
 import React from 'react';
-import PolicyComparisonSection from './PolicyComparisonSection';
+import { Container } from 'reactstrap';
 import BottomNavBar from './NavBar';
-import {Container} from 'reactstrap';
+import PolicyComparisonSection from './PolicyComparisonSection';
 
 
 class QuestionContainer extends React.Component {
@@ -26,6 +26,7 @@ class QuestionContainer extends React.Component {
                         columnNums={section.columnNums}
                         title={section.sectionName}  
                         description={section.sectionDescription}
+                        toolTipText={section.toolTipText}
                     />
                     )
                 })
