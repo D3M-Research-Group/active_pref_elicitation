@@ -106,57 +106,57 @@ $selected-color: #0d6efd;
 //   }
 // }
 
-button.bottom_navbar {
-  display: block;
-  cursor: pointer;
-  // width: 180px;
-  margin: 20px auto;
-  text-align: center;
-  padding: 16px;
-  border-color: transparent;
-  border-radius: 10px;
-  background: $selected-color !important;
-  color: #fff;
-  text-transform: capitalize;
-  font-weight: bold;
-  outline: none;
-  &:focus {
-    box-shadow: $card-shadow;
-  }
-  margin-inline: 10px;
-  font-size: 1rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+// button.bottom_navbar {
+//   display: block;
+//   cursor: pointer;
+//   // width: 180px;
+//   margin: 40px auto;
+//   text-align: center;
+//   padding: 12px;
+//   border-color: transparent;
+//   border-radius: 10px;
+//   background: $selected-color !important;
+//   color: #fff;
+//   text-transform: capitalize;
+//   font-weight: bold;
+//   outline: none;
+//   &:focus {
+//     box-shadow: $card-shadow;
+//   }
+//   margin-inline: 10px;
+//   font-size: 1rem;
+//   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+//     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+//     sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+// }
 
-button.bottom_navbar_submit {
-  display: block;
-  cursor: pointer;
-  // width: 180px;
-  margin: 20px auto;
-  text-align: center;
-  padding: 16px;
-  border-color: transparent;
-  border-radius: 10px;
-  background: $selected-color !important;
-  color: #fff;
-  text-transform: capitalize;
-  font-weight: bold;
-  outline: none;
-  &:focus {
-    box-shadow: $card-shadow;
-  }
-  margin-left: 1rem;
-  font-size: 1rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+// button.bottom_navbar_submit {
+//   display: block;
+//   cursor: pointer;
+//   // width: 180px;
+//   margin: 40px auto;
+//   text-align: center;
+//   padding: 16px;
+//   border-color: transparent;
+//   border-radius: 10px;
+//   background: $selected-color !important;
+//   color: #fff;
+//   text-transform: capitalize;
+//   font-weight: bold;
+//   outline: none;
+//   &:focus {
+//     box-shadow: $card-shadow;
+//   }
+//   margin-left: 1rem;
+//   font-size: 1rem;
+//   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+//     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+//     sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+// }
 
 .chart-container {
   display: flex;

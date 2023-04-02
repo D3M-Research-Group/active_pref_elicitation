@@ -1,6 +1,6 @@
-import React from 'react';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import React from 'react';
 
 export default function ToggleButtons(props) {
   const [selected, setSelected] = React.useState("");
@@ -29,6 +29,7 @@ export default function ToggleButtons(props) {
       onChange={handleSelected}
       aria-label="policy choices"
       id="choices_button_group"
+      size='small'
     >
       <ToggleButton className="bottom_navbar" value="1" >
         Policy A
