@@ -153,7 +153,7 @@ class PolicyDataPlot extends React.Component {
                 }
             ]
         }
-        console.log("chartData: ", chartData)
+        // console.log("chartData: ", chartData)
         return chartData;
     }
 

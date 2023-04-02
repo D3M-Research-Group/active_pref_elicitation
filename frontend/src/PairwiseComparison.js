@@ -564,7 +564,10 @@ class PairwiseComparison extends React.Component {
             maxVals.push(graphData[policy_ids[i]]['values'].slice(columnNums[0], columnNums[1]+1).reduce(
               function(a, b) {return Math.max(a, b);}, 0));
         }
-        return {"dat": dat, "maxYVal": maxVals.reduce(function(a, b) {return Math.max(a, b);}, 0)};
+        return {"dat": dat, 
+        // "maxYVal": maxVals.reduce(function(a, b) {return Math.max(a, b);}, 0)
+        "maxYVal": 1
+      };
     }
 
 
