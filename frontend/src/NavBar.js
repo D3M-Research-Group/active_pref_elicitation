@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import {
-  Navbar,
-  Nav,
-  NavItem,
-  NavLink,
-  Button,
-  UncontrolledTooltip
+    Button, Nav, Navbar, NavItem,
+    NavLink, UncontrolledTooltip
 } from 'reactstrap';
-import ToggleButtons from './ToggleButtons';
+import ButtonGroupReactStrap from './ToggleButtonsReactStrap';
 
 
 
@@ -37,15 +33,16 @@ function BottomNavBar(props){
                     {makeNavItem(sectionNames)}
                     </Nav>
                     <Nav className="ms-auto" navbar>
-                        <ToggleButtons 
+                        {/* <ToggleButtons 
                             toggleDisabled={toggleDisabled}
                             onSelectChange={props.onSelectChange}
                         >
 
-                        </ToggleButtons>
+                        </ToggleButtons> */}
+                        <ButtonGroupReactStrap onSelectChange={props.onSelectChange} toggleDisabled={toggleDisabled}/>
                         <span id="submitWrapper">
                             <Button 
-                                className="bottom_navbar_submit"
+                                color="primary"
                                 id="submitButton" 
                                 disabled={submitDisabled}
                                 onClick={props.submitChoice}>

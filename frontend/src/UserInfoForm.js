@@ -1,25 +1,23 @@
 import React from 'react';
 import { Field, FieldError, Form } from 'react-jsonschema-form-validation';
 import {
-	Col,
-	FormGroup,
-	Label,
-	Row,
-    Container
+    Col, Container, FormGroup,
+    Label,
+    Row
 } from 'reactstrap';
 
-import { defaultMessage, 
-    selectFieldMessage,
-    usernameFieldMessage,
-    healthcareroleFieldMessage } from './FormErrorMessages';
+import {
+    defaultMessage, healthcareroleFieldMessage, selectFieldMessage,
+    usernameFieldMessage
+} from './FormErrorMessages';
 
 import './Field.scss';
 import './FieldError.scss';
-import UserInfoSchema from './UserInfoFormSchema';
-import Submit from './Submit';
-import Select from './Select';
-import './UserInfoForm';
 import './Form.css';
+import Select from './Select';
+import Submit from './Submit';
+import './UserInfoForm';
+import UserInfoSchema from './UserInfoFormSchema';
 
 
 class UserInfoForm extends React.Component{
@@ -548,7 +546,8 @@ class UserInfoForm extends React.Component{
                             name="healthcare_role"
                             value={formData.healthcare_role}
                             type="input"
-                            placeholder=""
+                            placeholder="N/A"
+                            
                         />
                         <FieldError 
                         errorMessages={{

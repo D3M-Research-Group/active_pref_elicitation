@@ -1,8 +1,9 @@
 import React from 'react';
 import {
-  Navbar,
-  NavbarBrand,
+  Nav, Navbar,
+  NavbarBrand
 } from 'reactstrap';
+import ScenarioReminder from './ScenarioReminder';
 
 
 
@@ -13,6 +14,9 @@ const TopNavBar = (props) => {
             {/* TO-DO: Add alert when clicking on this to prevent people leaving accidentally */}
               Active Preference Elicitation <span role="img" aria-label="crystal ball">🔮</span>
             </NavbarBrand>
+            <Nav className="justify-content-end" style={{ width: "100%", paddingRight: "1.5rem" }}>
+              <ScenarioReminder/>
+            </Nav>
         </Navbar>
     );
   }
