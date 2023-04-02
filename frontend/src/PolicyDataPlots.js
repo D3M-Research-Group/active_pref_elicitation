@@ -1,7 +1,6 @@
-import React from 'react';
-import { Bar, Pie } from 'react-chartjs-2';
-import { defaults } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import React from 'react';
+import { Bar, defaults, Pie } from 'react-chartjs-2';
 
 
 
@@ -42,7 +41,7 @@ class PolicyDataPlot extends React.Component {
             scales: {
                 y: {
                     ticks: {
-                        // Include a dollar sign in the ticks
+                        // Include a percent sign in the ticks
                         callback: function(value, index, values) {
                             return (value*100).toFixed(0) + "%";
                         }
@@ -99,7 +98,7 @@ class PolicyDataPlot extends React.Component {
         if(plotType === "pie"){
             dat.push((1-dat[0]));
             labs.push("Deceased");
-            bg_colors = backgroundColors.slice(0, (column_end - column_start + 2)); // do this so we get additional color for completment
+            bg_colors = backgroundColors.slice(0, (column_end - column_start + 2)); // do this so we get additional color for complement
             border_colors = borderColors.slice(0, (column_end - column_start + 2));
 
             this.plotOptions = {
@@ -121,6 +120,7 @@ class PolicyDataPlot extends React.Component {
                     },
                     legend: {
                         display: true,
+                        reverse: true,
                         labels: {
                             font :{
                                 size : 20
@@ -153,7 +153,7 @@ class PolicyDataPlot extends React.Component {
                 }
             ]
         }
-        // console.log("chartData: ", chartData)
+        console.log("chartData: ", chartData)
         return chartData;
     }
 
