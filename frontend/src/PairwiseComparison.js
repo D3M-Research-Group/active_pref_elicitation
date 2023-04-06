@@ -79,7 +79,7 @@ class PairwiseComparison extends React.Component {
           sectionType : "plot",
           plotType : "pie",
           columnNums: [1,1],
-          sectionName: "Overall Survival Probability",
+          sectionName: "Patient's Overall Chance of Survival",
           sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
           toolTipText: ''
         },
@@ -87,16 +87,16 @@ class PairwiseComparison extends React.Component {
             sectionType : "plot",
             plotType : "bar",
             columnNums: [9,14],
-            sectionName: "Chance of Receiving Critical Care by Age Group",
-            sectionDescription: "Among People Who Need It",
+            sectionName: "Chance of Patient Receiving Critical Care by Age Group",
+            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
             toolTipText: ''
           },
           {
             sectionType : "plot",
             plotType : "bar",
             columnNums: [2,7],
-            sectionName: "Survival Probability",
-            sectionDescription: "Chance of Surviving by Age Group",
+            sectionName: "Chance of Patient Surviving by Age Group",
+            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
             toolTipText: ''
           } 
         ]
