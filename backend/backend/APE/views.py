@@ -1,25 +1,26 @@
-from rest_framework import mixins
-from rest_framework.generics import GenericAPIView, CreateAPIView
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .serializers import (
-    MemoryWipeInfoSerializer,
-    SessionInfoSerializer,
-    ChoicesSerializer,
-    FormInfoSerializer,
-)
-from .models import SessionInfo, Choices, FormInfo, MemoryWipeInfo
-from .policy_data import covid_data_dict, all_policies_dict, covid_data_normalized_dict
-from .choice_paths import choices_data
 from elicitation_for_website.get_next_query import (
     get_next_query,
     robust_recommend_subproblem,
 )
+from rest_framework import mixins
+from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .choice_paths import choices_data
+from .models import Choices, FormInfo, MemoryWipeInfo, SessionInfo
+from .policy_data import all_policies_dict, covid_data_dict, covid_data_normalized_dict
 from .policy_helpers import (
-    get_last_stage,
-    rec_policy_data_prep,
     elicitation_data_prep,
+    get_last_stage,
     look_up_choice,
+    rec_policy_data_prep,
+)
+from .serializers import (
+    ChoicesSerializer,
+    FormInfoSerializer,
+    MemoryWipeInfoSerializer,
+    SessionInfoSerializer,
 )
 
 ALGO_STAGE_MAP = {"adaptive": 0, "random": 1, "validation": 2}
@@ -114,9 +115,9 @@ class NextChoiceView(APIView):
         answered_queries, answered_queries_tuple, current_gamma = elicitation_data_prep(
             covid_data, request.data
         )
-        
+
         problem_type = "maximin"
-        u0_type = "positive_normed"
+        u0_type = "positive_partworth"
         if f_random == 1:
             # we are in the random stream
             (
