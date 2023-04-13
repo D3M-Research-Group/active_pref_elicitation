@@ -12,7 +12,7 @@ function ScenarioReminder(args) {
       <Button color="dark" outline onClick={toggle}>
         Scenario Summary
       </Button>
-      <Modal isOpen={modal} toggle={toggle} {...args}>
+      <Modal isOpen={modal} toggle={toggle} {...args} size={"xl"}>
         <ModalHeader toggle={toggle}>Scenario Summary</ModalHeader>
         <ModalBody>
           <ScenarioCopy/>
