@@ -1,18 +1,20 @@
 from django.contrib import admin
 from django.db import models
-from .models import SessionInfo, Choices, FormInfo, MemoryWipeInfo
+from import_export.admin import ExportActionMixin
+
+from .models import Choices, FormInfo, MemoryWipeInfo, SessionInfo
 
 # Register your models here.
 
 
-class SessionInfoAdmin(admin.ModelAdmin):
+class SessionInfoAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ("session_id", "time_submitted", "mturker")
 
 
 admin.site.register(SessionInfo, SessionInfoAdmin)
 
 
-class ChoicesAdmin(admin.ModelAdmin):
+class ChoicesAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = (
         "session_id",
         "question_num",
@@ -33,7 +35,7 @@ class ChoicesAdmin(admin.ModelAdmin):
 admin.site.register(Choices, ChoicesAdmin)
 
 
-class FormInfoAdmin(admin.ModelAdmin):
+class FormInfoAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = (
         "session_id",
         "turker_id",
@@ -53,7 +55,7 @@ class FormInfoAdmin(admin.ModelAdmin):
 admin.site.register(FormInfo, FormInfoAdmin)
 
 
-class MemoryWipeInfoAdmin(admin.ModelAdmin):
+class MemoryWipeInfoAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ("session_id", "question_1", "question_2", "question_3")
 
 
