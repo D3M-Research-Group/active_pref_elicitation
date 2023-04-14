@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # DEBUG = True
 DEBUG = os.environ.get("DJANGO_DEBUG", "") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(", ")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost, 127.0.0.1").split(", ")
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "APE",
     "django_extensions",
+    "import_export",
 ]
 
 MIDDLEWARE = [
