@@ -82,13 +82,15 @@ class RecommendPolicyView(APIView):
             covid_data, request.data, num_first_stage
         )
 
-        problem_type = "maximin"
+        problem_type = "mmr"
+        u0_type = "positive_box"
         recommended_item, _, _ = robust_recommend_subproblem(
             answered_queries,
             all_policies,
             problem_type=problem_type,
             verbose=False,
             gamma=current_gamma,
+            u0_type=u0_type
         )
 
         print(f"recommended_item: {recommended_item.id}")
@@ -116,8 +118,8 @@ class NextChoiceView(APIView):
             covid_data, request.data
         )
 
-        problem_type = "maximin"
-        u0_type = "positive_partworth"
+        problem_type = "mmr"
+        u0_type = "positive_box"
         if f_random == 1:
             # we are in the random stream
             (
@@ -133,6 +135,7 @@ class NextChoiceView(APIView):
                 gamma=current_gamma,
                 f_random=f_random,
                 verbose=True,
+                u0_type=u0_type
             )
         elif f_random == 2:
             # we are in the validation stage so we just return the two recommended policies as the validation items
@@ -151,6 +154,7 @@ class NextChoiceView(APIView):
                 choices_data,
                 covid_data,
                 gamma=current_gamma,
+                u0_type=u0_type
             )
         print(
             f"item A: {item_A}, item B: {item_B}, prediction: {predicted_response}, recommended_item: {recommended_item}, f_random: {f_random}, problem_type: {problem_type}, u0_type : {u0_type}, gamma: {current_gamma} "

@@ -34,8 +34,6 @@ class UserInfoForm extends React.Component{
                 political: '',
                 positive_family: '',
                 positive_anyone: '',
-                healthcare_yn: '',
-                healthcare_role: '',
                 defaultMessage, selectFieldMessage, usernameFieldMessage, healthcareroleFieldMessage
             },
             loading: false,
@@ -120,29 +118,21 @@ class UserInfoForm extends React.Component{
                             onChange={(newVal, handleFieldChange) => handleFieldChange('age', newVal)}
                             options={[
                                 {
-                                    name: "18-39",
-                                    label: "18-39",
-                                    value: "18-39",
+                                    name: "18-41",
+                                    label: "18-41",
+                                    value: "18-41",
                                 },{
-                                    name: "40-49",
-                                    label: "40-49",
-                                    value: "40-49",
+                                    name: "42-48",
+                                    label: "42-48",
+                                    value: "42-48",
                                 },{
-                                    name: "50-59",
-                                    label: "50-59",
-                                    value: "50-59",
+                                    name: "49-54",
+                                    label: "49-54",
+                                    value: "49-54",
                                 },{
-                                    name: "60-69",
-                                    label: "60-69",
-                                    value: "60-69",
-                                },{
-                                    name: "70-79",
-                                    label: "70-79",
-                                    value: "70-79",
-                                },{
-                                    name: "80+",
-                                    label: "80+",
-                                    value: "80+",
+                                    name: "55+",
+                                    label: "55+",
+                                    value: "55+",
                                 },{
                                     name: "Prefer not to Answer",
                                     label: "Prefer not to Answer",
@@ -428,7 +418,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}}>Do you have family members who tested positive for COVID-19? *</Label>
+					<Label style={{width: "100%"}}>Have you or a family member ever experienced homelessness? *</Label>
 					<Col  style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -466,7 +456,7 @@ class UserInfoForm extends React.Component{
 				</FormGroup>
 
                 <FormGroup>
-					<Label style={{width: "100%"}} >Do you know anyone (other than family members) who tested positive for COVID-19? *</Label>
+					<Label style={{width: "100%"}} >Do you know anyone (other than yourself or family members) who has experienced homelessness? *</Label>
                     <Col style={{width: "100%"}} md="4">
                         <Field
                             className=""
@@ -503,60 +493,6 @@ class UserInfoForm extends React.Component{
                     </Col>
 					
 				</FormGroup>
-
-                <FormGroup>
-					<Label style={{width: "100%"}}>Do you work in health care? *</Label>
-                    <Col  style={{width: "100%"}} md="4">
-                        <Field
-                            className=""
-                            component={Select}
-                            name="healthcare_yn"
-                            isClearable
-                            onChange={(newVal, handleFieldChange) => handleFieldChange('healthcare_yn', newVal)}
-                            options={[
-                                {
-                                    name: "Yes",
-                                    label: "Yes",
-                                    value: "Yes",
-                                },{
-                                    name: "No",
-                                    label: "No",
-                                    value: "No",
-                                },{
-                                    name: "Prefer not to Answer",
-                                    label: "Prefer not to Answer",
-                                    value: "Prefer not to Answer",
-                                }
-                            ]}
-                            value={formData.healthcare_yn}
-                        />
-                        <FieldError
-                        errorMessages={{
-                            required: () => formData.selectFieldMessage
-                        }}
-                        name="healthcare_yn" />
-                    </Col>
-					
-				</FormGroup>
-
-                <FormGroup>
-                    <Label style={{width: "100%"}}>If you answered yes to the above question, what is your role? Otherwise enter "N/A".</Label>
-                    <Col style={{width: "100%"}} md="4" >
-                        <Field className=""
-                            name="healthcare_role"
-                            value={formData.healthcare_role}
-                            type="input"
-                            placeholder="N/A"
-                            
-                        />
-                        <FieldError 
-                        errorMessages={{
-                            required: () => formData.healthcareroleFieldMessage
-                        }}
-                        name="healthcare_role" />
-                    </Col>
-
-                </FormGroup>
                 </Row>
                 <Row className="mb-4">
 					<Col md="10" className="">

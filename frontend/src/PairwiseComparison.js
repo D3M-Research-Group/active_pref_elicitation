@@ -69,39 +69,81 @@ class PairwiseComparison extends React.Component {
         // go to next step or end function
         this.next = this.props.next;
 
-        this.sectionInfo =  [{
-          sectionType : "number",
-          columnNums: [0,0],
-          sectionName: "Life Years Saved",
-          sectionDescription: "",
-          toolTipText: 'The metric "life years saved" is based on the life expectancies of those that will recover from COVID-19 under a given policy. Policies with higher life years saved values will, in general, save lives that are younger than those with lower life years saved.'
-        },{
-          sectionType : "plot",
-          plotType : "pie",
-          columnNums: [1,1],
-          sectionName: "Proportion of Patients that Survive",
-          sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
-          toolTipText: ''
-        },
-        {
-            sectionType : "plot",
-            plotType : "bar",
-            columnNums: [9,14],
-            sectionName: "Proportion of Patients that Receive Critical Care by Age Group",
-            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
-            toolTipText: ''
-          },
-          {
-            sectionType : "plot",
-            plotType : "bar",
-            columnNums: [2,7],
-            sectionName: "Proportion of Patients that Survive by Age Group",
-            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
-            toolTipText: ''
-          } 
-        ]
-       
+//        this.sectionInfo =  [{
+//          sectionType : "number",
+//          columnNums: [0,0],
+//          sectionName: "Life Years Saved",
+//          sectionDescription: "",
+//          toolTipText: 'The metric "life years saved" is based on the life expectancies of those that will recover from COVID-19 under a given policy. Policies with higher life years saved values will, in general, save lives that are younger than those with lower life years saved.'
+//        },{
+//          sectionType : "plot",
+//          plotType : "pie",
+//          columnNums: [1,1],
+//          sectionName: "Proportion of Patients that Survive",
+//          sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
+//          toolTipText: ''
+//        },
+//        {
+//            sectionType : "plot",
+//            plotType : "bar",
+//            columnNums: [9,14],
+//            sectionName: "Proportion of Patients that Receive Critical Care by Age Group",
+//            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
+//            toolTipText: ''
+//          },
+//          {
+//            sectionType : "plot",
+//            plotType : "bar",
+//            columnNums: [2,7],
+//            sectionName: "Proportion of Patients that Survive by Age Group",
+//            sectionDescription: "Among Those Who Contracted COVID-19 and Needed Critical Care",
+//            toolTipText: ''
+//          }
+//        ]
 
+
+        this.sectionInfo = [{
+                  sectionType : "number",
+                  columnNums: [0,0],
+                  sectionName: "Number of Individuals' Characteristics Used in the Policy",
+                  sectionDescription: "",
+                  toolTipText: ''
+                },
+                {
+                  sectionType : "number",
+                  columnNums: [1,1],
+                  sectionName: "Number of Individuals' Protected Characteristics Used in the Policy",
+                  sectionDescription: "",
+                  toolTipText: "Protected characteristics include an individual's race or ethnicity; gender; and/or age. "
+                },
+                    {
+                    sectionType : "number",
+                    columnNums: [2,2],
+                    sectionName: "Chance of Exiting Homelessness (Overall)",
+                    toolTipText: ''
+                  },
+                {
+                    sectionType : "plot",
+                    plotType : "bar",
+                    columnNums: [3,5],
+                    sectionName: "Chance of Exiting Homelessness (By Race or Ethnicity)",
+                    toolTipText: ''
+                  },
+                  {
+                    sectionType : "plot",
+                    plotType : "bar",
+                    columnNums: [6,8],
+                    sectionName: "Chance of Exiting Homelessness (By Gender)",
+                    toolTipText: ''
+                  },
+                  {
+                    sectionType : "plot",
+                    plotType : "bar",
+                    columnNums: [9,12],
+                    sectionName: "Chance of Exiting Homelessness (By Age)",
+                    toolTipText: ''
+                  }
+                ]
     }
 
     pushBackChoice(selected){

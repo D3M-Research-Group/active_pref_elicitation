@@ -9,7 +9,7 @@ from gurobipy import *
 from .gurobi_functions import create_mip_model, optimize
 from .preference_classes import Item, Query, User, is_feasible, robust_utility
 from .static_elicitation import static_mip_optimal
-from .utils import U0_positive_normed
+from .utils import U0_positive_normed, U0_positive_box, get_u0
 
 
 def get_next_query(
@@ -69,6 +69,7 @@ def get_next_query(
             gamma=gamma,
             problem_type=problem_type,
             eps=0.0,
+            u0_type=u0_type
         )
         objval = None
 
@@ -92,7 +93,7 @@ def get_next_query(
 
 
 def find_optimal_query_mip(
-    answered_queries, items, gamma=0.0, problem_type="maximin", eps=0.0
+    answered_queries, items, gamma=0.0, problem_type="maximin", eps=0.0, u0_type="positive_normed"
 ):
     """
     use the static elicitation MIP to find the next optimal query to ask. the next query can be constructed using any
@@ -124,16 +125,17 @@ def find_optimal_query_mip(
         subproblem_list=scenario_list,
         gamma_inconsistencies=gamma,
         problem_type=problem_type,
+        u0_type=u0_type
     )
 
     item_a_opt = queries[-1].item_A
     item_b_opt = queries[-1].item_B
 
     robust_utility_a, _ = robust_utility(
-        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma
+        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type
     )
     robust_utility_b, _ = robust_utility(
-        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma
+        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type
     )
 
     # predict the agent's response
@@ -148,7 +150,7 @@ def find_optimal_query_mip(
 
 
 def find_random_query_prediction(
-    answered_queries, items, item_a, item_b, gamma=0.0, problem_type="maximin", eps=0.0
+    answered_queries, items, item_a, item_b, gamma=0.0, problem_type="maximin", eps=0.0, u0_type="positive_normed"
 ):
     """
     use the static elicitation MIP to find the next optimal query to ask. the next query can be constructed using any
@@ -172,10 +174,10 @@ def find_random_query_prediction(
     item_b_opt = items[item_b.id]
 
     robust_utility_a, _ = robust_utility(
-        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma
+        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type
     )
     robust_utility_b, _ = robust_utility(
-        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma
+        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type
     )
     # sleep(randint(2, 5)) # this is a long time to sleep...
     sleep(round(uniform(0.5, 1), 2))
@@ -284,7 +286,7 @@ def find_optimal_query(answered_queries, items, verbose=False, gamma=0.0):
 
 
 def robust_recommend_subproblem(
-    answered_queries, items, problem_type="maximin", verbose=False, gamma=0.0
+    answered_queries, items, problem_type="maximin", verbose=False, gamma=0.0, u0_type="positive_normed"
 ):
     """
     solve the robust-recommendation subproblem: for a fixed set of queries and responses, contained in answered_queries
@@ -297,7 +299,7 @@ def robust_recommend_subproblem(
     """
 
     # if the agent's uncertainty set is empty, the recommendation subproblem is infeasible, return None
-    if not is_feasible(answered_queries, gamma_inconsistencies=gamma):
+    if not is_feasible(answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type):
         return None, None, None
 
     assert problem_type in ["maximin", "mmr"]
@@ -314,7 +316,7 @@ def robust_recommend_subproblem(
         assert query.response in Query.valid_responses
 
     # positive normed definition for U^0, b_mat and b_vec
-    b_mat, b_vec = U0_positive_normed(num_features)
+    b_mat, b_vec = get_u0(u0_type, num_features)
 
     # define beta vars (more dual variables)
     m_const = len(b_vec)
@@ -326,6 +328,7 @@ def robust_recommend_subproblem(
     y_vars = m.addVars(len(items), vtype=GRB.BINARY, name="y")
     m.addSOS(GRB.SOS_TYPE1, [y_vars[i] for i in range(len(items))])
     m.addConstr(quicksum(y_vars[i] for i in range(len(items))) == 1, name="y_constr")
+
 
     # add dual variables
     if problem_type == "maximin":
@@ -349,10 +352,15 @@ def robust_recommend_subproblem(
         beta_vars = {}
         alpha_vars = {}
         mu_vars = {}
+        rho_vars = {}
+        nu_vars = {}
+
         for item in items:
             (
                 mu_vars[item.id],
                 alpha_vars[item.id],
+                rho_vars[item.id],
+                nu_vars[item.id],
                 beta_vars[item.id],
             ) = add_rec_dual_variables(
                 m,
@@ -384,7 +392,9 @@ def robust_recommend_subproblem(
 
     m.Params.DualReductions = 0
     # m.write("recommendation.lp")
+
     optimize(m)
+
 
     # --- gather results ---
 
@@ -413,7 +423,7 @@ def robust_recommend_subproblem(
 
     # finally, find the minimum u-vector
     min_u_objval, u_vector = robust_utility(
-        recommended_item, answered_queries=answered_queries, gamma_inconsistencies=gamma
+        recommended_item, answered_queries=answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type
     )
 
     return recommended_item, m.objVal, u_vector
@@ -457,15 +467,28 @@ def add_rec_dual_variables(
         beta_name = f"beta_{mmr_item.id}"
         alpha_name = f"alpha_{mmr_item.id}"
 
+    if 0 in responses:
+        # print("0 in", response_scenario)
+        # indiff_lb = -GRB.INFINITY
+        if problem_type == "maximin":
+            indiff_lb = -GRB.INFINITY
+            indiff_ub = 0.0
+        if problem_type == "mmr":
+            indiff_lb = 0.0
+            indiff_ub = GRB.INFINITY
+    else:
+        indiff_lb = 0
+        indiff_ub = 0
+
     beta_vars = m.addVars(
         m_const, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=beta_name
     )
     alpha_vars = m.addVars(
         K, vtype=GRB.CONTINUOUS, lb=dual_lb, ub=dual_ub, name=alpha_name
     )
-    rho_vars = m.addVars(K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=0, name=f"rho")
+    rho_vars = m.addVars(K, vtype=GRB.CONTINUOUS,  lb=indiff_lb, ub=indiff_ub, name=f"rho")
 
-    nu_vars = m.addVars(K, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=0, name=f"nu")
+    nu_vars = m.addVars(K, vtype=GRB.CONTINUOUS,  lb=indiff_lb, ub=indiff_ub, name=f"nu")
 
     if gamma > 0:
         if problem_type == "maximin":
@@ -484,9 +507,18 @@ def add_rec_dual_variables(
                     raise Exception("response scenario value unexpected:", responses[k])
         if problem_type == "mmr":
             for k in range(K):
-                m.addConstr(
-                    alpha_vars[k] + mu_var >= 0, name=f"alpha_{mmr_item.id}_constr_k{k}"
-                )
+                if responses[k] == -1 or responses[k] == 1:
+                    m.addConstr(
+                        alpha_vars[k] + mu_var >= 0,
+                        name=f"alpha_constr_k{k}_resp{responses[k]}",
+                    )
+                elif responses[k] == 0:  # indifferent
+                    m.addConstr(
+                        -rho_vars[k] - nu_vars[k] + mu_var >= 0, name=f"rho_nu_constr_k{k}",
+                    )
+
+                else:
+                    raise Exception("response scenario value unexpected:", responses[k])
 
     # define an expression for each feature of x
     x_features = [

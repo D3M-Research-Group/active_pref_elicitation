@@ -62,7 +62,7 @@ def rec_policy_data_prep(json_data, response_data, last_N=10):
         )
         answered_queries.append(Query(item_A, item_B, current_choice))
 
-    current_gamma = get_gamma(len(answered_queries), sigma=0.1, confidence_level=0.9)
+    current_gamma = get_gamma(len(answered_queries), sigma=0.05, confidence_level=0.9)
 
     return answered_queries, current_gamma
 
@@ -114,7 +114,7 @@ def elicitation_data_prep(json_data, response_data):
         answered_queries.append(Query(item_A, item_B, current_choice))
 
     current_gamma = get_gamma(
-        len(answered_queries) + 1, sigma=0.1, confidence_level=0.9
+        len(answered_queries) + 1, sigma=0.05, confidence_level=0.9
     )
     return answered_queries, tuple(answered_queries_adaptive), current_gamma
 
@@ -155,7 +155,7 @@ def choice_path_data_prep(response_data):
     return tuple(answered_queries)
 
 
-def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0):
+def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0, u0_type="positive_normed"):
     """this function is just the last part of `get_next_query` where we calculate the robust utility for the two suggested options
     Args:
         item_a_opt: Item class object to show the user next as option A
@@ -164,10 +164,10 @@ def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0):
         gamma: gamma value, default is 0.0
     """
     robust_utility_a, _ = robust_utility(
-        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma
+        item_a_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type
     )
     robust_utility_b, _ = robust_utility(
-        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma
+        item_b_opt, answered_queries=answered_queries, gamma_inconsistencies=gamma, u0_type=u0_type
     )
 
     # predict the agent's response
@@ -181,7 +181,7 @@ def get_predicted_response(item_a_opt, item_b_opt, answered_queries, gamma=0.0):
 
 
 def look_up_choice(
-    answered_queries, answered_queries_tuple, choices_data, covid_data, gamma
+    answered_queries, answered_queries_tuple, choices_data, covid_data, gamma,u0_type="positive_normed"
 ):
     print(f"answered_queries: {answered_queries_tuple}")
     print(f"next_query_tuple: {choices_data.get(answered_queries_tuple, None)}")
@@ -190,7 +190,7 @@ def look_up_choice(
     item_A = make_item(covid_data, item_A_id)
     item_B = make_item(covid_data, item_B_id)
     predicted_response = get_predicted_response(
-        item_A, item_B, answered_queries, gamma=gamma
+        item_A, item_B, answered_queries, gamma=gamma, u0_type=u0_type
     )
     recommended_item = None
     return item_A_id, item_B_id, predicted_response, recommended_item

@@ -1,6 +1,6 @@
 import pickle
 
-covid_pickle_file = "data/COVID/UK_6781beds_K10_p0.9_maximin.p"
+covid_pickle_file = "data/LAHSA/AdultHMIS_20210922_prep_K10_s0.05_mmr.p"
 
 with open(covid_pickle_file, "rb") as fp:
     choices_data = pickle.load(fp)
