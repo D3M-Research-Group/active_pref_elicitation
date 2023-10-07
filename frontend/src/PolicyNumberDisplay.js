@@ -8,21 +8,31 @@ class PolicyNumberDisplay extends React.Component{
         this.columnNums = this.props.columnNums
     }
 
-    render(){
+    render(){if((this.data.values.slice(this.columnNums[0], this.columnNums[1]+1) < 1) &&
+    (this.data.values.slice(this.columnNums[0], this.columnNums[1]+1) > 0.0) ){
         return(
-            
             <Jumbotron>
                 <h1>{this.data.values.slice(this.columnNums[0],this.columnNums[1]+1).toLocaleString(undefined,
-                    {   
+                    {
                         minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                        style: 'percent'
                     })}
                 </h1>
-                <p>
-                    {this.data.labels.slice(this.columnNums[0], this.columnNums[1]+1)}
-                </p>
             </Jumbotron>
-        )
+        )}
+        else{
+        return(
+            <Jumbotron>
+                <h1>{this.data.values.slice(this.columnNums[0],this.columnNums[1]+1).toLocaleString(undefined,
+                    {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+
+                    })}
+                </h1>
+            </Jumbotron>
+        )}
     }
 }
 export default PolicyNumberDisplay;

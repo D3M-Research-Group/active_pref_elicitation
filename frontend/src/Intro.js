@@ -14,26 +14,26 @@ export default class Intro extends React.Component{
             steps: [
               {
                 element: "#container-fluid",
-                intro: "Throughout the questionnaire, different policies will be displayed under the headings Policy A and Policy B"
+                intro: "Throughout the questionnaire, different policies will be displayed under the headings Policy A and Policy B."
               },
               {
                 // element: "#section_2",
-                intro: "The outcomes of each policy are displayed in the form of bar and pie charts",
+                intro: "The design and performance metrics  of each policy are displayed in the form of numbers and bar charts.",
                 position: "bottom"
               },
               {
-                element: "#section_2_policy_A",
-                intro: "This plot shows the outcomes from policy A",
+                element: "#section_1_policy_A",
+                intro: "This number shows design information for policy A.",
                 position: "right"
               },
               {
-                element: "#section_2_policy_B",
-                intro: "This plot shows the outcomes from policy B",
+                element: "#section_1_policy_B",
+                intro: "This number shows design information for policy B.",
                 position: "left"
               },
               {
-                element: "#section_1",
-                intro: `We use the metric "life years saved," which is based on the life expectancies of those that will recover from COVID-19 under a given policy. Policies with higher life years saved values will, in general, save lives that are younger than those with lower life years saved.`
+                element: "#section_2",
+                intro: `Keep in mind that protected characteristics include an individual's race or ethnicity; gender; and/or age.`
               },
             //   {
             //     element: "#section_2",
@@ -41,16 +41,16 @@ export default class Intro extends React.Component{
             //   },
               {
                 element: "#sections",
-                intro: "Clicking here allows you to jump to the different sections",
+                intro: "Clicking here allows you to jump to the different sections.",
                 position: "right"
               },
               {
                 element: "#choices_button_group",
-                intro: "Once you have finished comparing the outcomes of the two policies, click one of the buttons which matches your preference"
+                intro: "Once you have finished comparing the outcomes of the two policies, click one of the buttons which matches your preference."
               },
               {
                 element: "#submitButton",
-                intro: "Once you have selected a policy, click here to submit your selection and move to the next policy"
+                intro: "Once you have selected a policy, click here to submit your selection and move to the next policies."
               },
               {
                 element: ".title",

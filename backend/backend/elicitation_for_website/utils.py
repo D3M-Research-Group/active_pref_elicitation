@@ -19,11 +19,13 @@ def U0_polyhedron(num_features):
 def get_u0(u0_type, num_features):
     """return a polyhedral definition for U^0, B_mat and b_vec"""
 
-    assert u0_type in ["box", "positive_normed"]
+    assert u0_type in ["box", "positive_normed", "positive_box"]
 
     if u0_type == "box":
         B_mat, b_vec = U0_box(num_features)
-    if u0_type == "positive_normed":
+    elif u0_type == "positive_box":
+        B_mat, b_vec = U0_positive_box(num_features)
+    elif u0_type == "positive_normed":
         B_mat, b_vec = U0_positive_normed(num_features)
     return B_mat, b_vec
 
@@ -32,6 +34,20 @@ def U0_box(num_features):
     # that is: U^0 = {u | B * u >= b}, in this case:
     B_mat = np.concatenate((np.eye(num_features), -np.eye(num_features)))
     b_vec = -np.ones(2 * num_features)
+    return B_mat, b_vec
+
+def U0_positive_box(num_features):
+    B_mat = np.concatenate(
+        (
+            np.eye(num_features),
+            -np.eye(num_features),
+        )
+    )
+    b_vec = np.concatenate(
+        (np.repeat(0.0, num_features), np.repeat(-1.0, num_features))
+    )
+    # print("Bmat", B_mat)
+    # print(b_vec)
     return B_mat, b_vec
 
 def U0_positive_normed(num_features):

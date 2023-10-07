@@ -12,7 +12,7 @@ const schema = {
       "age": {
         "title": "What is your age group?",
         "type": "string",
-        "enum": ["18-39","40-49", "50-59","60-69", "70-79","80+","Prefer not to Answer"]
+        "enum": ["18-41","42-48", "49-54","55+","Prefer not to Answer"]
       },
       "race_ethnicity": {
         "title": "What is your race/ethnicity?",
@@ -70,7 +70,7 @@ const schema = {
                 "Prefer not to Answer"]
       },
       "positive_family": {
-        "title": "Do you have family members who tested positive for COVID-19?",
+        "title": "Have you or a family member ever experienced homelessness?",
         "type": "string",
         "enum": [
             "Yes",
@@ -79,39 +79,39 @@ const schema = {
         ]
       },
       "positive_anyone": {
-        "title": "Do you know anyone (other than family members) who tested positive for COVID-19?",
+        "title": "Do you know anyone (other than yourself or family members) who has experienced homelessness?",
         "type": "string",
         "enum": [
             "Yes",
             "No",
             "Unsure","Prefer not to Answer"
         ]
-      },
-      "healthcare_yn": {
-        "title": "Do you work in health care?",
-        "type": "string",
-        "enum": [
-            "Yes",
-            "No","Prefer not to Answer"
-        ]
-      },
-
-      "healthcare_role": {
-        "title": "If yes, what is your role?",
-        "type": "string"
       }
-
-    },
-      "if": {
-        "properties": {
-          "healthcare_yn": {"const" : "Yes"}
-        }
-      },
-      "then": {
-        "required" : [
-          "healthcare_role"
-        ]
-      }
+//      "healthcare_yn": {
+//        "title": "Do you work in health care?",
+//        "type": "string",
+//        "enum": [
+//            "Yes",
+//            "No","Prefer not to Answer"
+//        ]
+//      },
+//
+//      "healthcare_role": {
+//        "title": "If yes, what is your role?",
+//        "type": "string"
+//      }
+//
+//    },
+//      "if": {
+//        "properties": {
+//          "healthcare_yn": {"const" : "Yes"}
+//        }
+//      },
+//      "then": {
+//        "required" : [
+//          "healthcare_role"
+//        ]
+//      }
 
       // "unidirectional": {
       //     "title": "",

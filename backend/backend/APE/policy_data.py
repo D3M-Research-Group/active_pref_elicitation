@@ -1,9 +1,15 @@
 import json
 from elicitation_for_website.preference_classes import Item
 
-covid_data_folder = "data/COVID"
-covid_filenames = ["UK_1360beds-25policies.json", "UK_500beds-25policies.json", "UK_6781beds-25policies.json"]
-covid_normalized_filenames = ["UK_1360beds-25policies_rescaled01.json", "UK_500beds-25policies_rescaled01.json", "UK_6781beds-25policies_rescaled01.json"]
+# covid_data_folder = "data/COVID"
+# covid_filenames = ["UK_1360beds-25policies.json", "UK_500beds-25policies.json", "UK_6781beds-25policies.json"]
+# covid_normalized_filenames = ["UK_1360beds-25policies_rescaled01.json", "UK_500beds-25policies_rescaled01.json", "UK_6781beds-25policies_rescaled01.json"]
+
+
+covid_data_folder = "data/LAHSA"
+covid_filenames = ["AdultHMIS_20210922_preprocessed_final_Robust_edit.json"]
+covid_normalized_filenames = ["AdultHMIS_20210922_preprocessed_final_Robust_edit_rescaled01.json"]
+
 
 covid_data_dict = {}
 
