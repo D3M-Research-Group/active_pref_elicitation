@@ -92,11 +92,8 @@ class App extends React.Component {
         gender: '',
         marital_status: '',
         education: '',
-        political: '',
         positive_family: '',
         positive_anyone: '',
-        healthcare_yn: '',
-        healthcare_role: ''
       }
     }
     this.randomize = true;

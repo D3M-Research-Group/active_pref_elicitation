@@ -40,11 +40,8 @@ class Migration(migrations.Migration):
                 ('gender', models.CharField(max_length=20)),
                 ('marital_status', models.CharField(max_length=100)),
                 ('education', models.CharField(max_length=100)),
-                ('political', models.CharField(max_length=100)),
                 ('positive_family', models.CharField(max_length=10, null=True)),
-                ('positive_anyone', models.CharField(max_length=10, null=True)),
-                ('healthcare_yn', models.CharField(max_length=10, null=True)),
-                ('healthcare_role', models.CharField(max_length=10, null=True)),
+                ('positive_anyone', models.CharField(max_length=10, null=True))
             ],
         ),
         migrations.CreateModel(

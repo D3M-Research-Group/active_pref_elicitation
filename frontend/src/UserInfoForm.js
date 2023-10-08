@@ -31,7 +31,6 @@ class UserInfoForm extends React.Component{
                 gender: '',
                 marital_status: '',
                 education: '',
-                political: '',
                 positive_family: '',
                 positive_anyone: '',
                 defaultMessage, selectFieldMessage, usernameFieldMessage, healthcareroleFieldMessage
@@ -361,60 +360,6 @@ class UserInfoForm extends React.Component{
                         name="education" />
                     </Col>
 					
-				</FormGroup>
-
-                <FormGroup>
-					<Label style={{width: "100%"}}>What is your political party affiliation? *</Label>
-					<Col style={{width: "100%"}} md="4">
-                        <Field
-                            className=""
-                            component={Select}
-                            name="political"
-                            isClearable
-                            onChange={(newVal, handleFieldChange) => handleFieldChange('political', newVal)}
-                            options={[
-                                {
-                                    name: "Constitution",
-                                    label: "Constitution",
-                                    value: "Constitution",
-                                },{
-                                    name: "Democratic",
-                                    label: "Democratic",
-                                    value: "Democratic",
-                                },{
-                                    name: "Green",
-                                    label: "Green",
-                                    value: "Green",
-                                },{
-                                    name: "Independent",
-                                    label: "Independent",
-                                    value: "Independent",
-                                },{
-                                    name: "Libertarian",
-                                    label: "Libertarian",
-                                    value: "Libertarian",
-                                },{
-                                    name: "Republican",
-                                    label: "Republican",
-                                    value: "Republican",
-                                },{
-                                    name: "Other",
-                                    label: "Other",
-                                    value: "Other",
-                                },{
-                                    name: "Prefer not to Answer",
-                                    label: "Prefer not to Answer",
-                                    value: "Prefer not to Answer",
-                                }
-                            ]}
-                            value={formData.political}
-                        />
-                        <FieldError
-                        errorMessages={{
-                            required: () => formData.selectFieldMessage
-                        }}
-                        name="political" />
-                    </Col>
 				</FormGroup>
 
                 <FormGroup>

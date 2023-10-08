@@ -80,21 +80,21 @@ class ScenarioCopy extends React.Component {
                 <p className="lead">
                     We have designed an adaptive questionnaire to learn your preferences for how these resources should be allocated. For each question, you will be shown a pair of policies. Please choose the policy with the design and performance metrics that you prefer. This information includes:
                     <ol type="1">
-                        <li>Number of Individuals' Characteristics Used in the Policy</li>
-                        <li>Number of Individuals' Protected Characteristics Used in the Policy</li>
-                        <li>Chance of Exiting Homelessness (Overall)</li>
-                        <li>Chance of Exiting Homelessness (By Race or Ethnicity)</li>
-                        <li>Chance of Exiting Homelessness (By Gender)</li>
-                        <li>Chance of Exiting Homelessness (By Age)</li>
+                        <li>Number of individuals' characteristics used in the policy (for example, how long since they last lived in permanent stable housing or how many times they have been to the emergency room in the past 6 months)</li>
+                        <li>Number of individuals' protected characteristics used in the policy</li>
+                        <li>Proportion of people exiting homelessness (overall)</li>
+                        <li>Proportion of people exiting homelessness (by race or ethnicity)</li>
+                        <li>Proportion of people exiting homelessness (by gender)</li>
+                        <li>Proportion of people exiting homelessness (by age)</li>
                     </ol> 
                 </p>
                 <p className="lead">
-                    1. and 2. are related to a policy’s level of  <b style={{"fontWeight":'bold'}}> simplicity</b>. In general, policies that use less characteristics may be easier for policymakers to implement and easier for individuals in the system to understand. Specifically, an individual could understand why they did or did not receive a resource. However, simplicity may deteriorate the other performance metrics.               </p>
+                    1. and 2. are related to a policy’s level of  <b style={{"fontWeight":'bold'}}> simplicity</b>. In general, policies that use fewer characteristics may be easier for policymakers to implement and easier for individuals in the system to understand. Specifically, an individual could understand why they did or did not receive a resource. However, simplicity may deteriorate the other performance metrics.               </p>
                 <p className="lead">
                 3. - 6. are related to a policy’s <b style={{"fontWeight":'bold'}}> efficiency</b> (3.) and <b style={{"fontWeight":'bold'}}> fairness or equity</b> (4. - 6.), estimated using historical data for 22,165 unhoused single adults from 16 communities across the US who exited homelessness between February 2015 and April 2018. The data includes the protected information (race or ethnicity, gender, and age) of the individual and whether they received a housing resource.
                 </p>
                 <p className="lead">
-                 In the graphs below, you can additionally see the proportions of the unhouse population by their age; gender; and race or ethnicity. Please keep this information in mind as you take the questionnaire.
+                 In the graphs below, you can additionally see the proportions of the unhoused population by their age; gender; and race or ethnicity. Please keep this information in mind as you take the questionnaire.
                 </p>
                 <br></br>
                 <br></br>

@@ -57,18 +57,6 @@ const schema = {
                     "Professional degree",
                     "Doctorate degree","Prefer not to Answer"]
       },
-      "political": {
-        "title": "What is your political party affiliation?",
-        "type": "string",
-        "enum": ["Constitution",
-                "Democratic",
-                "Green",
-                "Independent",
-                "Libertarian",
-                "Republican",
-                "Other",
-                "Prefer not to Answer"]
-      },
       "positive_family": {
         "title": "Have you or a family member ever experienced homelessness?",
         "type": "string",

@@ -44,14 +44,6 @@ const UserInfoSchema = {
 				value: { type: 'string', minimum: 1 },
 			}
       },
-      political: {
-        type: 'object',
-			properties: {
-				label: { type: 'string', minimum: 1 },
-				name: { type: 'string', minimum: 1 },
-				value: { type: 'string', minimum: 1 },
-			}
-      },
       positive_family: {
         type: 'object',
 			properties: {

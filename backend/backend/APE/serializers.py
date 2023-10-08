@@ -45,11 +45,8 @@ class FormInfoSerializer(serializers.ModelSerializer):
             "gender",
             "marital_status",
             "education",
-            "political",
             "positive_family",
             "positive_anyone",
-            "healthcare_yn",
-            "healthcare_role",
         )
 
 

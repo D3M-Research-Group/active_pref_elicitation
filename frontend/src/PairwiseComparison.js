@@ -105,7 +105,7 @@ class PairwiseComparison extends React.Component {
         this.sectionInfo = [{
                   sectionType : "number",
                   columnNums: [0,0],
-                  sectionName: "Number of Individuals' Characteristics Used in the Policy",
+                  sectionName: "Number of Individual Characteristics Used in the Policy",
                   sectionDescription: "",
                   toolTipText: ''
                 },
@@ -119,28 +119,28 @@ class PairwiseComparison extends React.Component {
                     {
                     sectionType : "number",
                     columnNums: [2,2],
-                    sectionName: "Chance of Exiting Homelessness (Overall)",
+                    sectionName: "Proportion of People Exiting Homelessness (Overall)",
                     toolTipText: ''
                   },
                 {
                     sectionType : "plot",
                     plotType : "bar",
                     columnNums: [3,5],
-                    sectionName: "Chance of Exiting Homelessness (By Race or Ethnicity)",
+                    sectionName: "Proportion of People Exiting Homelessness (By Race or Ethnicity)",
                     toolTipText: ''
                   },
                   {
                     sectionType : "plot",
                     plotType : "bar",
                     columnNums: [6,8],
-                    sectionName: "Chance of Exiting Homelessness (By Gender)",
+                    sectionName: "Proportion of People Exiting Homelessness (By Gender)",
                     toolTipText: ''
                   },
                   {
                     sectionType : "plot",
                     plotType : "bar",
                     columnNums: [9,12],
-                    sectionName: "Chance of Exiting Homelessness (By Age)",
+                    sectionName: "Proportion of People Exiting Homelessness (By Age)",
                     toolTipText: ''
                   }
                 ]
