@@ -105,11 +105,7 @@ class PairwiseComparison extends React.Component {
         this.sectionInfo = [{
                   sectionType : "number",
                   columnNums: [0,0],
-<<<<<<< HEAD
                   sectionName: "Number of Individual Characteristics Used in the Policy",
-=======
-                  sectionName: "Number of Individuals' Characteristics Used in the Policy",
->>>>>>> 4fcd52455510821c981c340ae46f033e07c5734d
                   sectionDescription: "",
                   toolTipText: ''
                 },
