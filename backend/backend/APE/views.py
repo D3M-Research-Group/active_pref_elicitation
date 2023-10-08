@@ -135,8 +135,7 @@ class NextChoiceView(APIView):
                 gamma=current_gamma,
                 f_random=f_random,
                 verbose=True,
-                u0_type=u0_type,
-                problem_type=problem_type
+                u0_type=u0_type
             )
         elif f_random == 2:
             # we are in the validation stage so we just return the two recommended policies as the validation items

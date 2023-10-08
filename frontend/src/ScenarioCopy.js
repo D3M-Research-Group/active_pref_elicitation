@@ -80,6 +80,7 @@ class ScenarioCopy extends React.Component {
                 <p className="lead">
                     We have designed an adaptive questionnaire to learn your preferences for how these resources should be allocated. For each question, you will be shown a pair of policies. Please choose the policy with the design and performance metrics that you prefer. This information includes:
                     <ol type="1">
+
                         <li>Number of individuals' characteristics used in the policy (for example, how long since they last lived in permanent stable housing or how many times they have been to the emergency room in the past 6 months)</li>
                         <li>Number of individuals' protected characteristics used in the policy</li>
                         <li>Proportion of people exiting homelessness (overall)</li>
@@ -94,7 +95,9 @@ class ScenarioCopy extends React.Component {
                 3. - 6. are related to a policy’s <b style={{"fontWeight":'bold'}}> efficiency</b> (3.) and <b style={{"fontWeight":'bold'}}> fairness or equity</b> (4. - 6.), estimated using historical data for 22,165 unhoused single adults from 16 communities across the US who exited homelessness between February 2015 and April 2018. The data includes the protected information (race or ethnicity, gender, and age) of the individual and whether they received a housing resource.
                 </p>
                 <p className="lead">
+
                  In the graphs below, you can additionally see the proportions of the unhoused population by their age; gender; and race or ethnicity. Please keep this information in mind as you take the questionnaire.
+
                 </p>
                 <br></br>
                 <br></br>
