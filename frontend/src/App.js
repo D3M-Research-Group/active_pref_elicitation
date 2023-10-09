@@ -387,7 +387,7 @@ class App extends React.Component {
   updateUserInfo(data){
     // remove form errors messages from the object
     var toUpdate = _.omit(data, ["defaultMessage", "selectFieldMessage",
-     "usernameFieldMessage", "healthcareroleFieldMessage"])
+     "usernameFieldMessage"])
 
     toUpdate = Object.keys(toUpdate).reduce((obj,key) => {
           if(_.isObject(toUpdate[key])){
