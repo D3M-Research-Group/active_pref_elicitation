@@ -7,7 +7,7 @@ import {
 } from 'reactstrap';
 
 import {
-    defaultMessage, healthcareroleFieldMessage, selectFieldMessage,
+    defaultMessage, selectFieldMessage,
     usernameFieldMessage
 } from './FormErrorMessages';
 
@@ -33,7 +33,9 @@ class UserInfoForm extends React.Component{
                 education: '',
                 positive_family: '',
                 positive_anyone: '',
-                defaultMessage, selectFieldMessage, usernameFieldMessage, healthcareroleFieldMessage
+                defaultMessage,
+                selectFieldMessage,
+                usernameFieldMessage
             },
             loading: false,
 			success: false,
