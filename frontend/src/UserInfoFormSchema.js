@@ -74,7 +74,7 @@ const UserInfoSchema = {
 //      }
 
     },
-    required: ["age", "race_ethnicity", "gender", "marital_status", "education", "political",
+    required: ["age", "race_ethnicity", "gender", "marital_status", "education",
     "positive_family", "positive_anyone"]
 }
 export default UserInfoSchema;
